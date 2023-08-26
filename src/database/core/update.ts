@@ -8,6 +8,7 @@
 export interface Update {
     readonly name: string;
     readonly version: number;
+    readonly timestamp: number | string;
     readonly update: string;
     readonly reset?: string;
     readonly revert?: string;
