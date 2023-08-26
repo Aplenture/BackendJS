@@ -67,9 +67,18 @@ export class Database {
         this.pool = null;
     }
 
-    public async update(updates: readonly Update[]): Promise<void> {
-        if (0 == updates.length)
-            return this.onMessage.emit(this, `there are no updates to execute`);
+    public async currentVersion(): Promise<number> {
+        const result = await this.query(`SELECT \`version\` FROM \`updates\` ORDER BY \`version\` DESC LIMIT 1`);
+
+        console.log(result);
+        return result;
+    }
+
+    public async update(updates: readonly Update[]): Promise<number> {
+        if (0 == updates.length) {
+            this.onMessage.emit(this, `there are no updates to execute`);
+            return await this.currentVersion();
+        }
 
         this.onMessage.emit(this, 'update');
 
@@ -104,6 +113,8 @@ export class Database {
         const latestUpdate = await this.query(`SELECT * FROM \`updates\` ORDER BY \`version\` DESC LIMIT 1`);
 
         this.onMessage.emit(this, `updated to version '${latestUpdate[0].version}'`);
+
+        return latestUpdate[0].version;
     }
 
     public async reset(updates: readonly Update[]): Promise<void> {
@@ -138,16 +149,20 @@ export class Database {
         this.onMessage.emit(this, `all updates reset`);
     }
 
-    public async revert(updates: readonly Update[]): Promise<void> {
-        if (0 == updates.length)
-            return this.onMessage.emit(this, `there are no updates to revert`);
+    public async revert(updates: readonly Update[]): Promise<number> {
+        if (0 == updates.length) {
+            this.onMessage.emit(this, `there are no updates to revert`);
+            return await this.currentVersion();
+        }
 
         this.onMessage.emit(this, 'revert');
 
         const updateTables = await this.query(`SHOW TABLES LIKE 'updates'`);
 
-        if (0 == updateTables.length)
-            return this.onMessage.emit(this, 'there are no executed updates to revert');
+        if (0 == updateTables.length) {
+            this.onMessage.emit(this, 'there are no executed updates to revert');
+            return await this.currentVersion();
+        }
 
         const descendingUpdates: readonly Update[] = Object.assign([], updates)
             .sort((a, b) => b.version - a.version);
@@ -173,10 +188,14 @@ export class Database {
 
         const latestUpdate = await this.query(`SELECT * FROM \`updates\` ORDER BY \`version\` DESC LIMIT 1`);
 
-        if (latestUpdate.length)
+        if (latestUpdate.length) {
             this.onMessage.emit(this, `reverted to version '${latestUpdate[0].version}'`);
-        else
-            this.onMessage.emit(this, `all updates reverted`);
+            return latestUpdate[0].version;
+        }
+
+        this.onMessage.emit(this, `all updates reverted`);
+
+        return 0;
     }
 
     public async query(query: string, values: readonly Type[] = [], debug = false): Promise<any> {
