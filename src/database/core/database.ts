@@ -70,8 +70,10 @@ export class Database {
     public async currentVersion(): Promise<number> {
         const result = await this.query(`SELECT \`version\` FROM \`updates\` ORDER BY \`version\` DESC LIMIT 1`);
 
-        console.log(result);
-        return result;
+        if (!result.length)
+            return 0;
+
+        return result[0].version;
     }
 
     public async update(updates: readonly Update[]): Promise<number> {
