@@ -19,8 +19,8 @@ export class Log {
         return new Log(stream);
     }
 
-    public close() {
-        this.stream.end();
+    public close(): Promise<void> {
+        return new Promise(resolve => this.stream.end(resolve));
     }
 
     public write(text: string | Buffer, title?: string): void {
