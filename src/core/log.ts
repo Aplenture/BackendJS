@@ -19,6 +19,10 @@ export class Log {
         return new Log(stream);
     }
 
+    public static clear(filepath: string): Promise<void> {
+        return new Promise((resolve, reject) => FS.truncate(filepath, error => error ? reject(error) : resolve()));
+    }
+
     public close(): Promise<void> {
         return new Promise(resolve => this.stream.end(resolve));
     }
