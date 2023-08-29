@@ -43,8 +43,23 @@ export abstract class Module<TContext extends Context, TArgs extends Args, TOpti
         await Promise.all(Object.values(this.commander.commands).map((command: any) => command.deinit(this.options)));
     }
 
+    public has(command: string): boolean {
+        return this.commander.has(command);
+    }
+
     public execute(command?: string, args?: NodeJS.ReadOnlyDict<any>): Promise<CoreJS.Response | void> {
         return this.commander.execute(command, args);
+    }
+
+    public serialize(options?: CoreJS.SerializationOptions) {
+        return CoreJS.serialize({
+            name: this.name,
+            commander: this.commander
+        }, options);
+    }
+
+    public toString(): string {
+        return this.commander.toString();
     }
 
     protected addCommands(commands: readonly Command<TContext, TArgs, TOptions>[]) {
