@@ -51,18 +51,18 @@ export abstract class Module<TContext extends Context, TArgs extends Args, TOpti
         return this.commander.execute(command, args);
     }
 
-    public serialize(options?: CoreJS.SerializationOptions) {
-        return CoreJS.serialize({
-            name: this.name,
-            commander: this.commander
-        }, options);
+    protected addCommands(commands: readonly Command<TContext, TArgs, TOptions>[]) {
+        this.commander.set(...commands);
     }
 
-    public toString(): string {
+    public toString() {
         return this.commander.toString();
     }
 
-    protected addCommands(commands: readonly Command<TContext, TArgs, TOptions>[]) {
-        this.commander.set(...commands);
+    public toJSON() {
+        return {
+            name: this.name,
+            commands: Object.values(this.commander.commands).map((command: Command<TContext, TArgs, TOptions>) => command.toJSON())
+        };
     }
 }

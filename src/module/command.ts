@@ -27,4 +27,12 @@ export abstract class Command<TContext extends Context, TArgs extends Args, TOpt
     protected message(message: string) {
         this.onMessage.emit(this, message);
     }
+
+    public toJSON() {
+        return {
+            name: this.name,
+            description: this.description,
+            parameters: this.parameters.toJSON()
+        };
+    }
 }
