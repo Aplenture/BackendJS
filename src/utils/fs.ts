@@ -1,8 +1,8 @@
 /**
- * Aplenture/CoreJS
- * https://github.com/Aplenture/CoreJS
+ * Aplenture/BackendJS
+ * https://github.com/Aplenture/BackendJS
  * Copyright (c) 2023 Aplenture
- * MIT License https://github.com/Aplenture/CoreJS/blob/main/LICENSE
+ * MIT License https://github.com/Aplenture/BackendJS/blob/main/LICENSE
  */
 
 import * as FS from "fs";
