@@ -76,7 +76,7 @@ export class Database {
         return result[0].version;
     }
 
-    public async update(updates: readonly Update[]): Promise<number> {
+    public async update(updates: readonly Update<any>[]): Promise<number> {
         if (0 == updates.length) {
             this.onMessage.emit(this, `there are no updates to execute`);
             return await this.currentVersion();
@@ -91,7 +91,7 @@ export class Database {
             \`version\` BIGINT NOT NULL
             ) DEFAULT CHARSET=utf8`);
 
-        const ascendingUpdates: readonly Update[] = Object.assign([], updates)
+        const ascendingUpdates: readonly Update<any>[] = Object.assign([], updates)
             .sort((a, b) => a.version - b.version);
 
         for (let i = 0; i < ascendingUpdates.length; ++i) {
@@ -119,7 +119,7 @@ export class Database {
         return latestUpdate[0].version;
     }
 
-    public async reset(updates: readonly Update[]): Promise<void> {
+    public async reset(updates: readonly Update<any>[]): Promise<void> {
         if (0 == updates.length)
             return this.onMessage.emit(this, `there are no updates to reset`);
 
@@ -130,7 +130,7 @@ export class Database {
         if (0 == updateTables.length)
             return this.onMessage.emit(this, 'there are no executed updates to reset');
 
-        const descendingUpdates: readonly Update[] = Object.assign([], updates)
+        const descendingUpdates: readonly Update<any>[] = Object.assign([], updates)
             .sort((a, b) => b.version - a.version);
 
         for (let i = 0; i < descendingUpdates.length; ++i) {
@@ -151,7 +151,7 @@ export class Database {
         this.onMessage.emit(this, `all updates reset`);
     }
 
-    public async revert(updates: readonly Update[]): Promise<number> {
+    public async revert(updates: readonly Update<any>[]): Promise<number> {
         if (0 == updates.length) {
             this.onMessage.emit(this, `there are no updates to revert`);
             return await this.currentVersion();
@@ -166,7 +166,7 @@ export class Database {
             return await this.currentVersion();
         }
 
-        const descendingUpdates: readonly Update[] = Object.assign([], updates)
+        const descendingUpdates: readonly Update<any>[] = Object.assign([], updates)
             .sort((a, b) => b.version - a.version);
 
         for (let i = 0; i < descendingUpdates.length; ++i) {

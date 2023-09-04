@@ -5,11 +5,13 @@
  * MIT License https://github.com/Aplenture/BackendJS/blob/main/LICENSE
  */
 
-export interface Update {
-    readonly name: string;
-    readonly version: number;
-    readonly timestamp: number | string;
-    readonly update: string;
-    readonly reset?: string;
-    readonly revert?: string;
+export abstract class Update<T> {
+    public abstract readonly name: string;
+    public abstract readonly version: number;
+    public abstract readonly timestamp: number | string;
+    public abstract readonly update: string;
+    public abstract readonly reset?: string;
+    public abstract readonly revert?: string;
+
+    constructor(_: T) { }
 }

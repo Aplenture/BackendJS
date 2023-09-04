@@ -10,4 +10,5 @@ export * from "./database";
 export * from "./errorCode";
 export * from "./parameters";
 export * from "./parsing";
+export * from "./repository";
 export * from "./update";
