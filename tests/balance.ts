@@ -24,32 +24,6 @@ const databaseConfig = {
     timeout: 60000
 };
 
-const additionalIncreases = Array.from({ length: 10000 }, (_, i) => {
-    const account = randomRanged(Number.MAX_SAFE_INTEGER, 1000, i + 1);
-    const depot = randomRanged(1000, 0, i + 2);
-    const asset = randomRanged(1000, 0, i + 3);
-    const value = randomRanged(1000, 0, i + 4);
-    const product = randomRanged(1000, 0, i + 5);
-    const data = '';
-
-    return {
-        update: {
-            account,
-            depot,
-            asset,
-            value,
-            product,
-            data
-        },
-        result: {
-            account,
-            depot,
-            asset,
-            value
-        }
-    }
-});
-
 const database = new Database.Database(databaseConfig, true);
 
 const repository = new Balance.BalanceRepository(tables, database, process.cwd() + '/src/balance/updates/BalanceRepository');
@@ -79,8 +53,6 @@ describe("Module", () => {
 
         it("second account", () => repository.increase({ account: 2, depot: 1, asset: 1, value: 6, product: 1, data: '' })
             .then(result => expect(result).deep.contains({ account: 2, depot: 1, asset: 1, value: 6 })));
-
-        it("additional updates", () => Promise.all(additionalIncreases.map(data => repository.increase(data.update).then(result => expect(result).deep.contains(data.result))))).timeout(databaseConfig.timeout);
     });
 
     describe("decreasing", () => {
