@@ -11,4 +11,5 @@ export interface Config {
     readonly password: string;
     readonly database: string;
     readonly timeout?: number;
+    readonly multipleStatements?: boolean;
 }
