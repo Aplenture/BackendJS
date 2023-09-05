@@ -5,3 +5,4 @@
  * MIT License https://github.com/Aplenture/BackendJS/blob/main/LICENSE
  */
 
+export * from "./BalanceRepository";
