@@ -55,7 +55,9 @@ export class Database {
         if (this.isInitialized)
             return;
 
-        this.pool = await MySQL.createPool(this.config);
+        this.pool = await MySQL.createPool(Object.assign({}, this.config, {
+            acquireTimeout: this.config.timeout
+        }));
     }
 
     public async close(): Promise<void> {
