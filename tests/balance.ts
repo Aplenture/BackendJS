@@ -81,7 +81,7 @@ describe("Module", () => {
     });
 
     describe("closing", () => {
-        // it("reverts", async () => expect(await repository.revert()).equals(0));
+        it("reverts", async () => expect(await repository.revert()).equals(0));
         it("deinitializes", () => repository.deinit());
     });
 })

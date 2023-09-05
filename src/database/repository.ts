@@ -29,15 +29,15 @@ export abstract class Repository<T> {
     public async init(): Promise<void> { }
     public async deinit(): Promise<void> { }
 
-    public async reset(options?: LoadUpdatesOptions) {
-        return this.database.reset(Repository.loadUpdates(this, options));
+    public async reset(options?: LoadUpdatesOptions): Promise<void> {
+        await this.database.reset(Repository.loadUpdates(this, options));
     }
 
-    public async revert(options?: LoadUpdatesOptions) {
+    public revert(options?: LoadUpdatesOptions): Promise<number> {
         return this.database.revert(Repository.loadUpdates(this, options));
     }
 
-    public async update(options?: LoadUpdatesOptions) {
+    public update(options?: LoadUpdatesOptions): Promise<number> {
         return this.database.update(Repository.loadUpdates(this, options));
     }
 
