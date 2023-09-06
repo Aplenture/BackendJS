@@ -182,11 +182,17 @@ export class BalanceRepository extends Database.Repository<Tables> {
         return this.updateBalance(data, UpdateType.Decrease);
     }
 
-    public async updateHistory(): Promise<void> {
+    public async updateHistory(): Promise<boolean> {
+        // skip if history is up to date
+        if ((await this.database.query(`SELECT * FROM ${this.data.historyTable} WHERE \`timestamp\`=NOW() LIMIT 1`)).length)
+            return false;
+
         await this.database.query(`
             LOCK TABLES ${this.data.historyTable} WRITE, ${this.data.updateTable} WRITE, ${this.data.balanceTable} WRITE;
             INSERT INTO ${this.data.historyTable} (\`account\`,\`depot\`,\`asset\`,\`value\`) SELECT \`account\`,\`depot\`,\`asset\`,\`value\` FROM ${this.data.balanceTable};
             UNLOCK TABLES;
         `);
+
+        return true;
     }
 }
