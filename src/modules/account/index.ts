@@ -5,9 +5,9 @@
  * MIT License https://github.com/Aplenture/BackendJS/blob/main/LICENSE
  */
 
-export * as Balance from "./balance";
-export * as Log from "./log";
-export * as Database from "./database";
-export * as Module from "./module";
-export * as Modules from "./modules";
+export * from "./commands";
+export * from "./core";
+export * from "./models";
+export * from "./repositories";
+export * from "./updates";
 export * from "./utils";
