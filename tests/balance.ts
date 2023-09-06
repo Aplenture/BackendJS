@@ -5,7 +5,7 @@
  * MIT License https://github.com/Aplenture/BackendJS/blob/main/LICENSE
  */
 
-import { randomRanged } from "corejs";
+import * as CoreJS from "corejs";
 import { Balance, Database, Log } from "../src";
 import { expect } from "chai";
 
@@ -73,11 +73,41 @@ describe("Module", () => {
     });
 
     describe("history", () => {
-        it("additional updates", () => repository.updateHistory());
-    });
+        describe("first update", () => {
+            it("updates history", async () => expect(await repository.updateHistory()).is.true);
+            it("includes history data", () => Promise.all([
+                database.query(`SELECT * FROM ${tables.historyTable} WHERE \`account\`=1 AND \`depot\`=1 AND \`asset\`=1`).then(result => expect(result.map(data => data.value), "account '1', depot '1', asset '1'").has.length(1).deep.equals([0])),
+                database.query(`SELECT * FROM ${tables.historyTable} WHERE \`account\`=1 AND \`depot\`=2 AND \`asset\`=1`).then(result => expect(result.map(data => data.value), "account '1', depot '2', asset '1'").has.length(1).deep.equals([0])),
+                database.query(`SELECT * FROM ${tables.historyTable} WHERE \`account\`=1 AND \`depot\`=1 AND \`asset\`=2`).then(result => expect(result.map(data => data.value), "account '1', depot '1', asset '2'").has.length(1).deep.equals([-2])),
+                database.query(`SELECT * FROM ${tables.historyTable} WHERE \`account\`=2 AND \`depot\`=1 AND \`asset\`=1`).then(result => expect(result.map(data => data.value), "account '2', depot '1', asset '1'").has.length(1).deep.equals([2]))
+            ]));
+            it("skips updating up to date history", async () => expect(await repository.updateHistory()).is.false);
+        });
 
-    describe("fetching", () => {
+        describe("second update", () => {
+            it("updates history", async () => expect(await repository.updateHistory()).is.true);
+            it("includes history data", () => Promise.all([
+                database.query(`SELECT * FROM ${tables.historyTable} WHERE \`account\`=1 AND \`depot\`=1 AND \`asset\`=1`).then(result => expect(result.map(data => data.value), "account '1', depot '1', asset '1'").has.length(2).deep.equals([0, 50])),
+                database.query(`SELECT * FROM ${tables.historyTable} WHERE \`account\`=1 AND \`depot\`=2 AND \`asset\`=1`).then(result => expect(result.map(data => data.value), "account '1', depot '2', asset '1'").has.length(2).deep.equals([0, 0])),
+                database.query(`SELECT * FROM ${tables.historyTable} WHERE \`account\`=1 AND \`depot\`=1 AND \`asset\`=2`).then(result => expect(result.map(data => data.value), "account '1', depot '1', asset '2'").has.length(2).deep.equals([-2, -2])),
+                database.query(`SELECT * FROM ${tables.historyTable} WHERE \`account\`=2 AND \`depot\`=1 AND \`asset\`=1`).then(result => expect(result.map(data => data.value), "account '2', depot '1', asset '1'").has.length(2).deep.equals([2, 2])),
+                database.query(`SELECT * FROM ${tables.historyTable} WHERE \`account\`=3 AND \`depot\`=1 AND \`asset\`=1`).then(result => expect(result.map(data => data.value), "account '3', depot '1', asset '1'").has.length(1).deep.equals([50]))
+            ]));
+        }).beforeAll(() => Promise.all([
+            repository.increase({ account: 1, depot: 1, asset: 1, value: 50, product: 0, data: '' }),
+            repository.increase({ account: 3, depot: 1, asset: 1, value: 50, product: 0, data: '' })
+        ]).then(() => CoreJS.sleep(1000)));
 
+        describe("third update", () => {
+            it("updates history", async () => expect(await repository.updateHistory()).is.true);
+            it("includes history data", () => Promise.all([
+                database.query(`SELECT * FROM ${tables.historyTable} WHERE \`account\`=1 AND \`depot\`=1 AND \`asset\`=1`).then(result => expect(result.map(data => data.value), "account '1', depot '1', asset '1'").has.length(3).deep.equals([0, 50, 50])),
+                database.query(`SELECT * FROM ${tables.historyTable} WHERE \`account\`=1 AND \`depot\`=2 AND \`asset\`=1`).then(result => expect(result.map(data => data.value), "account '1', depot '2', asset '1'").has.length(3).deep.equals([0, 0, 0])),
+                database.query(`SELECT * FROM ${tables.historyTable} WHERE \`account\`=1 AND \`depot\`=1 AND \`asset\`=2`).then(result => expect(result.map(data => data.value), "account '1', depot '1', asset '2'").has.length(3).deep.equals([-2, -2, -2])),
+                database.query(`SELECT * FROM ${tables.historyTable} WHERE \`account\`=2 AND \`depot\`=1 AND \`asset\`=1`).then(result => expect(result.map(data => data.value), "account '2', depot '1', asset '1'").has.length(3).deep.equals([2, 2, 2])),
+                database.query(`SELECT * FROM ${tables.historyTable} WHERE \`account\`=3 AND \`depot\`=1 AND \`asset\`=1`).then(result => expect(result.map(data => data.value), "account '3', depot '1', asset '1'").has.length(2).deep.equals([50, 50]))
+            ]));
+        }).beforeAll(() => CoreJS.sleep(1000));
     });
 
     describe("closing", () => {
@@ -85,5 +115,5 @@ describe("Module", () => {
         it("deinitializes", () => repository.deinit());
     });
 })
-    .beforeAll(() => Database.Database.create(databaseConfig).then(() => database.init()))
+    .beforeAll(() => Database.Database.drop(databaseConfig).then(() => Database.Database.create(databaseConfig).then(() => database.init())))
     .afterAll(() => database.close());
