@@ -8,7 +8,6 @@
 import * as BackendJS from "../src";
 import * as CoreJS from 'corejs';
 import { expect } from "chai";
-import { Module } from "../src";
 
 const args = {
     debug: true
@@ -24,7 +23,7 @@ const config = {
     }
 };
 
-const m = new BackendJS.Modules.Account.Module(args, config);
+const m = new BackendJS.Account.Module(args, config);
 const log = BackendJS.Log.Log.createFileLog('./test.log', true);
 
 m.onMessage.on(message => log.write(message));
@@ -66,7 +65,7 @@ describe("Account Module", () => {
 
             expect(result.code).equals(200, 'wrong response code');
 
-            const access: BackendJS.Modules.Account.Access = JSON.parse(result.data);
+            const access: BackendJS.Account.Access = JSON.parse(result.data);
 
             expect(access).contains.keys(['id', 'account', 'secret']);
             expect(access.id).equals(1, 'access id');
@@ -151,7 +150,7 @@ describe("Account Module", () => {
 
             expect(result.code).equals(200, 'wrong response code');
 
-            const access: BackendJS.Modules.Account.Access = JSON.parse(result.data);
+            const access: BackendJS.Account.Access = JSON.parse(result.data);
 
             expect(access).contains.keys(['id', 'expiration']);
             expect(access.expiration).greaterThanOrEqual(minExpirationTime, 'access expiration is to low');
@@ -166,7 +165,7 @@ describe("Account Module", () => {
 
     describe("Password changing", () => {
         it("catches wrong old password", async () => {
-            let accounts: readonly BackendJS.Modules.Account.Account[] = await m.database.query(`SELECT * FROM ${m.accountRepository.data}`);
+            let accounts: readonly BackendJS.Account.Account[] = await m.database.query(`SELECT * FROM ${m.accountRepository.data}`);
 
             const result = await m.execute('ChangePassword', {
                 account: accounts[0].id,
@@ -183,7 +182,7 @@ describe("Account Module", () => {
         });
 
         it("changes password", async () => {
-            let accounts: readonly BackendJS.Modules.Account.Account[] = await m.database.query(`SELECT * FROM ${m.accountRepository.data}`);
+            let accounts: readonly BackendJS.Account.Account[] = await m.database.query(`SELECT * FROM ${m.accountRepository.data}`);
 
             const password = 'hello world';
 
@@ -203,7 +202,7 @@ describe("Account Module", () => {
 
     describe("Access creation", () => {
         it("creates access with default options", async () => {
-            let accounts: readonly BackendJS.Modules.Account.Account[] = await m.database.query(`SELECT * FROM ${m.accountRepository.data}`);
+            let accounts: readonly BackendJS.Account.Account[] = await m.database.query(`SELECT * FROM ${m.accountRepository.data}`);
 
             const result = await m.execute('CreateAccess', {
                 account: accounts[0].id
@@ -211,7 +210,7 @@ describe("Account Module", () => {
 
             expect(result.code).equals(200, 'wrong response code');
 
-            const access: BackendJS.Modules.Account.Access = JSON.parse(result.data);
+            const access: BackendJS.Account.Access = JSON.parse(result.data);
 
             expect(access).contains.keys(['id', 'account', 'api', 'secret', 'expiration', 'rights', 'label']);
             expect(access.account).equals(accounts[0].id, 'created access account id');
@@ -231,7 +230,7 @@ describe("Account Module", () => {
         });
 
         it("creates access with specific rights", async () => {
-            let accounts: readonly BackendJS.Modules.Account.Account[] = await m.database.query(`SELECT * FROM ${m.accountRepository.data}`);
+            let accounts: readonly BackendJS.Account.Account[] = await m.database.query(`SELECT * FROM ${m.accountRepository.data}`);
 
             const rights = 97;
             const result = await m.execute('CreateAccess', {
@@ -241,7 +240,7 @@ describe("Account Module", () => {
 
             expect(result.code).equals(200, 'wrong response code');
 
-            const access: BackendJS.Modules.Account.Access = JSON.parse(result.data);
+            const access: BackendJS.Account.Access = JSON.parse(result.data);
 
             expect(access).contains.keys(['id', 'rights']);
             expect(access.rights).equals(rights, 'created access has wrong rights');
@@ -253,7 +252,7 @@ describe("Account Module", () => {
         });
 
         it("creates access with specific label", async () => {
-            let accounts: readonly BackendJS.Modules.Account.Account[] = await m.database.query(`SELECT * FROM ${m.accountRepository.data}`);
+            let accounts: readonly BackendJS.Account.Account[] = await m.database.query(`SELECT * FROM ${m.accountRepository.data}`);
 
             const label = 'hello world';
             const result = await m.execute('CreateAccess', {
@@ -263,7 +262,7 @@ describe("Account Module", () => {
 
             expect(result.code).equals(200, 'wrong response code');
 
-            const access: BackendJS.Modules.Account.Access = JSON.parse(result.data);
+            const access: BackendJS.Account.Access = JSON.parse(result.data);
 
             expect(access).contains.keys(['id', 'label']);
             expect(access.label).equals(label, 'created access has wrong label');
@@ -275,7 +274,7 @@ describe("Account Module", () => {
         });
 
         it("creates access with specific expiration", async () => {
-            let accounts: readonly BackendJS.Modules.Account.Account[] = await m.database.query(`SELECT * FROM ${m.accountRepository.data}`);
+            let accounts: readonly BackendJS.Account.Account[] = await m.database.query(`SELECT * FROM ${m.accountRepository.data}`);
 
             const expiration_duration = CoreJS.Milliseconds.Hour * 3;
             const minExpirationTime = BackendJS.Database.trimTime(expiration_duration + Date.now());
@@ -289,7 +288,7 @@ describe("Account Module", () => {
 
             expect(result.code).equals(200, 'wrong response code');
 
-            const access: BackendJS.Modules.Account.Access = JSON.parse(result.data);
+            const access: BackendJS.Account.Access = JSON.parse(result.data);
 
             expect(access).contains.keys(['id', 'expiration']);
             expect(access.expiration).greaterThanOrEqual(minExpirationTime, 'access expiration is to low');
@@ -304,7 +303,7 @@ describe("Account Module", () => {
 
     describe("Access deletion", () => {
         it("catches missing parameter account id", async () => {
-            let accesses: readonly BackendJS.Modules.Account.Access[] = await m.database.query(`SELECT * FROM ${m.accessRepository.data}`);
+            let accesses: readonly BackendJS.Account.Access[] = await m.database.query(`SELECT * FROM ${m.accessRepository.data}`);
 
             try {
                 const result = await m.execute('DeleteAccess', {
@@ -319,7 +318,7 @@ describe("Account Module", () => {
         });
 
         it("catches missing parameter api_to_delete", async () => {
-            let accesses: readonly BackendJS.Modules.Account.Access[] = await m.database.query(`SELECT * FROM ${m.accessRepository.data}`);
+            let accesses: readonly BackendJS.Account.Access[] = await m.database.query(`SELECT * FROM ${m.accessRepository.data}`);
 
             try {
                 const result = await m.execute('DeleteAccess', {
@@ -334,7 +333,7 @@ describe("Account Module", () => {
         });
 
         it("deletes access", async () => {
-            let accesses: readonly BackendJS.Modules.Account.Access[] = await m.database.query(`SELECT * FROM ${m.accessRepository.data}`);
+            let accesses: readonly BackendJS.Account.Access[] = await m.database.query(`SELECT * FROM ${m.accessRepository.data}`);
 
             const result = await m.execute('DeleteAccess', {
                 account: accesses[0].account,
@@ -397,7 +396,7 @@ describe("Account Module", () => {
         });
 
         it("executes login without keep login", async () => {
-            let accounts: readonly BackendJS.Modules.Account.Account[] = await m.database.query(`SELECT * FROM ${m.accountRepository.data} WHERE \`key\`=?`, [publickey]);
+            let accounts: readonly BackendJS.Account.Account[] = await m.database.query(`SELECT * FROM ${m.accountRepository.data} WHERE \`key\`=?`, [publickey]);
 
             const timestamp = Date.now();
             const hash = CoreJS.toHashInt(timestamp.toString());
@@ -415,7 +414,7 @@ describe("Account Module", () => {
 
             expect(result.code).equals(200, 'wrong response code');
 
-            const access: BackendJS.Modules.Account.Access = JSON.parse(result.data);
+            const access: BackendJS.Account.Access = JSON.parse(result.data);
 
             expect(access).contains.keys(['id', 'account', 'api', 'secret', 'expiration', 'rights', 'label']);
             expect(access.account).equals(accounts[0].id, 'created access account id');
@@ -435,7 +434,7 @@ describe("Account Module", () => {
         });
 
         it("executes login with keep login", async () => {
-            let accounts: readonly BackendJS.Modules.Account.Account[] = await m.database.query(`SELECT * FROM ${m.accountRepository.data} WHERE \`key\`=?`, [publickey]);
+            let accounts: readonly BackendJS.Account.Account[] = await m.database.query(`SELECT * FROM ${m.accountRepository.data} WHERE \`key\`=?`, [publickey]);
 
             const timestamp = Date.now();
             const hash = CoreJS.toHashInt(timestamp.toString());
@@ -454,7 +453,7 @@ describe("Account Module", () => {
 
             expect(result.code).equals(200, 'wrong response code');
 
-            const access: BackendJS.Modules.Account.Access = JSON.parse(result.data);
+            const access: BackendJS.Account.Access = JSON.parse(result.data);
 
             expect(access).contains.keys(['id', 'expiration']);
             expect(access.expiration).greaterThanOrEqual(minExpirationTime, 'expiration of created access is to low');
@@ -469,7 +468,7 @@ describe("Account Module", () => {
 
     describe("Logout", () => {
         it("executes logout", async () => {
-            let accesses: readonly BackendJS.Modules.Account.Access[] = await m.database.query(`SELECT * FROM ${m.accessRepository.data}`);
+            let accesses: readonly BackendJS.Account.Access[] = await m.database.query(`SELECT * FROM ${m.accessRepository.data}`);
 
             const result = await m.execute('Logout', {
                 api: accesses[0].api

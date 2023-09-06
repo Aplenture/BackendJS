@@ -7,13 +7,13 @@
 
 import * as CoreJS from "corejs";
 import { Context, Args as ArgsData, Options } from "../core";
-import { Module } from "../../..";
+import { Command } from "../../module";
 
 interface Args extends ArgsData {
     readonly api_to_delete: string;
 }
 
-export class DeleteAccess extends Module.Command<Context, Args, Options> {
+export class DeleteAccess extends Command<Context, Args, Options> {
     public readonly description = "Deletes all or one specific access.";
     public readonly parameters = new CoreJS.ParameterList(
         new CoreJS.NumberParameter('account', "ID of account."),

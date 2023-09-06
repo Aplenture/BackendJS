@@ -7,12 +7,12 @@
 
 import * as CoreJS from "corejs";
 import { Context, Args as ArgsData, Options } from "../core";
-import { Module } from "../../..";
+import { Command } from "../../module";
 
 interface Args extends ArgsData {
 }
 
-export class Logout extends Module.Command<Context, Args, Options> {
+export class Logout extends Command<Context, Args, Options> {
     public readonly description = "Closes the access."
     public readonly parameters = new CoreJS.ParameterList(
         new CoreJS.StringParameter("api", "From access to close.")

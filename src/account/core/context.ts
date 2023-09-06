@@ -6,7 +6,7 @@
  */
 
 import { AccessRepository, AccountRepository } from "../repositories";
-import { Module, Database } from "../../..";
+import { Module, Database } from "../..";
 
 export interface Context extends Module.Context {
     readonly database: Database.Database;

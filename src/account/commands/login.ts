@@ -7,7 +7,7 @@
 
 import * as CoreJS from "corejs";
 import { Context, Args as ArgsData, Options } from "../core";
-import { Module } from "../../..";
+import { Command } from "../../module";
 
 const DURATION_DELAY = CoreJS.Milliseconds.Second;
 const DURATION_SHORT_ACCESS = CoreJS.Milliseconds.Day;
@@ -21,7 +21,7 @@ interface Args extends ArgsData {
     readonly label?: string;
 }
 
-export class Login extends Module.Command<Context, Args, Options> {
+export class Login extends Command<Context, Args, Options> {
     public readonly description = "Creates access to account."
     public readonly parameters = new CoreJS.ParameterList(
         new CoreJS.NumberParameter("timestamp", "For validation."),

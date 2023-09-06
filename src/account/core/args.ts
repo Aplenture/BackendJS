@@ -5,7 +5,7 @@
  * MIT License https://github.com/Aplenture/BackendJS/blob/main/LICENSE
  */
 
-import { Module } from "../../..";
+import { Module } from "../..";
 
 export interface Args extends Module.Args {
     readonly timestamp?: number;

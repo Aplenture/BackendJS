@@ -7,13 +7,13 @@
 
 import * as CoreJS from "corejs";
 import { Args as GlobalArgs, Context, Options } from "../core";
-import { Module } from "../../..";
+import { Command } from "../../module";
 
 interface Args extends GlobalArgs {
     readonly versions: readonly number[];
 }
 
-export class Reset extends Module.Command<Context, Args, Options> {
+export class Reset extends Command<Context, Args, Options> {
     public readonly description = 'resets the database';
     public readonly parameters = new CoreJS.ParameterList(
         new CoreJS.ArrayParameter('versions', 'resets these versions only', new CoreJS.NumberParameter('', ''), null)

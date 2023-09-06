@@ -8,7 +8,7 @@
 import * as CoreJS from "corejs";
 import { Context, Args as ArgsData, Options } from "../core";
 import { validateAPIRights, validateAccess, validateSignature } from "../utils";
-import { Module } from "../../..";
+import { Command } from "../../module";
 
 interface Args extends ArgsData {
     timestamp: number;
@@ -20,7 +20,7 @@ interface Args extends ArgsData {
     debug: boolean;
 }
 
-export class Validate extends Module.Command<Context, Args, Options> {
+export class Validate extends Command<Context, Args, Options> {
     public readonly description = "Changes the account password."
     public readonly parameters = new CoreJS.ParameterList(
         new CoreJS.NumberParameter("rights", "bitmap to describe the api rights"),

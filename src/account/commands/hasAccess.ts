@@ -8,7 +8,7 @@
 import * as CoreJS from "corejs";
 import { Context, Args as ArgsData, Options } from "../core";
 import { validateAccess, validateSignature } from "../utils";
-import { Module } from "../../..";
+import { Command } from "../../module";
 
 const DURATION_DELAY = CoreJS.Milliseconds.Second;
 
@@ -17,7 +17,7 @@ interface Args extends ArgsData {
     readonly timestamp: number;
 }
 
-export class HasAccess extends Module.Command<Context, Args, Options> {
+export class HasAccess extends Command<Context, Args, Options> {
     public readonly description = "Returns whether access is valid.";
     public readonly parameters = new CoreJS.ParameterList(
         new CoreJS.StringParameter("api", "From access."),

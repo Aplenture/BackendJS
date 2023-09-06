@@ -7,7 +7,8 @@
 
 import * as CoreJS from "corejs";
 import { Context, Args as ArgsData, Options } from "../core";
-import { Module, Database } from "../../..";
+import { Command } from "../../module";
+import { ErrorCode } from "../../database";
 
 const DURATION_ACCESS_EXPIRATION = CoreJS.Milliseconds.Hour;
 const LENGTH_PASSWORD_BLOCKS = 6;
@@ -21,7 +22,7 @@ interface Args extends ArgsData {
     readonly access_expiration: number;
 }
 
-export class CreateAccount extends Module.Command<Context, Args, Options> {
+export class CreateAccount extends Command<Context, Args, Options> {
     public readonly description = "Creates a new account and optionaly a temporary access.";
     public readonly parameters = new CoreJS.ParameterList(
         new CoreJS.StringParameter("username", "For account."),
@@ -54,7 +55,7 @@ export class CreateAccount extends Module.Command<Context, Args, Options> {
             return new CoreJS.JSONResponse(access);
         } catch (error) {
             switch (error.code) {
-                case Database.ErrorCode.Duplicate:
+                case ErrorCode.Duplicate:
                     return new CoreJS.ErrorResponse(CoreJS.ResponseCode.BadRequest, '#_username_duplicate');
 
                 default:

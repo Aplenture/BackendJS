@@ -7,7 +7,8 @@
 
 import * as CoreJS from "corejs";
 import { Access } from "../models";
-import { Database } from "../../..";
+import { Repository } from "../../database";
+import { Database } from "../..";
 
 interface CreateOptions {
     readonly rights?: number;
@@ -15,7 +16,7 @@ interface CreateOptions {
     readonly label?: string;
 }
 
-export class AccessRepository extends Database.Repository<string> {
+export class AccessRepository extends Repository<string> {
     public async hasAccess(api: string): Promise<boolean> {
         const result = await this.database.query(`SELECT UNIX_TIMESTAMP(\`expiration\`) FROM ${this.data} WHERE \`api\`=? AND (\`expiration\`>NOW() OR \`expiration\` IS NULL)`, [api]);
 

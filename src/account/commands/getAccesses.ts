@@ -7,12 +7,12 @@
 
 import * as CoreJS from "corejs";
 import { Context, Args as ArgsData, Options } from "../core";
-import { Module } from "../../..";
+import { Command } from "../../module";
 
 interface Args extends ArgsData {
 }
 
-export class GetAccesses extends Module.Command<Context, Args, Options> {
+export class GetAccesses extends Command<Context, Args, Options> {
     public readonly description = "Returns all open accesses.";
     public readonly parameters = new CoreJS.ParameterList(
         new CoreJS.NumberParameter('account', "ID of account.")

@@ -5,10 +5,10 @@
  * MIT License https://github.com/Aplenture/BackendJS/blob/main/LICENSE
  */
 
+import { Repository } from "../../database";
 import { Account } from "../models";
-import { Database } from "../../..";
 
-export class AccountRepository extends Database.Repository<string> {
+export class AccountRepository extends Repository<string> {
     public async getByID(id: number): Promise<Account | null> {
         const result = await this.database.query(`SELECT *, FROM_UNIXTIME(\`created\`) as \`created\` FROM ${this.data} WHERE \`id\`=? LIMIT 1`, [
             id

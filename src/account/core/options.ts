@@ -5,7 +5,7 @@
  * MIT License https://github.com/Aplenture/BackendJS/blob/main/LICENSE
  */
 
-import { Database, Module } from "../../..";
+import { Database, Module } from "../..";
 
 export interface Options extends Module.Options {
     readonly databaseConfig: Database.Config;

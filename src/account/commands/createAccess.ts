@@ -7,7 +7,7 @@
 
 import * as CoreJS from "corejs";
 import { Context, Args as ArgsData, Options } from "../core";
-import { Module } from "../../..";
+import { Command } from "../../module";
 
 interface Args extends ArgsData {
     readonly rights: number;
@@ -15,7 +15,7 @@ interface Args extends ArgsData {
     readonly expiration_duration: number;
 }
 
-export class CreateAccess extends Module.Command<Context, Args, Options> {
+export class CreateAccess extends Command<Context, Args, Options> {
     public readonly description = "Creates a new access."
     public readonly parameters = new CoreJS.ParameterList(
         new CoreJS.NumberParameter('account', "ID of account."),

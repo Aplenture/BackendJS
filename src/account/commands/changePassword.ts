@@ -7,14 +7,14 @@
 
 import * as CoreJS from "corejs";
 import { Context, Args as ArgsData, Options } from "../core";
-import { Module } from "../../..";
+import { Command } from "../../module";
 
 interface Args extends ArgsData {
     readonly old: string;
     readonly new: string;
 }
 
-export class ChangePassword extends Module.Command<Context, Args, Options> {
+export class ChangePassword extends Command<Context, Args, Options> {
     public readonly description = "Changes the account password."
     public readonly parameters = new CoreJS.ParameterList(
         new CoreJS.NumberParameter("account", "Where to change the password."),

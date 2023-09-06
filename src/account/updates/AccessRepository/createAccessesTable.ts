@@ -5,9 +5,9 @@
  * MIT License https://github.com/Aplenture/BackendJS/blob/main/LICENSE
  */
 
-import { Database } from "../../../..";
+import { Update } from "../../../database";
 
-export class CreateAccessesTable extends Database.Update<string> {
+export class CreateAccessesTable extends Update<string> {
     public readonly name = "Create Accesses Table";
     public readonly version = 1;
     public readonly timestamp = '2023-08-26';
