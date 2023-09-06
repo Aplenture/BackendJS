@@ -24,7 +24,7 @@ export abstract class Module<TContext extends Context, TArgs extends Args, TOpti
     constructor(args: Args, options?: TOptions, ...params: readonly CoreJS.Parameter<any>[]) {
         const parameterList = new CoreJS.ParameterList(new CoreJS.StringParameter('name', 'name of the module'), ...params);
 
-        this.options = Object.assign({}, parameterList.parse(options)) as any;
+        this.options = Object.assign({}, parameterList.parse(options, options)) as any;
 
         // setup commander config by global parameters
         GlobalParameters.forEach(param => this.commander.config.add(param));
