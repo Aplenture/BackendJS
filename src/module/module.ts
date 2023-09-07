@@ -36,10 +36,14 @@ export abstract class Module<TContext extends Context, TArgs extends Args, TOpti
     public get name(): string { return this.options.name || this.constructor.name; }
 
     public async init(): Promise<void> {
+        this.onMessage.emit(this, "init");
+
         await Promise.all(Object.values(this.commander.commands).map((command: any) => command.init(this.options)));
     }
 
     public async deinit(): Promise<void> {
+        this.onMessage.emit(this, "deinit");
+
         await Promise.all(Object.values(this.commander.commands).map((command: any) => command.deinit(this.options)));
     }
 
