@@ -18,8 +18,7 @@ export abstract class Module<TContext extends Context, TArgs extends Args, TOpti
     public readonly options: TOptions;
 
     private readonly commander = new CoreJS.Commander({
-        fallback: () => Promise.reject(new Error('unknown command')),
-        addConfigCommands: false
+        fallback: () => Promise.reject(new Error('unknown command'))
     });
 
     constructor(args: Args, options?: TOptions, ...params: readonly CoreJS.Parameter<any>[]) {
