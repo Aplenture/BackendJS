@@ -10,6 +10,8 @@ import { UpdateType } from "../enums";
 import { Balance, Update } from "../models";
 import { Tables } from "../models/tables";
 
+const MAX_FETCH_LIMIT = 1000;
+
 interface UpdateData {
     readonly account: number;
     readonly depot: number;
@@ -24,9 +26,12 @@ interface HistoryOptions {
     readonly asset?: number;
     readonly start?: number;
     readonly end?: number;
+    readonly limit?: number;
 }
 
 interface UpdateOptions extends HistoryOptions {
+    readonly firstID?: number;
+    readonly lastID?: number;
     readonly data?: string;
 }
 
@@ -50,9 +55,28 @@ export class BalanceRepository extends Database.Repository<Tables> {
         };
     }
 
-    public async fetchUpdates(account: number, options: UpdateOptions = {}, callback: (data: Update, index: number) => Promise<any>): Promise<void> {
+    public async getUpdates(account: number, options: UpdateOptions = {}): Promise<Update[]> {
+        const result = [];
+
+        await this.fetchUpdates(account, async data => result.push(data), options);
+
+        return result;
+    }
+
+    public async fetchUpdates(account: number, callback: (data: Update, index: number) => Promise<any>, options: UpdateOptions = {}): Promise<void> {
         const values: any[] = [account];
         const where = ['`account`=?'];
+        const limit = Math.min(MAX_FETCH_LIMIT, options.limit || MAX_FETCH_LIMIT);
+
+        if (options.firstID) {
+            values.push(options.firstID);
+            where.push('`id`>=?');
+        }
+
+        if (options.lastID) {
+            values.push(options.lastID);
+            where.push('`id`<=?');
+        }
 
         if (options.depot) {
             values.push(options.depot);
@@ -71,15 +95,15 @@ export class BalanceRepository extends Database.Repository<Tables> {
 
         if (options.start) {
             values.push(Database.parseFromTime(options.start));
-            where.push('`timestamp`>=?');
+            where.push('`timestamp`>=FROM_UNIXTIME(?)');
         }
 
         if (options.end) {
             values.push(Database.parseFromTime(options.end));
-            where.push('`timestamp`<=?');
+            where.push('`timestamp`<=FROM_UNIXTIME(?)');
         }
 
-        await this.database.fetch(`SELECT * FROM ${this.data.balanceTable} ${where.join(' AND ')}`, async (data, index) => callback({
+        await this.database.fetch(`SELECT * FROM ${this.data.balanceTable} WHERE ${where.join(' AND ')} LIMIT ${limit}`, async (data, index) => callback({
             id: data.id,
             timestamp: Database.parseToTime(data.timestamp),
             type: data.type,
@@ -92,9 +116,18 @@ export class BalanceRepository extends Database.Repository<Tables> {
         }, index), values);
     }
 
-    public async fetchHistory(account: number, options: HistoryOptions = {}, callback: (data: Balance, index: number) => Promise<any>): Promise<void> {
+    public async getHistory(account: number, options: HistoryOptions = {}): Promise<Balance[]> {
+        const result = [];
+
+        await this.fetchHistory(account, async data => result.push(data), options);
+
+        return result;
+    }
+
+    public async fetchHistory(account: number, callback: (data: Balance, index: number) => Promise<any>, options: HistoryOptions = {}): Promise<void> {
         const values: any[] = [account];
         const where = ['`account`=?'];
+        const limit = Math.min(MAX_FETCH_LIMIT, options.limit || MAX_FETCH_LIMIT);
 
         if (options.depot) {
             values.push(options.depot);
@@ -108,15 +141,15 @@ export class BalanceRepository extends Database.Repository<Tables> {
 
         if (options.start) {
             values.push(Database.parseFromTime(options.start));
-            where.push('`timestamp`>=?');
+            where.push('`timestamp`>=FROM_UNIXTIME(?)');
         }
 
         if (options.end) {
             values.push(Database.parseFromTime(options.end));
-            where.push('`timestamp`<=?');
+            where.push('`timestamp`<=FROM_UNIXTIME(?)');
         }
 
-        await this.database.fetch(`SELECT * FROM ${this.data.historyTable} ${where.join(' AND ')}`, async (data, index) => callback({
+        await this.database.fetch(`SELECT * FROM ${this.data.historyTable} WHERE ${where.join(' AND ')} LIMIT ${limit}`, async (data, index) => callback({
             timestamp: Database.parseToTime(data.timestamp),
             account: data.account,
             depot: data.depot,
