@@ -29,6 +29,9 @@ export abstract class Module<TContext extends Context, TArgs extends Args, TOpti
         // setup commander config by global parameters
         GlobalParameters.forEach(param => this.commander.config.add(param));
 
+        // setup commander config by args
+        this.commander.config.deserialize(args);
+
         if (args.debug)
             this.commander.onMessage.on(message => this.onMessage.emit(this, message));
     }
