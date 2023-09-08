@@ -36,8 +36,19 @@ interface UpdateOptions extends HistoryOptions {
 }
 
 export class BalanceRepository extends Database.Repository<Tables> {
+    constructor(
+        data: Tables,
+        database: Database.Database,
+        updatePath?: string
+    ) {
+        super(data, database, updatePath);
+
+        if (!database.config.multipleStatements)
+            throw new Error('database needs to support multiple statements for balance repository');
+    }
+
     public async getCurrent(account: number, depot: number, asset: number): Promise<Balance | null> {
-        const response = await this.database.query(`SELECT * FROM ${this.data.balanceTable} WHERE \`account\`=? AND \`depot\`=? AND \`asset\`=? ORDER BY \`id\` DESC LIMIT 1`, [
+        const response = await this.database.query(`SELECT * FROM ${this.data.balanceTable} WHERE \`account\`=? AND \`depot\`=? AND \`asset\`=? LIMIT 1`, [
             account,
             depot,
             asset
@@ -88,7 +99,7 @@ export class BalanceRepository extends Database.Repository<Tables> {
             where.push('`asset`=?');
         }
 
-        if (options.data) {
+        if (undefined != options.data) {
             values.push(options.data);
             where.push('`data`=?');
         }
@@ -103,7 +114,7 @@ export class BalanceRepository extends Database.Repository<Tables> {
             where.push('`timestamp`<=FROM_UNIXTIME(?)');
         }
 
-        await this.database.fetch(`SELECT * FROM ${this.data.balanceTable} WHERE ${where.join(' AND ')} LIMIT ${limit}`, async (data, index) => callback({
+        await this.database.fetch(`SELECT * FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} LIMIT ${limit}`, async (data, index) => callback({
             id: data.id,
             timestamp: Database.parseToTime(data.timestamp),
             type: data.type,
