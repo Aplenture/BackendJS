@@ -23,6 +23,9 @@ export class Module extends Parent<Context, Args, Options> implements Context {
             new CoreJS.StringParameter('accountTable', 'account database table name', '`accounts`')
         );
 
+        // force multiple statement support
+        Object.assign(this.options.databaseConfig, { multipleStatements: true });
+
         this.database = new Database(this.options.databaseConfig, args.debug);
         this.database.onMessage.on(message => this.onMessage.emit(this, `database '${this.options.databaseConfig.database}' ${message}`));
 
