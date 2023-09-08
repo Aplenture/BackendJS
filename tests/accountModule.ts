@@ -156,7 +156,7 @@ describe("Account Module", () => {
             expect(access.expiration).greaterThanOrEqual(minExpirationTime, 'access expiration is to low');
             expect(access.expiration).lessThanOrEqual(maxExpirationTime, 'access expiration is to high');
 
-            const accesses = await m.database.query(`SELECT *, UNIX_TIMESTAMP(\`expiration\`) as \`expiration\` FROM ${m.accessRepository.data} WHERE \`id\`=?`, [access.id]);
+            const accesses = await m.database.query(`SELECT * FROM ${m.accessRepository.data} WHERE \`id\`=?`, [access.id]);
 
             expect(accesses).has.length(1);
             expect(BackendJS.Database.parseToTime(accesses[0].expiration)).equals(access.expiration, 'access expiration');

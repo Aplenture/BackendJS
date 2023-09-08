@@ -27,15 +27,15 @@ export class AccessRepository extends Repository<string> {
     }
 
     public async getByAPI(api: string): Promise<Access | null> {
-        const result = await this.database.query(`SELECT *, UNIX_TIMESTAMP(\`created\`) as \`created\`, UNIX_TIMESTAMP(\`expiration\`) as \`expiration\` FROM ${this.data} WHERE \`api\`=? LIMIT 1`, [api]);
+        const result = await this.database.query(`SELECT * FROM ${this.data} WHERE \`api\`=? LIMIT 1`, [api]);
 
         if (!result.length)
             return null;
 
         return {
             id: result[0].id,
-            created: result[0].created * 1000,
-            expiration: result[0].expiration * 1000,
+            created: Database.parseToTime(result[0].created),
+            expiration: Database.parseToTime(result[0].expiration),
             account: result[0].account,
             api: result[0].api,
             secret: result[0].secret,
@@ -45,15 +45,15 @@ export class AccessRepository extends Repository<string> {
     }
 
     public async getByAccount(account: number): Promise<readonly Access[]> {
-        const result = await this.database.query(`SELECT *, UNIX_TIMESTAMP(\`created\`) as \`created\`, UNIX_TIMESTAMP(\`expiration\`) as \`expiration\` FROM ${this.data} WHERE \`account\`=? AND (\`expiration\`>NOW() OR \`expiration\` IS NULL)`, [account]);
+        const result = await this.database.query(`SELECT * FROM ${this.data} WHERE \`account\`=? AND (\`expiration\`>NOW() OR \`expiration\` IS NULL)`, [account]);
 
         if (!result.length)
             return [];
 
         return result.map(data => ({
             id: data.id,
-            created: data.created * 1000,
-            expiration: data.expiration * 1000,
+            created: Database.parseToTime(data.created),
+            expiration: Database.parseToTime(data.expiration),
             account: data.account,
             api: data.api,
             secret: '',

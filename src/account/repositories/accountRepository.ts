@@ -53,16 +53,18 @@ export class AccountRepository extends Repository<string> {
     }
 
     public async create(username: string, key: string): Promise<Account | null> {
-        const created = Date.now();
-        const result = await this.database.query(`INSERT INTO ${this.data} (\`username\`,\`key\`,\`created\`) VALUES (?,?,FROM_UNIXTIME(?))`, [
+        const result = await this.database.query(`
+            INSERT INTO ${this.data} (\`username\`,\`key\`) VALUES (?,?);
+            SELECT * FROM ${this.data} WHERE \`username\`=? LIMIT 1;
+        `, [
             username,
             key,
-            created / 1000
+            username
         ]);
 
         return {
-            id: result.insertId,
-            created,
+            id: result[1][0].id,
+            created: parseToTime(result[1][0].created),
             username,
             key
         };
