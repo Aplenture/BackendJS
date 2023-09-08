@@ -5,10 +5,21 @@
  * MIT License https://github.com/Aplenture/BackendJS/blob/main/LICENSE
  */
 
-import { Repository } from "../../database";
+import { Repository, parseToTime, Database } from "../../database";
 import { Account } from "../models";
 
 export class AccountRepository extends Repository<string> {
+    constructor(
+        data: string,
+        database: Database,
+        updatePath?: string
+    ) {
+        super(data, database, updatePath);
+
+        if (!database.config.multipleStatements)
+            throw new Error('database needs to support multiple statements for account repository');
+    }
+
     public async getByID(id: number): Promise<Account | null> {
         const result = await this.database.query(`SELECT *, FROM_UNIXTIME(\`created\`) as \`created\` FROM ${this.data} WHERE \`id\`=? LIMIT 1`, [
             id
