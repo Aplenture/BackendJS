@@ -7,6 +7,10 @@
 
 import * as CoreJS from "corejs";
 
+export enum GlobalParamterName {
+    Debug = 'debug'
+}
+
 export const GlobalParameters: readonly CoreJS.Parameter<any>[] = [
-    new CoreJS.BoolParameter('debug', 'enables/disables debug mode', false)
+    new CoreJS.BoolParameter(GlobalParamterName.Debug, 'enables/disables debug mode', false)
 ]
