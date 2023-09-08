@@ -24,7 +24,7 @@ const config = {
 };
 
 const m = new BackendJS.Account.Module(args, config);
-const log = BackendJS.Log.Log.createFileLog('./test.log', true);
+const log = BackendJS.Log.Log.createFileLog('./test.account.log', true);
 
 m.onMessage.on(message => log.write(message));
 

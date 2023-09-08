@@ -27,7 +27,7 @@ const databaseConfig = {
 const database = new Database.Database(databaseConfig, true);
 
 const repository = new Balance.BalanceRepository(tables, database, process.cwd() + '/src/balance/updates/BalanceRepository');
-const log = Log.Log.createFileLog('./test.log', true);
+const log = Log.Log.createFileLog('./test.balance.log', true);
 
 database.onMessage.on(message => log.write(message));
 
