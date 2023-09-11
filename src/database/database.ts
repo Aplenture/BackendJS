@@ -9,6 +9,7 @@ import * as MySQL from "mariadb";
 import * as CoreJS from "corejs";
 import { Update } from "./update";
 import { Config } from "./config";
+import { parseFromTime } from "./parsing";
 
 type Type = string | number
 type Entry = NodeJS.ReadOnlyDict<any>;
@@ -87,10 +88,10 @@ export class Database {
         this.onMessage.emit(this, 'update');
 
         await this.query(`CREATE TABLE IF NOT EXISTS \`updates\` (
-            \`id\` BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-            \`time\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            \`name\` TEXT NOT NULL,
-            \`version\` BIGINT NOT NULL
+            \`time\` TIMESTAMP NOT NULL,
+            \`name\` CHAR(48) NOT NULL,
+            \`version\` BIGINT NOT NULL,
+            PRIMARY KEY (\`time\`,\`name\`,\`version\`)
             ) DEFAULT CHARSET=utf8`);
 
         const ascendingUpdates: readonly Update<any>[] = Object.assign([], updates)
@@ -98,7 +99,11 @@ export class Database {
 
         for (let i = 0; i < ascendingUpdates.length; ++i) {
             const update = ascendingUpdates[i];
-            const executedUpdates = await this.query(`SELECT * FROM \`updates\` WHERE \`version\`=?`, [update.version]);
+            const executedUpdates = await this.query(`SELECT * FROM \`updates\` WHERE \`time\`=FROM_UNIXTIME(?) AND \`name\`=? AND \`version\`=? LIMIT 1`, [
+                parseFromTime(new Date(update.timestamp).getTime()),
+                update.name,
+                update.version
+            ]);
 
             if (executedUpdates.length) {
                 this.onMessage.emit(this, `skip update '${update.name}' (already executed)`);
@@ -108,7 +113,8 @@ export class Database {
             this.onMessage.emit(this, `execute update '${update.name}'`);
 
             await this.query(update.update);
-            await this.query(`INSERT INTO \`updates\` (\`name\`,\`version\`) VALUES (?,?)`, [
+            await this.query(`INSERT INTO \`updates\` (\`time\`,\`name\`,\`version\`) VALUES (FROM_UNIXTIME(?),?,?)`, [
+                parseFromTime(new Date(update.timestamp).getTime()),
                 update.name,
                 update.version
             ]);
@@ -137,7 +143,11 @@ export class Database {
 
         for (let i = 0; i < descendingUpdates.length; ++i) {
             const update = descendingUpdates[i];
-            const executedUpdates = await this.query(`SELECT * FROM \`updates\` WHERE \`version\`=?`, [update.version]);
+            const executedUpdates = await this.query(`SELECT * FROM \`updates\` WHERE \`time\`=FROM_UNIXTIME(?) AND \`name\`=? AND \`version\`=? LIMIT 1`, [
+                parseFromTime(new Date(update.timestamp).getTime()),
+                update.name,
+                update.version
+            ]);
 
             if (0 == executedUpdates.length) {
                 this.onMessage.emit(this, `skip reset of update '${update.name}' (update not executed)`);
@@ -173,7 +183,11 @@ export class Database {
 
         for (let i = 0; i < descendingUpdates.length; ++i) {
             const update = descendingUpdates[i];
-            const executedUpdates = await this.query(`SELECT * FROM \`updates\` WHERE \`version\`=?`, [update.version]);
+            const executedUpdates = await this.query(`SELECT * FROM \`updates\` WHERE \`time\`=FROM_UNIXTIME(?) AND \`name\`=? AND \`version\`=? LIMIT 1`, [
+                parseFromTime(new Date(update.timestamp).getTime()),
+                update.name,
+                update.version
+            ]);
 
             if (0 == executedUpdates.length) {
                 this.onMessage.emit(this, `skip revert of update '${update.name}' (update not executed)`);
