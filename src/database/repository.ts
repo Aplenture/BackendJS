@@ -16,15 +16,11 @@ interface LoadUpdatesOptions {
 }
 
 export abstract class Repository<T> {
-    protected readonly updatePath: string;
-
     constructor(
         public readonly data: T,
         protected readonly database: Database,
-        updatePath?: string
-    ) {
-        this.updatePath = updatePath || process.cwd() + '/src/updates/' + this.constructor.name;
-    }
+        protected readonly updatePath: string
+    ) { }
 
     public async init(): Promise<void> { }
     public async deinit(): Promise<void> { }
