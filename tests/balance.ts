@@ -29,7 +29,7 @@ const database = new Database.Database(databaseConfig, {
     multipleStatements: true
 });
 
-const repository = new Balance.BalanceRepository(tables, database, process.cwd() + '/src/balance/updates/BalanceRepository');
+const repository = new Balance.Repository(tables, database);
 const log = Log.Log.createFileLog('./test.balance.log', true);
 
 database.onMessage.on(message => log.write(message));

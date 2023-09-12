@@ -5,4 +5,6 @@
  * MIT License https://github.com/Aplenture/BackendJS/blob/main/LICENSE
  */
 
-export * from "./BalanceRepository";
+export * from "./createBalanceUpdatesTable";
+export * from "./createBalancesTable";
+export * from "./createHistoryTable";

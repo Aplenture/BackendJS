@@ -5,8 +5,8 @@
  * MIT License https://github.com/Aplenture/BackendJS/blob/main/LICENSE
  */
 
-import * as Database from "../../../database";
-import { Tables } from "../../models/tables";
+import * as Database from "../../database";
+import { Tables } from "../models/tables";
 
 export class CreateHistoryTable extends Database.Update<Tables> {
     public readonly name = "Create History Table";

@@ -35,15 +35,14 @@ interface UpdateOptions extends HistoryOptions {
     readonly data?: string;
 }
 
-export class BalanceRepository extends Database.Repository<Tables> {
+export class Repository extends Database.Repository<Tables> {
     constructor(
         data: Tables,
-        database: Database.Database,
-        updatePath?: string
+        database: Database.Database
     ) {
-        super(data, database, updatePath);
+        super(data, database, __dirname + '/../updates');
 
-        if (!database.config.multipleStatements)
+        if (!database.allowsMultipleStatements)
             throw new Error('database needs to support multiple statements for balance repository');
     }
 

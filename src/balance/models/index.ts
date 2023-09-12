@@ -6,4 +6,5 @@
  */
 
 export * from "./balance";
+export * from "./tables";
 export * from "./update";
