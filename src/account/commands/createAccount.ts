@@ -37,30 +37,20 @@ export class CreateAccount extends Command<Context, Args, Options> {
         const seed = !args.publickey && (args.password || CoreJS.randomPassword(LENGTH_PASSWORD_BLOCKS));
         const publicKey = args.publickey || CoreJS.EC.secp256k1.createPublicKey(CoreJS.EC.createPrivateKey(seed));
 
-        try {
-            const account = await this.context.accountRepository.create(args.username, publicKey.toString());
+        const account = await this.context.accountRepository.create(args.username, publicKey.toString());
 
-            this.message(`created new account with id '${account.id}'`);
+        this.message(`created new account with id '${account.id}'`);
 
-            if (!args.create_access)
-                return new CoreJS.OKResponse();
+        if (!args.create_access)
+            return new CoreJS.OKResponse();
 
-            const access = await this.context.accessRepository.create(account.id, {
-                label: args.label,
-                expirationDuration: args.access_expiration
-            });
+        const access = await this.context.accessRepository.create(account.id, {
+            label: args.label,
+            expirationDuration: args.access_expiration
+        });
 
-            this.message(`created new access for account '${account.id}'`);
+        this.message(`created new access for account '${account.id}'`);
 
-            return new CoreJS.JSONResponse(access);
-        } catch (error) {
-            switch (error.code) {
-                case ErrorCode.Duplicate:
-                    return new CoreJS.ErrorResponse(CoreJS.ResponseCode.BadRequest, '#_username_duplicate');
-
-                default:
-                    throw error;
-            }
-        }
+        return new CoreJS.JSONResponse(access);
     }
 }

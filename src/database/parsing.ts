@@ -6,6 +6,7 @@
  */
 
 import * as CoreJS from "corejs";
+import { ErrorCode } from "./errorCode";
 
 export function trimTime(time?: number): number {
     return CoreJS.trimTime(1000, time);
@@ -17,4 +18,14 @@ export function parseFromTime(time?: number): number {
 
 export function parseToTime(time: string): number {
     return Number(time);
+}
+
+export function parseToError(error: ErrorCode): CoreJS.CoreErrorCode {
+    switch (error) {
+        case ErrorCode.Duplicate:
+            return CoreJS.CoreErrorCode.Duplicate;
+
+        default:
+            throw new Error(`unknown database error code '${error}'`);
+    }
 }

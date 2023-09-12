@@ -250,7 +250,7 @@ export class Database {
 
             this.onMessage.emit(this, error.message);
 
-            throw new CoreJS.CoreError(error.errno);
+            throw new CoreJS.CoreError(parseToError(error.errno));
         }
     }
 

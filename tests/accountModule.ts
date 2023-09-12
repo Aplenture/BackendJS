@@ -127,13 +127,7 @@ describe("Account Module", () => {
             expect(await m.database.query(`SELECT * FROM ${m.accessRepository.data} WHERE \`account\`=?`, [accounts[0].id])).is.empty;
         });
 
-        it("Catches duplicate usernames", async () => {
-            const username = 'rdm_pw_no_acc';
-            const result = await m.execute('CreateAccount', { username }) as CoreJS.Response;
-
-            expect(result.code).equals(400, 'wrong response code');
-            expect(result.data).equals('#_username_duplicate', 'response data');
-        });
+        it("Catches duplicate usernames", () => m.execute('CreateAccount', { username: 'rdm_pw_no_acc' }).catch(error => expect(error).contains({ code: CoreJS.CoreErrorCode.Duplicate })));
 
         it("creates account with specific access expiration duration", async () => {
             const username = 'acc_expiration';
@@ -310,9 +304,9 @@ describe("Account Module", () => {
                     api_to_delete: accesses[0].api
                 }) as CoreJS.Response;
 
-                expect(result.code).equals(-1001, 'wrong response code');
+                expect(result.code).equals(CoreJS.CoreErrorCode.MissingParameter, 'wrong response code');
             } catch (error) {
-                expect(error.code).equals(-1001, 'wrong response code');
+                expect(error.code).equals(CoreJS.CoreErrorCode.MissingParameter, 'wrong response code');
                 expect(error.data).contains({ name: 'account', type: 'number' });
             }
         });
@@ -325,9 +319,9 @@ describe("Account Module", () => {
                     account: accesses[0].account,
                 }) as CoreJS.Response;
 
-                expect(result.code).equals(-1001, 'wrong response code');
+                expect(result.code).equals(CoreJS.CoreErrorCode.MissingParameter, 'wrong response code');
             } catch (error) {
-                expect(error.code).equals(-1001, 'wrong response code');
+                expect(error.code).equals(CoreJS.CoreErrorCode.MissingParameter, 'wrong response code');
                 expect(error.data).contains({ name: 'api_to_delete', type: 'string' });
             }
         });
