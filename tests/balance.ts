@@ -24,7 +24,10 @@ const databaseConfig = {
     timeout: 60000
 };
 
-const database = new Database.Database(databaseConfig, true);
+const database = new Database.Database(databaseConfig, {
+    debug: true,
+    multipleStatements: true
+});
 
 const repository = new Balance.BalanceRepository(tables, database, process.cwd() + '/src/balance/updates/BalanceRepository');
 const log = Log.Log.createFileLog('./test.balance.log', true);

@@ -9,19 +9,29 @@ import * as MySQL from "mariadb";
 import * as CoreJS from "corejs";
 import { Update } from "./update";
 import { Config } from "./config";
-import { parseFromTime } from "./parsing";
+import { parseFromTime, parseToError } from "./parsing";
 
 type Type = string | number
 type Entry = NodeJS.ReadOnlyDict<any>;
+
+interface Options {
+    readonly debug?: boolean;
+    readonly multipleStatements?: boolean;
+}
 
 export class Database {
     public readonly onMessage = new CoreJS.Event<Database, string>('Database.onMessage');
 
     private pool: MySQL.Pool;
 
-    constructor(public readonly config: Config, public readonly debug = false) { }
+    constructor(
+        private readonly config: Config,
+        private readonly options: Options = {}
+    ) { }
 
     public get isInitialized(): boolean { return !!this.pool; }
+    public get debug(): boolean { return !!this.options.debug; }
+    public get allowsMultipleStatements(): boolean { return !!this.options.multipleStatements; }
 
     public static async create(config: Config): Promise<void> {
         const connection = await MySQL.createConnection({
@@ -57,7 +67,8 @@ export class Database {
             return;
 
         this.pool = await MySQL.createPool(Object.assign({}, this.config, {
-            acquireTimeout: this.config.timeout
+            acquireTimeout: this.config.timeout,
+            multipleStatements: this.options.multipleStatements || false
         }));
     }
 

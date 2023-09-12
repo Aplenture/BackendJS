@@ -16,7 +16,7 @@ export class AccountRepository extends Repository<string> {
     ) {
         super(data, database, updatePath);
 
-        if (!database.config.multipleStatements)
+        if (!database.allowsMultipleStatements)
             throw new Error('database needs to support multiple statements for account repository');
     }
 
