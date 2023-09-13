@@ -210,7 +210,9 @@ export class Database {
             if (update.revert)
                 await this.query(update.revert);
 
-            await this.query(`DELETE from \`updates\` WHERE \`version\`=?`, [
+            await this.query(`DELETE from \`updates\` WHERE \`time\`=FROM_UNIXTIME(?) AND \`name\`=? AND \`version\`=?`, [
+                parseFromTime(new Date(update.timestamp).getTime()),
+                update.name,
                 update.version
             ]);
         }
