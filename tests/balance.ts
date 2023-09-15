@@ -134,8 +134,8 @@ describe("Module", () => {
         }).beforeAll(async () => {
             const result = await database.query(`SELECT \`timestamp\` FROM ${tables.historyTable} ORDER BY \`timestamp\` ASC`);
 
-            start = Database.parseToTime(result[0].timestamp);
-            end = Database.parseToTime(result[result.length - 1].timestamp);
+            start = Database.parseToTime(result[0].timestamp) as number;
+            end = Database.parseToTime(result[result.length - 1].timestamp) as number;
         });
     });
 
@@ -168,8 +168,8 @@ describe("Module", () => {
         }).beforeAll(async () => {
             const result = await database.query(`SELECT \`timestamp\` FROM ${tables.updateTable} ORDER BY \`timestamp\` ASC`);
 
-            start = Database.parseToTime(result[0].timestamp);
-            end = Database.parseToTime(result[result.length - 1].timestamp);
+            start = Database.parseToTime(result[0].timestamp) as number;
+            end = Database.parseToTime(result[result.length - 1].timestamp) as number;
         });
     });
 
