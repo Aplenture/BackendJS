@@ -15,8 +15,8 @@ const MAX_FETCH_LIMIT = 1000;
 interface UpdateData {
     readonly account: number;
     readonly depot: number;
+    readonly order: number;
     readonly asset: number;
-    readonly product: number;
     readonly value: number;
     readonly data: string;
 }
@@ -119,8 +119,8 @@ export class Repository extends Database.Repository<Tables> {
             type: data.type,
             account: data.account,
             depot: data.depot,
+            order: data.order,
             asset: data.asset,
-            product: data.product,
             change: data.change,
             data: data.data
         }, index), values);
@@ -186,7 +186,7 @@ export class Repository extends Database.Repository<Tables> {
 
         const result = await this.database.query(`
             LOCK TABLES ${this.data.updateTable} WRITE, ${this.data.balanceTable} WRITE;
-            INSERT INTO ${this.data.updateTable} (\`type\`,\`account\`,\`depot\`,\`asset\`,\`product\`,\`change\`,\`data\`) VALUES (?,?,?,?,?,?,?);
+            INSERT INTO ${this.data.updateTable} (\`type\`,\`account\`,\`depot\`,\`asset\`,\`order\`,\`change\`,\`data\`) VALUES (?,?,?,?,?,?,?);
             INSERT INTO ${this.data.balanceTable} (\`account\`,\`depot\`,\`asset\`,\`value\`) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE \`value\`=\`value\`+?;
             SELECT * FROM ${this.data.balanceTable} WHERE \`account\`=? AND \`depot\`=? AND \`asset\`=? LIMIT 1;
             UNLOCK TABLES;
@@ -195,7 +195,7 @@ export class Repository extends Database.Repository<Tables> {
             data.account,
             data.depot,
             data.asset,
-            data.product,
+            data.order,
             change,
             data.data,
             data.account,

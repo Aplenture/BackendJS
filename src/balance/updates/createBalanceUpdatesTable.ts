@@ -28,8 +28,8 @@ export class CreateBalanceUpdatesTable extends Database.Update<Tables> {
             \`type\` SMALLINT NOT NULL,
             \`account\` BIGINT NOT NULL,
             \`depot\` BIGINT NOT NULL,
+            \`order\` INT NOT NULL,
             \`asset\` BIGINT NOT NULL,
-            \`product\` INT NOT NULL,
             \`change\` INT NOT NULL,
             \`data\` TEXT DEFAULT ''
         ) DEFAULT CHARSET=utf8`;

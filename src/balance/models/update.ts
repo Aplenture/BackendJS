@@ -13,8 +13,8 @@ export interface Update {
     readonly type: UpdateType;
     readonly account: number;
     readonly depot: number;
+    readonly order: number;
     readonly asset: number;
-    readonly product: number;
     readonly change: number;
     readonly data: string;
 }
