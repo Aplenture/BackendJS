@@ -16,7 +16,10 @@ export function parseFromTime(time?: number): number {
     return trimTime(time) / 1000;
 }
 
-export function parseToTime(time: string): number {
+export function parseToTime(time: string): number | null {
+    if (!time)
+        return null;
+
     return Number(time);
 }
 
