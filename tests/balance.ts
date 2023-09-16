@@ -32,7 +32,7 @@ const database = new Database.Database(databaseConfig, {
 const repository = new Balance.Repository(tables, database);
 const log = Log.Log.createFileLog('./test.balance.log', true);
 
-database.onMessage.on(message => log.write(message));
+CoreJS.GlobalEventManager.onMessage.on(message => log.write(message));
 
 describe("Module", () => {
     describe("init", () => {

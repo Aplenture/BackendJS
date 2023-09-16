@@ -20,16 +20,16 @@ interface Options {
 }
 
 export class Database {
-    public readonly onMessage = new CoreJS.Event<Database, string>('Database.onMessage');
-
     private pool: MySQL.Pool;
 
     constructor(
         private readonly config: Config,
-        private readonly options: Options = {}
+        private readonly options: Options = {},
+        public readonly eventManager = CoreJS.GlobalEventManager
     ) { }
 
     public get isInitialized(): boolean { return !!this.pool; }
+    public get name(): string { return this.config.database; }
     public get debug(): boolean { return !!this.options.debug; }
     public get allowsMultipleStatements(): boolean { return !!this.options.multipleStatements; }
 
@@ -92,11 +92,11 @@ export class Database {
 
     public async update(updates: readonly Update<any>[]): Promise<number> {
         if (0 == updates.length) {
-            this.onMessage.emit(this, `there are no updates to execute`);
+            this.eventManager.onMessage.emit(this, `there are no updates to execute`);
             return await this.currentVersion();
         }
 
-        this.onMessage.emit(this, 'update');
+        this.eventManager.onMessage.emit(this, 'update');
 
         await this.query(`CREATE TABLE IF NOT EXISTS \`updates\` (
             \`time\` TIMESTAMP NOT NULL,
@@ -117,11 +117,11 @@ export class Database {
             ]);
 
             if (executedUpdates.length) {
-                this.onMessage.emit(this, `skip update '${update.name}' (already executed)`);
+                this.eventManager.onMessage.emit(this, `skip update '${update.name}' (already executed)`);
                 continue;
             }
 
-            this.onMessage.emit(this, `execute update '${update.name}'`);
+            this.eventManager.onMessage.emit(this, `execute update '${update.name}'`);
 
             await this.query(update.update);
             await this.query(`INSERT INTO \`updates\` (\`time\`,\`name\`,\`version\`) VALUES (FROM_UNIXTIME(?),?,?)`, [
@@ -133,21 +133,21 @@ export class Database {
 
         const latestUpdate = await this.query(`SELECT * FROM \`updates\` ORDER BY \`version\` DESC LIMIT 1`);
 
-        this.onMessage.emit(this, `updated to version '${latestUpdate[0].version}'`);
+        this.eventManager.onMessage.emit(this, `updated to version '${latestUpdate[0].version}'`);
 
         return latestUpdate[0].version;
     }
 
     public async reset(updates: readonly Update<any>[]): Promise<void> {
         if (0 == updates.length)
-            return this.onMessage.emit(this, `there are no updates to reset`);
+            return this.eventManager.onMessage.emit(this, `there are no updates to reset`);
 
-        this.onMessage.emit(this, 'reset');
+        this.eventManager.onMessage.emit(this, 'reset');
 
         const updateTables = await this.query(`SHOW TABLES LIKE 'updates'`);
 
         if (0 == updateTables.length)
-            return this.onMessage.emit(this, 'there are no executed updates to reset');
+            return this.eventManager.onMessage.emit(this, 'there are no executed updates to reset');
 
         const descendingUpdates: readonly Update<any>[] = Object.assign([], updates)
             .sort((a, b) => b.version - a.version);
@@ -161,31 +161,31 @@ export class Database {
             ]);
 
             if (0 == executedUpdates.length) {
-                this.onMessage.emit(this, `skip reset of update '${update.name}' (update not executed)`);
+                this.eventManager.onMessage.emit(this, `skip reset of update '${update.name}' (update not executed)`);
                 continue;
             }
 
-            this.onMessage.emit(this, `reset update '${update.name}'`);
+            this.eventManager.onMessage.emit(this, `reset update '${update.name}'`);
 
             if (update.reset)
                 await this.query(update.reset);
         }
 
-        this.onMessage.emit(this, `all updates reset`);
+        this.eventManager.onMessage.emit(this, `all updates reset`);
     }
 
     public async revert(updates: readonly Update<any>[]): Promise<number> {
         if (0 == updates.length) {
-            this.onMessage.emit(this, `there are no updates to revert`);
+            this.eventManager.onMessage.emit(this, `there are no updates to revert`);
             return await this.currentVersion();
         }
 
-        this.onMessage.emit(this, 'revert');
+        this.eventManager.onMessage.emit(this, 'revert');
 
         const updateTables = await this.query(`SHOW TABLES LIKE 'updates'`);
 
         if (0 == updateTables.length) {
-            this.onMessage.emit(this, 'there are no executed updates to revert');
+            this.eventManager.onMessage.emit(this, 'there are no executed updates to revert');
             return await this.currentVersion();
         }
 
@@ -201,11 +201,11 @@ export class Database {
             ]);
 
             if (0 == executedUpdates.length) {
-                this.onMessage.emit(this, `skip revert of update '${update.name}' (update not executed)`);
+                this.eventManager.onMessage.emit(this, `skip revert of update '${update.name}' (update not executed)`);
                 continue;
             }
 
-            this.onMessage.emit(this, `revert update '${update.name}'`);
+            this.eventManager.onMessage.emit(this, `revert update '${update.name}'`);
 
             if (update.revert)
                 await this.query(update.revert);
@@ -220,11 +220,11 @@ export class Database {
         const latestUpdate = await this.query(`SELECT * FROM \`updates\` ORDER BY \`version\` DESC LIMIT 1`);
 
         if (latestUpdate.length) {
-            this.onMessage.emit(this, `reverted to version '${latestUpdate[0].version}'`);
+            this.eventManager.onMessage.emit(this, `reverted to version '${latestUpdate[0].version}'`);
             return latestUpdate[0].version;
         }
 
-        this.onMessage.emit(this, `all updates reverted`);
+        this.eventManager.onMessage.emit(this, `all updates reverted`);
 
         return 0;
     }
@@ -254,14 +254,14 @@ export class Database {
                 result.forEach(entry => Database.decodeEntry(entry));
 
             if (this.debug || debug)
-                this.onMessage.emit(this, `executed "${query}" in ${CoreJS.formatDuration(stopwatch.duration, { seconds: true, milliseconds: true })}`);
+                this.eventManager.onMessage.emit(this, `executed "${query}" in ${CoreJS.formatDuration(stopwatch.duration, { seconds: true, milliseconds: true })}`);
 
             return result;
         } catch (error) {
             stopwatch.stop();
             connection.release();
 
-            this.onMessage.emit(this, error.message);
+            this.eventManager.onMessage.emit(this, error.message);
 
             throw new CoreJS.CoreError(parseToError(error.errno));
         }
@@ -288,7 +288,7 @@ export class Database {
 
             stream.on("error", error => {
                 connection.release();
-                this.onMessage.emit(this, error.message);
+                this.eventManager.onMessage.emit(this, error.message);
                 reject(error);
             });
 
@@ -298,7 +298,7 @@ export class Database {
                 resolve();
 
                 if (this.debug || debug)
-                    this.onMessage.emit(this, `fetched "${query}" in ${CoreJS.formatDuration(stopwatch.duration, { seconds: true, milliseconds: true })}`);
+                    this.eventManager.onMessage.emit(this, `fetched "${query}" in ${CoreJS.formatDuration(stopwatch.duration, { seconds: true, milliseconds: true })}`);
             });
 
             stream.on("data", async entry => {
