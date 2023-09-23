@@ -35,6 +35,14 @@ interface UpdateOptions extends HistoryOptions {
     readonly data?: string;
 }
 
+interface FetchCurrentOptions {
+    readonly depot?: number;
+    readonly asset?: number;
+    readonly firstDepotID?: number;
+    readonly lastDepotID?: number;
+    readonly limit?: number;
+}
+
 export class Repository extends Database.Repository<Tables> {
     constructor(
         data: Tables,
@@ -63,6 +71,40 @@ export class Repository extends Database.Repository<Tables> {
             asset: response[0].asset,
             value: response[0].value
         };
+    }
+
+    public async fetchCurrent(account: number, callback: (data: Balance, index: number) => Promise<any>, options: FetchCurrentOptions = {}): Promise<void> {
+        const values: any[] = [account];
+        const where = ['`account`=?'];
+        const limit = Math.min(MAX_FETCH_LIMIT, options.limit || MAX_FETCH_LIMIT);
+
+        if (options.depot) {
+            values.push(options.depot);
+            where.push('`depot`=?');
+        }
+
+        if (options.asset) {
+            values.push(options.asset);
+            where.push('`asset`=?');
+        }
+
+        if (options.firstDepotID) {
+            values.push(options.firstDepotID);
+            where.push('`depot`>=?');
+        }
+
+        if (options.lastDepotID) {
+            values.push(options.lastDepotID);
+            where.push('`depot`<=?');
+        }
+
+        await this.database.fetch(`SELECT * FROM ${this.data.balanceTable} WHERE ${where.join(' AND ')} ORDER BY \`depot\` ASC LIMIT ${limit}`, async (data, index) => callback({
+            timestamp: Database.parseToTime(data.timestamp),
+            account: data.account,
+            depot: data.depot,
+            asset: data.asset,
+            value: data.value
+        }, index), values);
     }
 
     public async getUpdates(account: number, options: UpdateOptions = {}): Promise<Update[]> {
