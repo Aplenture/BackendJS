@@ -99,7 +99,7 @@ describe("Module", () => {
                 database.query(`SELECT * FROM ${tables.historyTable} WHERE \`account\`=2 AND \`depot\`=1 AND \`asset\`=1`).then(result => expect(result.map(data => data.value), "account 2, depot 1, asset 1").has.length(2).deep.equals([2, 2])),
                 database.query(`SELECT * FROM ${tables.historyTable} WHERE \`account\`=3 AND \`depot\`=1 AND \`asset\`=1`).then(result => expect(result.map(data => data.value), "account 3, depot 1, asset 1").has.length(1).deep.equals([50]))
             ]));
-        }).beforeAll(() => CoreJS.sleep(1100).then(() => Promise.all([
+        }).beforeAll(() => CoreJS.sleep(2000).then(() => Promise.all([
             repository.increase({ account: 1, depot: 1, asset: 1, value: 50, order: 0, data: '' }),
             repository.increase({ account: 3, depot: 1, asset: 1, value: 50, order: 0, data: '' })
         ])));
@@ -113,7 +113,7 @@ describe("Module", () => {
                 database.query(`SELECT * FROM ${tables.historyTable} WHERE \`account\`=2 AND \`depot\`=1 AND \`asset\`=1`).then(result => expect(result.map(data => data.value), "account 2, depot 1, asset 1").has.length(3).deep.equals([2, 2, 2])),
                 database.query(`SELECT * FROM ${tables.historyTable} WHERE \`account\`=3 AND \`depot\`=1 AND \`asset\`=1`).then(result => expect(result.map(data => data.value), "account 3, depot 1, asset 1").has.length(2).deep.equals([50, 50]))
             ]));
-        }).beforeAll(() => CoreJS.sleep(1100));
+        }).beforeAll(() => CoreJS.sleep(2000));
 
         describe("fetching", () => {
             it("fetches all from account 1", () => repository.getHistory(1).then(result => expect(result.map(data => data.value)).has.length(9).deep.equals([0, -2, 0, 50, -2, 0, 50, -2, 0])));
