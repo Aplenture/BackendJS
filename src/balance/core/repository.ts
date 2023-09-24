@@ -73,7 +73,15 @@ export class Repository extends Database.Repository<Tables> {
         };
     }
 
-    public async fetchCurrent(account: number, callback: (data: Balance, index: number) => Promise<any>, options: FetchCurrentOptions = {}): Promise<void> {
+    public async getCurrents(account: number, options?: FetchCurrentOptions): Promise<Balance[]> {
+        const result = [];
+
+        await this.fetchCurrents(account, async data => result.push(data), options);
+
+        return result;
+    }
+
+    public async fetchCurrents(account: number, callback: (data: Balance, index: number) => Promise<any>, options: FetchCurrentOptions = {}): Promise<void> {
         const values: any[] = [account];
         const where = ['`account`=?'];
         const limit = Math.min(MAX_FETCH_LIMIT, options.limit || MAX_FETCH_LIMIT);
@@ -107,7 +115,7 @@ export class Repository extends Database.Repository<Tables> {
         }, index), values);
     }
 
-    public async getUpdates(account: number, options: UpdateOptions = {}): Promise<Update[]> {
+    public async getUpdates(account: number, options?: UpdateOptions): Promise<Update[]> {
         const result = [];
 
         await this.fetchUpdates(account, async data => result.push(data), options);
@@ -168,7 +176,7 @@ export class Repository extends Database.Repository<Tables> {
         }, index), values);
     }
 
-    public async getHistory(account: number, options: HistoryOptions = {}): Promise<Balance[]> {
+    public async getHistory(account: number, options?: HistoryOptions): Promise<Balance[]> {
         const result = [];
 
         await this.fetchHistory(account, async data => result.push(data), options);
