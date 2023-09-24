@@ -94,88 +94,88 @@ describe("Balance Repository", () => {
     describe("Events", () => {
         describe("get", () => {
             describe("current", () => {
-                it("all from account 1", () => repository.getEvents(1).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([-2, -6, -5])));
-                it("all from account 2", () => repository.getEvents(2).then(result => expect(result.map(data => data.value)).has.length(1).deep.equals([-4])));
+                it("all from account 1", () => repository.getEvents(1).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([2, 6, 5])));
+                it("all from account 2", () => repository.getEvents(2).then(result => expect(result.map(data => data.value)).has.length(1).deep.equals([4])));
                 it("all from account 3", () => repository.getEvents(3).then(result => expect(result.map(data => data.value)).has.length(0).deep.equals([])));
 
-                it("account 1, depot 1", () => repository.getEvents(1, { depot: 1 }).then(result => expect(result.map(data => data.value)).has.length(2).deep.equals([-2, -6])));
-                it("account 1, depot 2", () => repository.getEvents(1, { depot: 2 }).then(result => expect(result.map(data => data.value)).has.length(1).deep.equals([-5])));
+                it("account 1, depot 1", () => repository.getEvents(1, { depot: 1 }).then(result => expect(result.map(data => data.value)).has.length(2).deep.equals([2, 6])));
+                it("account 1, depot 2", () => repository.getEvents(1, { depot: 2 }).then(result => expect(result.map(data => data.value)).has.length(1).deep.equals([5])));
 
-                it("account 1, asset 1", () => repository.getEvents(1, { asset: 1 }).then(result => expect(result.map(data => data.value)).has.length(2).deep.equals([-2, -5])));
-                it("account 1, asset 2", () => repository.getEvents(1, { asset: 2 }).then(result => expect(result.map(data => data.value)).has.length(1).deep.equals([-6])));
+                it("account 1, asset 1", () => repository.getEvents(1, { asset: 1 }).then(result => expect(result.map(data => data.value)).has.length(2).deep.equals([2, 5])));
+                it("account 1, asset 2", () => repository.getEvents(1, { asset: 2 }).then(result => expect(result.map(data => data.value)).has.length(1).deep.equals([6])));
 
                 it("with type increase", () => repository.getEvents(1, { type: EventType.Increase }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([2, 4, 5])));
-                it("with type decrease", () => repository.getEvents(1, { type: EventType.Decrease }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([-2, -6, -5])));
+                it("with type decrease", () => repository.getEvents(1, { type: EventType.Decrease }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([2, 6, 5])));
 
-                it("with data", () => repository.getEvents(1, { data: 'decrease' }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([-2, -6, -5])));
+                it("with data", () => repository.getEvents(1, { data: 'decrease' }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([2, 6, 5])));
                 it("with empty data", () => repository.getEvents(1, { data: '' }).then(result => expect(result.map(data => data.value)).has.length(0).deep.equals([])));
             });
 
             describe("history", () => {
-                it("all from account 1", () => repository.getEvents(1, { end }).then(result => expect(result.map(data => data.value)).has.length(8).deep.equals([1, 2, 4, 5, -1, -2, -6, -5])));
-                it("all from account 2", () => repository.getEvents(2, { end }).then(result => expect(result.map(data => data.value)).has.length(2).deep.equals([6, -4])));
+                it("all from account 1", () => repository.getEvents(1, { end }).then(result => expect(result.map(data => data.value)).has.length(8).deep.equals([1, 2, 4, 5, 1, 2, 6, 5])));
+                it("all from account 2", () => repository.getEvents(2, { end }).then(result => expect(result.map(data => data.value)).has.length(2).deep.equals([6, 4])));
                 it("all from account 3", () => repository.getEvents(3, { end }).then(result => expect(result.map(data => data.value)).has.length(0).deep.equals([])));
 
-                it("account 1, depot 1", () => repository.getEvents(1, { depot: 1, end }).then(result => expect(result.map(data => data.value)).has.length(6).deep.equals([1, 2, 4, -1, -2, -6])));
-                it("account 1, depot 2", () => repository.getEvents(1, { depot: 2, end }).then(result => expect(result.map(data => data.value)).has.length(2).deep.equals([5, -5])));
+                it("account 1, depot 1", () => repository.getEvents(1, { depot: 1, end }).then(result => expect(result.map(data => data.value)).has.length(6).deep.equals([1, 2, 4, 1, 2, 6])));
+                it("account 1, depot 2", () => repository.getEvents(1, { depot: 2, end }).then(result => expect(result.map(data => data.value)).has.length(2).deep.equals([5, 5])));
 
-                it("account 1, asset 1", () => repository.getEvents(1, { asset: 1, end }).then(result => expect(result.map(data => data.value)).has.length(6).deep.equals([1, 2, 5, -1, -2, -5])));
-                it("account 1, asset 2", () => repository.getEvents(1, { asset: 2, end }).then(result => expect(result.map(data => data.value)).has.length(2).deep.equals([4, -6])));
+                it("account 1, asset 1", () => repository.getEvents(1, { asset: 1, end }).then(result => expect(result.map(data => data.value)).has.length(6).deep.equals([1, 2, 5, 1, 2, 5])));
+                it("account 1, asset 2", () => repository.getEvents(1, { asset: 2, end }).then(result => expect(result.map(data => data.value)).has.length(2).deep.equals([4, 6])));
 
-                it("with start", () => repository.getEvents(1, { start: end }).then(result => expect(result.map(data => data.value)).has.length(4).deep.equals([-1, -2, -6, -5])));
+                it("with start", () => repository.getEvents(1, { start: end }).then(result => expect(result.map(data => data.value)).has.length(4).deep.equals([1, 2, 6, 5])));
                 it("with end", () => repository.getEvents(1, { end: start }).then(result => expect(result.map(data => data.value)).has.length(4).deep.equals([1, 2, 4, 5])));
 
                 it("with limit 1", () => repository.getEvents(1, { limit: 1, end }).then(result => expect(result.map(data => data.value)).has.length(1).deep.equals([1])));
-                it("with limit 8", () => repository.getEvents(1, { limit: 8, end }).then(result => expect(result.map(data => data.value)).has.length(8).deep.equals([1, 2, 4, 5, -1, -2, -6, -5])));
+                it("with limit 8", () => repository.getEvents(1, { limit: 8, end }).then(result => expect(result.map(data => data.value)).has.length(8).deep.equals([1, 2, 4, 5, 1, 2, 6, 5])));
 
                 it("with type increase", () => repository.getEvents(1, { type: EventType.Increase, end }).then(result => expect(result.map(data => data.value)).has.length(4).deep.equals([1, 2, 4, 5])));
-                it("with type decrease", () => repository.getEvents(1, { type: EventType.Decrease, end }).then(result => expect(result.map(data => data.value)).has.length(4).deep.equals([-1, -2, -6, -5])));
+                it("with type decrease", () => repository.getEvents(1, { type: EventType.Decrease, end }).then(result => expect(result.map(data => data.value)).has.length(4).deep.equals([1, 2, 6, 5])));
 
-                it("with data", () => repository.getEvents(1, { data: 'decrease', end }).then(result => expect(result.map(data => data.value)).has.length(4).deep.equals([-1, -2, -6, -5])));
+                it("with data", () => repository.getEvents(1, { data: 'decrease', end }).then(result => expect(result.map(data => data.value)).has.length(4).deep.equals([1, 2, 6, 5])));
                 it("with empty data", () => repository.getEvents(1, { data: '', end }).then(result => expect(result.map(data => data.value)).has.length(0).deep.equals([])));
             });
         });
 
         describe("fetch", () => {
             describe("current", () => {
-                it("all from account 1", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data)).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([-2, -6, -5])) });
-                it("all from account 2", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(2, async data => array.push(data)).then(() => expect(array.map(data => data.value)).has.length(1).deep.equals([-4])) });
+                it("all from account 1", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data)).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([2, 6, 5])) });
+                it("all from account 2", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(2, async data => array.push(data)).then(() => expect(array.map(data => data.value)).has.length(1).deep.equals([4])) });
                 it("all from account 3", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(3, async data => array.push(data)).then(() => expect(array.map(data => data.value)).has.length(0).deep.equals([])) });
 
-                it("account 1, depot 1", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { depot: 1 }).then(() => expect(array.map(data => data.value)).has.length(2).deep.equals([-2, -6])) });
-                it("account 1, depot 2", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { depot: 2 }).then(() => expect(array.map(data => data.value)).has.length(1).deep.equals([-5])) });
+                it("account 1, depot 1", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { depot: 1 }).then(() => expect(array.map(data => data.value)).has.length(2).deep.equals([2, 6])) });
+                it("account 1, depot 2", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { depot: 2 }).then(() => expect(array.map(data => data.value)).has.length(1).deep.equals([5])) });
 
-                it("account 1, asset 1", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { asset: 1 }).then(() => expect(array.map(data => data.value)).has.length(2).deep.equals([-2, -5])) });
-                it("account 1, asset 2", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { asset: 2 }).then(() => expect(array.map(data => data.value)).has.length(1).deep.equals([-6])) });
+                it("account 1, asset 1", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { asset: 1 }).then(() => expect(array.map(data => data.value)).has.length(2).deep.equals([2, 5])) });
+                it("account 1, asset 2", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { asset: 2 }).then(() => expect(array.map(data => data.value)).has.length(1).deep.equals([6])) });
 
                 it("with type increase", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { type: EventType.Increase }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([2, 4, 5])) });
-                it("with type decrease", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { type: EventType.Decrease }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([-2, -6, -5])) });
+                it("with type decrease", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { type: EventType.Decrease }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([2, 6, 5])) });
 
-                it("with data", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { data: 'decrease' }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([-2, -6, -5])) });
+                it("with data", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { data: 'decrease' }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([2, 6, 5])) });
                 it("with empty data", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { data: '' }).then(() => expect(array.map(data => data.value)).has.length(0).deep.equals([])) });
             });
 
             describe("history", () => {
-                it("all from account 1", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { end }).then(() => expect(array.map(data => data.value)).has.length(8).deep.equals([1, 2, 4, 5, -1, -2, -6, -5])) });
-                it("all from account 2", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(2, async data => array.push(data), { end }).then(() => expect(array.map(data => data.value)).has.length(2).deep.equals([6, -4])) });
+                it("all from account 1", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { end }).then(() => expect(array.map(data => data.value)).has.length(8).deep.equals([1, 2, 4, 5, 1, 2, 6, 5])) });
+                it("all from account 2", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(2, async data => array.push(data), { end }).then(() => expect(array.map(data => data.value)).has.length(2).deep.equals([6, 4])) });
                 it("all from account 3", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(3, async data => array.push(data), { end }).then(() => expect(array.map(data => data.value)).has.length(0).deep.equals([])) });
 
-                it("account 1, depot 1", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { depot: 1, end }).then(() => expect(array.map(data => data.value)).has.length(6).deep.equals([1, 2, 4, -1, -2, -6])) });
-                it("account 1, depot 2", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { depot: 2, end }).then(() => expect(array.map(data => data.value)).has.length(2).deep.equals([5, -5])) });
+                it("account 1, depot 1", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { depot: 1, end }).then(() => expect(array.map(data => data.value)).has.length(6).deep.equals([1, 2, 4, 1, 2, 6])) });
+                it("account 1, depot 2", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { depot: 2, end }).then(() => expect(array.map(data => data.value)).has.length(2).deep.equals([5, 5])) });
 
-                it("account 1, asset 1", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { asset: 1, end }).then(() => expect(array.map(data => data.value)).has.length(6).deep.equals([1, 2, 5, -1, -2, -5])) });
-                it("account 1, asset 2", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { asset: 2, end }).then(() => expect(array.map(data => data.value)).has.length(2).deep.equals([4, -6])) });
+                it("account 1, asset 1", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { asset: 1, end }).then(() => expect(array.map(data => data.value)).has.length(6).deep.equals([1, 2, 5, 1, 2, 5])) });
+                it("account 1, asset 2", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { asset: 2, end }).then(() => expect(array.map(data => data.value)).has.length(2).deep.equals([4, 6])) });
 
-                it("with start", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { start: end }).then(() => expect(array.map(data => data.value)).has.length(4).deep.equals([-1, -2, -6, -5])) });
+                it("with start", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { start: end }).then(() => expect(array.map(data => data.value)).has.length(4).deep.equals([1, 2, 6, 5])) });
                 it("with end", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { end: start }).then(() => expect(array.map(data => data.value)).has.length(4).deep.equals([1, 2, 4, 5])) });
 
                 it("with limit 1", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { limit: 1, end }).then(() => expect(array.map(data => data.value)).has.length(1).deep.equals([1])) });
-                it("with limit 8", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { limit: 8, end }).then(() => expect(array.map(data => data.value)).has.length(8).deep.equals([1, 2, 4, 5, -1, -2, -6, -5])) });
+                it("with limit 8", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { limit: 8, end }).then(() => expect(array.map(data => data.value)).has.length(8).deep.equals([1, 2, 4, 5, 1, 2, 6, 5])) });
 
                 it("with type increase", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { type: EventType.Increase, end }).then(() => expect(array.map(data => data.value)).has.length(4).deep.equals([1, 2, 4, 5])) });
-                it("with type decrease", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { type: EventType.Decrease, end }).then(() => expect(array.map(data => data.value)).has.length(4).deep.equals([-1, -2, -6, -5])) });
+                it("with type decrease", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { type: EventType.Decrease, end }).then(() => expect(array.map(data => data.value)).has.length(4).deep.equals([1, 2, 6, 5])) });
 
-                it("with data", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { data: 'decrease', end }).then(() => expect(array.map(data => data.value)).has.length(4).deep.equals([-1, -2, -6, -5])) });
+                it("with data", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { data: 'decrease', end }).then(() => expect(array.map(data => data.value)).has.length(4).deep.equals([1, 2, 6, 5])) });
                 it("with empty data", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { data: '', end }).then(() => expect(array.map(data => data.value)).has.length(0).deep.equals([])) });
             });
         });

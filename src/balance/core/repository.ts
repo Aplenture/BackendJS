@@ -274,7 +274,7 @@ export class Repository extends Database.Repository<Tables> {
             data.depot,
             data.asset,
             data.order,
-            change,
+            data.value,
             data.data,
             data.account,
             data.depot,
