@@ -32,7 +32,7 @@ export class CreateEventTable extends Database.Update<Tables> {
             \`value\` INT NOT NULL,
             \`order\` BIGINT NOT NULL,
             \`data\` CHAR(32) NOT NULL,
-            UNIQUE (\`type\`,\`account\`,\`depot\`,\`asset\`,\`order\`)
+            UNIQUE (\`account\`,\`depot\`,\`asset\`,\`order\`)
         ) DEFAULT CHARSET=utf8`;
     }
 }

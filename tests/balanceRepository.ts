@@ -68,19 +68,19 @@ describe("Balance Repository", () => {
     });
 
     describe("Decreasing", () => {
-        it("simple order", () => repository.decrease({ account: 1, depot: 1, asset: 1, value: 1, order: 1, data: 'decrease' })
+        it("simple order", () => repository.decrease({ account: 1, depot: 1, asset: 1, value: 1, order: 4, data: 'decrease' })
             .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 1, value: 2 })));
 
-        it("second order", () => repository.decrease({ account: 1, depot: 1, asset: 1, value: 2, order: 2, data: 'decrease' })
+        it("second order", () => repository.decrease({ account: 1, depot: 1, asset: 1, value: 2, order: 3, data: 'decrease' })
             .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 1, value: 0 })));
 
-        it("second asset", () => repository.decrease({ account: 1, depot: 1, asset: 2, value: 6, order: 3, data: 'decrease' })
+        it("second asset", () => repository.decrease({ account: 1, depot: 1, asset: 2, value: 6, order: 2, data: 'decrease' })
             .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 2, value: -2 })));
 
-        it("second depot", () => repository.decrease({ account: 1, depot: 2, asset: 1, value: 5, order: 4, data: 'decrease' })
+        it("second depot", () => repository.decrease({ account: 1, depot: 2, asset: 1, value: 5, order: 1, data: 'decrease' })
             .then(result => expect(result).deep.contains({ account: 1, depot: 2, asset: 1, value: 0 })));
 
-        it("second account", () => repository.decrease({ account: 2, depot: 1, asset: 1, value: 4, order: 5, data: 'decrease' })
+        it("second account", () => repository.decrease({ account: 2, depot: 1, asset: 1, value: 4, order: 6, data: 'decrease' })
             .then(result => expect(result).deep.contains({ account: 2, depot: 1, asset: 1, value: 2 })));
     })
         .beforeAll(() => CoreJS.sleep(2000))

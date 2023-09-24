@@ -72,8 +72,8 @@ export class Repository extends Database.Repository<Tables> {
         }
 
         const query = options.start || options.end
-            ? `SELECT * FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} LIMIT ${limit}`
-            : `SELECT * FROM ${this.data.updateTable} WHERE \`id\` IN (SELECT MAX(\`id\`) FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`account\`,\`depot\`,\`asset\`)`;
+            ? `SELECT * FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} ORDER BY \`id\` ASC LIMIT ${limit}`
+            : `SELECT * FROM ${this.data.updateTable} WHERE \`id\` IN (SELECT MAX(\`id\`) FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`account\`,\`depot\`,\`asset\`) ORDER BY \`id\` ASC`;
 
         const result = await this.database.query(query, values);
 
@@ -116,8 +116,8 @@ export class Repository extends Database.Repository<Tables> {
         }
 
         const query = options.start || options.end
-            ? `SELECT * FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} LIMIT ${limit}`
-            : `SELECT * FROM ${this.data.updateTable} WHERE \`id\` IN (SELECT MAX(\`id\`) FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`account\`,\`depot\`,\`asset\`)`;
+            ? `SELECT * FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} ORDER BY \`id\` ASC LIMIT ${limit}`
+            : `SELECT * FROM ${this.data.updateTable} WHERE \`id\` IN (SELECT MAX(\`id\`) FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`account\`,\`depot\`,\`asset\`) ORDER BY \`id\` ASC`;
 
         await this.database.fetch(query, async (data, index) => callback({
             id: data.id,
@@ -165,8 +165,8 @@ export class Repository extends Database.Repository<Tables> {
         }
 
         const query = options.start || options.end
-            ? `SELECT * FROM ${this.data.eventTable} WHERE ${where.join(' AND ')} LIMIT ${limit}`
-            : `SELECT * FROM ${this.data.eventTable} WHERE \`id\` IN (SELECT MAX(\`id\`) FROM ${this.data.eventTable} WHERE ${where.join(' AND ')} GROUP BY \`account\`,\`depot\`,\`asset\`)`;
+            ? `SELECT * FROM ${this.data.eventTable} WHERE ${where.join(' AND ')} ORDER BY \`id\` ASC LIMIT ${limit}`
+            : `SELECT * FROM ${this.data.eventTable} WHERE \`id\` IN (SELECT MAX(\`id\`) FROM ${this.data.eventTable} WHERE ${where.join(' AND ')} GROUP BY \`account\`,\`depot\`,\`asset\`) ORDER BY \`id\` ASC`;
 
         const result = await this.database.query(query, values);
 
@@ -222,8 +222,8 @@ export class Repository extends Database.Repository<Tables> {
         }
 
         const query = options.start || options.end
-            ? `SELECT * FROM ${this.data.eventTable} WHERE ${where.join(' AND ')} LIMIT ${limit}`
-            : `SELECT * FROM ${this.data.eventTable} WHERE \`id\` IN (SELECT MAX(\`id\`) FROM ${this.data.eventTable} WHERE ${where.join(' AND ')} GROUP BY \`account\`,\`depot\`,\`asset\`)`;
+            ? `SELECT * FROM ${this.data.eventTable} WHERE ${where.join(' AND ')} ORDER BY \`id\` ASC LIMIT ${limit}`
+            : `SELECT * FROM ${this.data.eventTable} WHERE \`id\` IN (SELECT MAX(\`id\`) FROM ${this.data.eventTable} WHERE ${where.join(' AND ')} GROUP BY \`account\`,\`depot\`,\`asset\`) ORDER BY \`id\` ASC`;
 
         await this.database.fetch(query, async (data, index) => callback({
             id: data.id,
