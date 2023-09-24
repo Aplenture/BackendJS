@@ -58,13 +58,6 @@ describe("Balance Repository", () => {
 
         it("second account", () => repository.increase({ account: 2, depot: 1, asset: 1, value: 6, order: 5, data: 'increase' })
             .then(result => expect(result).deep.contains({ account: 2, depot: 1, asset: 1, value: 6 })));
-
-        it("catches duplicate order", done => {
-            repository.increase({ account: 1, depot: 1, asset: 1, value: 1, order: 1, data: 'increase' })
-                .catch(result => expect(result).deep.contains({ code: CoreJS.CoreErrorCode.Duplicate }))
-                .catch(done)
-                .then(() => done())
-        });
     });
 
     describe("Decreasing", () => {
