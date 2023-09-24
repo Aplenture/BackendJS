@@ -5,10 +5,16 @@
  * MIT License https://github.com/Aplenture/BackendJS/blob/main/LICENSE
  */
 
-export interface Balance {
+import { EventType } from "../enums";
+
+export interface Event {
+    readonly id: number;
     readonly timestamp: number;
+    readonly type: EventType;
     readonly account: number;
     readonly depot: number;
     readonly asset: number;
+    readonly order: number;
     readonly value: number;
+    readonly data: string;
 }

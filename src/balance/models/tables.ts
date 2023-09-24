@@ -6,7 +6,6 @@
  */
 
 export interface Tables {
-    readonly balanceTable: string;
     readonly updateTable: string;
-    readonly historyTable: string;
+    readonly eventTable: string;
 }

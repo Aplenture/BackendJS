@@ -8,9 +8,9 @@
 import * as Database from "../../database";
 import { Tables } from "../models/tables";
 
-export class CreateHistoryTable extends Database.Update<Tables> {
-    public readonly name = "Create History Table";
-    public readonly version = 3;
+export class CreateUpdateTable extends Database.Update<Tables> {
+    public readonly name = "Create Update Table";
+    public readonly version = 2;
     public readonly timestamp = '2023-09-01';
 
     public readonly update: string;
@@ -20,15 +20,15 @@ export class CreateHistoryTable extends Database.Update<Tables> {
     constructor(data: Tables) {
         super(data);
 
-        this.reset = `TRUNCATE TABLE ${data.historyTable}`;
-        this.revert = `DROP TABLE IF EXISTS ${data.historyTable}`;
-        this.update = `CREATE TABLE IF NOT EXISTS ${data.historyTable} (
-            \`timestamp\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        this.reset = `TRUNCATE TABLE ${data.updateTable}`;
+        this.revert = `DROP TABLE IF EXISTS ${data.updateTable}`;
+        this.update = `CREATE TABLE IF NOT EXISTS ${data.updateTable} (
+            \`id\` BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+            \`timestamp\` TIMESTAMP NOT NULL,
             \`account\` BIGINT NOT NULL,
             \`depot\` BIGINT NOT NULL,
             \`asset\` BIGINT NOT NULL,
-            \`value\` INT NOT NULL,
-            PRIMARY KEY (\`timestamp\`,\`account\`,\`depot\`,\`asset\`)
+            \`value\` INT NOT NULL
         ) DEFAULT CHARSET=utf8`;
     }
 }

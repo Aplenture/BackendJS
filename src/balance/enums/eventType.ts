@@ -5,7 +5,7 @@
  * MIT License https://github.com/Aplenture/BackendJS/blob/main/LICENSE
  */
 
-export enum UpdateType {
+export enum EventType {
     Increase = 1,
     Decrease,
     // Set

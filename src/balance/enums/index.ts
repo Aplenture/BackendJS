@@ -5,4 +5,4 @@
  * MIT License https://github.com/Aplenture/BackendJS/blob/main/LICENSE
  */
 
-export * from "./updateType";
+export * from "./eventType";
