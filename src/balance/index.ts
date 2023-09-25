@@ -6,5 +6,6 @@
  */
 
 export * from "./core";
+export * from "./enums";
 export * from "./models";
 export * from "./updates";
