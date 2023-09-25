@@ -32,7 +32,7 @@ interface UpdateOptions {
 
 interface EventOptions extends UpdateOptions {
     readonly type?: EventType;
-    readonly data?: string;
+    readonly data?: string | readonly string[];
 }
 
 export class Repository extends Database.Repository<Tables> {
@@ -160,8 +160,13 @@ export class Repository extends Database.Repository<Tables> {
         }
 
         if (undefined != options.data) {
-            values.push(options.data);
-            where.push('`data`=?');
+            if (Array.isArray(options.data)) {
+                values.push(...options.data);
+                where.push(`\`data\` IN (${options.data.map(() => '?').join(',')})`);
+            } else {
+                values.push(options.data);
+                where.push('`data`=?');
+            }
         }
 
         const query = options.start || options.end
@@ -217,8 +222,13 @@ export class Repository extends Database.Repository<Tables> {
         }
 
         if (undefined != options.data) {
-            values.push(options.data);
-            where.push('`data`=?');
+            if (Array.isArray(options.data)) {
+                values.push(...options.data);
+                where.push(`\`data\` IN (${options.data.map(() => '?').join(',')})`);
+            } else {
+                values.push(options.data);
+                where.push('`data`=?');
+            }
         }
 
         const query = options.start || options.end

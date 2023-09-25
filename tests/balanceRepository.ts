@@ -100,8 +100,9 @@ describe("Balance Repository", () => {
                 it("with type increase", () => repository.getEvents(1, { type: EventType.Increase }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([2, 4, 5])));
                 it("with type decrease", () => repository.getEvents(1, { type: EventType.Decrease }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([2, 6, 5])));
 
-                it("with data", () => repository.getEvents(1, { data: 'decrease' }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([2, 6, 5])));
                 it("with empty data", () => repository.getEvents(1, { data: '' }).then(result => expect(result.map(data => data.value)).has.length(0).deep.equals([])));
+                it("with data", () => repository.getEvents(1, { data: 'decrease' }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([2, 6, 5])));
+                it("with data array", () => repository.getEvents(1, { data: ['increase', 'decrease'] }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([2, 6, 5])));
             });
 
             describe("history", () => {
@@ -124,8 +125,9 @@ describe("Balance Repository", () => {
                 it("with type increase", () => repository.getEvents(1, { type: EventType.Increase, end }).then(result => expect(result.map(data => data.value)).has.length(4).deep.equals([1, 2, 4, 5])));
                 it("with type decrease", () => repository.getEvents(1, { type: EventType.Decrease, end }).then(result => expect(result.map(data => data.value)).has.length(4).deep.equals([1, 2, 6, 5])));
 
-                it("with data", () => repository.getEvents(1, { data: 'decrease', end }).then(result => expect(result.map(data => data.value)).has.length(4).deep.equals([1, 2, 6, 5])));
                 it("with empty data", () => repository.getEvents(1, { data: '', end }).then(result => expect(result.map(data => data.value)).has.length(0).deep.equals([])));
+                it("with data", () => repository.getEvents(1, { data: 'decrease', end }).then(result => expect(result.map(data => data.value)).has.length(4).deep.equals([1, 2, 6, 5])));
+                it("with data array", () => repository.getEvents(1, { data: ['increase', 'decrease'], end }).then(result => expect(result.map(data => data.value)).has.length(8).deep.equals([1, 2, 4, 5, 1, 2, 6, 5])));
             });
         });
 
@@ -144,8 +146,9 @@ describe("Balance Repository", () => {
                 it("with type increase", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { type: EventType.Increase }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([2, 4, 5])) });
                 it("with type decrease", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { type: EventType.Decrease }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([2, 6, 5])) });
 
-                it("with data", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { data: 'decrease' }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([2, 6, 5])) });
                 it("with empty data", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { data: '' }).then(() => expect(array.map(data => data.value)).has.length(0).deep.equals([])) });
+                it("with data", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { data: 'decrease' }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([2, 6, 5])) });
+                it("with data array", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { data: ['increase', 'decrease'] }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([2, 6, 5])) });
             });
 
             describe("history", () => {
@@ -168,8 +171,9 @@ describe("Balance Repository", () => {
                 it("with type increase", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { type: EventType.Increase, end }).then(() => expect(array.map(data => data.value)).has.length(4).deep.equals([1, 2, 4, 5])) });
                 it("with type decrease", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { type: EventType.Decrease, end }).then(() => expect(array.map(data => data.value)).has.length(4).deep.equals([1, 2, 6, 5])) });
 
-                it("with data", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { data: 'decrease', end }).then(() => expect(array.map(data => data.value)).has.length(4).deep.equals([1, 2, 6, 5])) });
                 it("with empty data", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { data: '', end }).then(() => expect(array.map(data => data.value)).has.length(0).deep.equals([])) });
+                it("with data", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { data: 'decrease', end }).then(() => expect(array.map(data => data.value)).has.length(4).deep.equals([1, 2, 6, 5])) });
+                it("with data array", async () => { const array = new Array<Balance.Event>; await repository.fetchEvents(1, async data => array.push(data), { data: ['increase', 'decrease'], end }).then(() => expect(array.map(data => data.value)).has.length(8).deep.equals([1, 2, 4, 5, 1, 2, 6, 5])) });
             });
         });
     });
