@@ -5,8 +5,9 @@
  * MIT License https://github.com/Aplenture/BackendJS/blob/main/LICENSE
  */
 
+import * as CoreJS from "corejs";
 import * as Database from "../../database";
-import { EventType } from "../enums";
+import { EventType, UpdateResolution } from "../enums";
 import { Event, Update } from "../models";
 import { Tables } from "../models/tables";
 
@@ -28,9 +29,15 @@ interface UpdateOptions {
     readonly depot?: number;
     readonly asset?: number;
     readonly limit?: number;
+    readonly resolution?: UpdateResolution;
 }
 
-interface EventOptions extends UpdateOptions {
+interface EventOptions {
+    readonly start?: number;
+    readonly end?: number;
+    readonly depot?: number;
+    readonly asset?: number;
+    readonly limit?: number;
     readonly type?: EventType;
     readonly data?: string | readonly string[];
 }
@@ -47,9 +54,21 @@ export class Repository extends Database.Repository<Tables> {
     }
 
     public async getUpdates(account: number, options: UpdateOptions = {}): Promise<Update[]> {
-        const values: any[] = [account];
-        const where = ['`account`=?'];
         const limit = Math.min(MAX_GET_LIMIT, options.limit || MAX_GET_LIMIT);
+
+        const resolution = options.start || options.end
+            ? options.resolution || UpdateResolution.Day
+            : options.resolution || UpdateResolution.None;
+
+        const values: any[] = [
+            account,
+            resolution
+        ];
+
+        const where = [
+            '`account`=?',
+            '`resolution`=?'
+        ];
 
         if (options.start) {
             values.push(Database.parseFromTime(options.start));
@@ -71,18 +90,14 @@ export class Repository extends Database.Repository<Tables> {
             where.push('`asset`=?');
         }
 
-        const query = options.start || options.end
-            ? `SELECT * FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} ORDER BY \`id\` ASC LIMIT ${limit}`
-            : `SELECT * FROM ${this.data.updateTable} WHERE \`id\` IN (SELECT MAX(\`id\`) FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`account\`,\`depot\`,\`asset\`) ORDER BY \`id\` ASC`;
-
-        const result = await this.database.query(query, values);
+        const result = await this.database.query(`SELECT * FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} ORDER BY \`timestamp\` ASC LIMIT ${limit}`, values);
 
         if (!result.length)
             return [];
 
         return result.map(data => ({
-            id: data.id,
             timestamp: Database.parseToTime(data.timestamp),
+            resolution: data.resolution,
             account: data.account,
             depot: data.depot,
             asset: data.asset,
@@ -91,9 +106,21 @@ export class Repository extends Database.Repository<Tables> {
     }
 
     public async fetchUpdates(account: number, callback: (data: Update, index: number) => Promise<any>, options: UpdateOptions = {}): Promise<void> {
-        const values: any[] = [account];
-        const where = ['`account`=?'];
         const limit = Math.min(MAX_FETCH_LIMIT, options.limit || MAX_FETCH_LIMIT);
+
+        const resolution = options.start || options.end
+            ? options.resolution || UpdateResolution.Day
+            : options.resolution || UpdateResolution.None;
+
+        const values: any[] = [
+            account,
+            resolution
+        ];
+
+        const where = [
+            '`account`=?',
+            '`resolution`=?'
+        ];
 
         if (options.start) {
             values.push(Database.parseFromTime(options.start));
@@ -115,13 +142,9 @@ export class Repository extends Database.Repository<Tables> {
             where.push('`asset`=?');
         }
 
-        const query = options.start || options.end
-            ? `SELECT * FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} ORDER BY \`id\` ASC LIMIT ${limit}`
-            : `SELECT * FROM ${this.data.updateTable} WHERE \`id\` IN (SELECT MAX(\`id\`) FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`account\`,\`depot\`,\`asset\`) ORDER BY \`id\` ASC`;
-
-        await this.database.fetch(query, async (data, index) => callback({
-            id: data.id,
+        await this.database.fetch(`SELECT * FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} ORDER BY \`timestamp\` ASC LIMIT ${limit}`, async (data, index) => callback({
             timestamp: Database.parseToTime(data.timestamp),
+            resolution: data.resolution,
             account: data.account,
             depot: data.depot,
             asset: data.asset,
@@ -169,11 +192,7 @@ export class Repository extends Database.Repository<Tables> {
             }
         }
 
-        const query = options.start || options.end
-            ? `SELECT * FROM ${this.data.eventTable} WHERE ${where.join(' AND ')} ORDER BY \`id\` ASC LIMIT ${limit}`
-            : `SELECT * FROM ${this.data.eventTable} WHERE \`id\` IN (SELECT MAX(\`id\`) FROM ${this.data.eventTable} WHERE ${where.join(' AND ')} GROUP BY \`account\`,\`depot\`,\`asset\`) ORDER BY \`id\` ASC`;
-
-        const result = await this.database.query(query, values);
+        const result = await this.database.query(`SELECT * FROM ${this.data.eventTable} WHERE ${where.join(' AND ')} ORDER BY \`id\` ASC LIMIT ${limit}`, values);
 
         if (!result.length)
             return [];
@@ -231,11 +250,7 @@ export class Repository extends Database.Repository<Tables> {
             }
         }
 
-        const query = options.start || options.end
-            ? `SELECT * FROM ${this.data.eventTable} WHERE ${where.join(' AND ')} ORDER BY \`id\` ASC LIMIT ${limit}`
-            : `SELECT * FROM ${this.data.eventTable} WHERE \`id\` IN (SELECT MAX(\`id\`) FROM ${this.data.eventTable} WHERE ${where.join(' AND ')} GROUP BY \`account\`,\`depot\`,\`asset\`) ORDER BY \`id\` ASC`;
-
-        await this.database.fetch(query, async (data, index) => callback({
+        await this.database.fetch(`SELECT * FROM ${this.data.eventTable} WHERE ${where.join(' AND ')} ORDER BY \`id\` ASC LIMIT ${limit}`, async (data, index) => callback({
             id: data.id,
             timestamp: Database.parseToTime(data.timestamp),
             type: data.type,
@@ -248,8 +263,12 @@ export class Repository extends Database.Repository<Tables> {
         }, index), values);
     }
 
-    public async updateBalance(data: UpdateData, type: EventType): Promise<Update> {
-        const timestamp = Database.parseFromTime();
+    public async updateBalance(data: UpdateData, type: EventType, date = new Date()): Promise<Update> {
+        const now = Database.parseFromTime(Number(date));
+        const day = Database.parseFromTime(Number(CoreJS.calcUTCDate({ date })));
+        const week = Database.parseFromTime(Number(CoreJS.calcUTCDate({ date, weekDay: CoreJS.WeekDay.Monday })));
+        const month = Database.parseFromTime(Number(CoreJS.calcUTCDate({ date, monthDay: 1 })));
+        const year = Database.parseFromTime(Number(CoreJS.calcUTCDate({ date, monthDay: 1, month: CoreJS.Month.January })));
 
         let change: number;
 
@@ -267,18 +286,18 @@ export class Repository extends Database.Repository<Tables> {
         }
 
         const result = await this.database.query(`
-        LOCK TABLES ${this.data.eventTable} WRITE, ${this.data.updateTable} WRITE, ${this.data.updateTable} AS u READ;
+        LOCK TABLES ${this.data.eventTable} WRITE, ${this.data.updateTable} WRITE;
             START TRANSACTION;
                 INSERT INTO ${this.data.eventTable} (\`timestamp\`,\`type\`,\`account\`,\`depot\`,\`asset\`,\`order\`,\`value\`,\`data\`) VALUES (FROM_UNIXTIME(?),?,?,?,?,?,?,?);
-                IF EXISTS (SELECT * FROM ${this.data.updateTable} WHERE \`account\`=? AND \`depot\`=? AND \`asset\`=? LIMIT 1) THEN
-                    INSERT INTO ${this.data.updateTable} (\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) SELECT FROM_UNIXTIME(?),?,?,?,?+\`value\` FROM ${this.data.updateTable} AS u WHERE \`account\`=? AND \`depot\`=? AND \`asset\`=? ORDER BY \`id\` DESC LIMIT 1;
-                ELSE
-                    INSERT INTO ${this.data.updateTable} (\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) VALUES (FROM_UNIXTIME(?),?,?,?,?);
-                END IF;
-                SELECT * FROM ${this.data.updateTable} WHERE \`id\`=LAST_INSERT_ID() LIMIT 1;
+                INSERT INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) VALUES (?,0,?,?,?,?) ON DUPLICATE KEY UPDATE \`value\`=\`value\`+?,\`timestamp\`=0;
+                INSERT INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) SELECT ?,FROM_UNIXTIME(?),?,?,?,u.value FROM ${this.data.updateTable} u WHERE \`resolution\`=? AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ON DUPLICATE KEY UPDATE \`value\`=${this.data.updateTable}.value+?,\`timestamp\`=${this.data.updateTable}.timestamp;
+                INSERT INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) SELECT ?,FROM_UNIXTIME(?),?,?,?,u.value FROM ${this.data.updateTable} u WHERE \`resolution\`=? AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ON DUPLICATE KEY UPDATE \`value\`=${this.data.updateTable}.value+?,\`timestamp\`=${this.data.updateTable}.timestamp;
+                INSERT INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) SELECT ?,FROM_UNIXTIME(?),?,?,?,u.value FROM ${this.data.updateTable} u WHERE \`resolution\`=? AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ON DUPLICATE KEY UPDATE \`value\`=${this.data.updateTable}.value+?,\`timestamp\`=${this.data.updateTable}.timestamp;
+                INSERT INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) SELECT ?,FROM_UNIXTIME(?),?,?,?,u.value FROM ${this.data.updateTable} u WHERE \`resolution\`=? AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ON DUPLICATE KEY UPDATE \`value\`=${this.data.updateTable}.value+?,\`timestamp\`=${this.data.updateTable}.timestamp;
+                SELECT * FROM ${this.data.updateTable} WHERE \`resolution\`=? AND \`account\`=? AND \`depot\`=? AND \`asset\`=?;
             COMMIT;
         UNLOCK TABLES;`, [
-            timestamp,
+            now,
             type,
             data.account,
             data.depot,
@@ -286,39 +305,73 @@ export class Repository extends Database.Repository<Tables> {
             data.order,
             data.value,
             data.data,
-            data.account,
-            data.depot,
-            data.asset,
-            timestamp,
+            UpdateResolution.None,
             data.account,
             data.depot,
             data.asset,
             change,
+            change,
+            UpdateResolution.Day,
+            day,
             data.account,
             data.depot,
             data.asset,
-            timestamp,
+            UpdateResolution.None,
             data.account,
             data.depot,
             data.asset,
-            change
+            change,
+            UpdateResolution.Week,
+            week,
+            data.account,
+            data.depot,
+            data.asset,
+            UpdateResolution.None,
+            data.account,
+            data.depot,
+            data.asset,
+            change,
+            UpdateResolution.Month,
+            month,
+            data.account,
+            data.depot,
+            data.asset,
+            UpdateResolution.None,
+            data.account,
+            data.depot,
+            data.asset,
+            change,
+            UpdateResolution.Year,
+            year,
+            data.account,
+            data.depot,
+            data.asset,
+            UpdateResolution.None,
+            data.account,
+            data.depot,
+            data.asset,
+            change,
+            UpdateResolution.None,
+            data.account,
+            data.depot,
+            data.asset
         ]);
 
         return {
-            id: result[4][0].id,
-            timestamp: Database.parseToTime(result[4][0].timestamp),
-            account: result[4][0].account,
-            depot: result[4][0].depot,
-            asset: result[4][0].asset,
-            value: result[4][0].value
+            timestamp: Database.parseToTime(result[8][0].timestamp),
+            resolution: result[8][0].resolution,
+            account: result[8][0].account,
+            depot: result[8][0].depot,
+            asset: result[8][0].asset,
+            value: result[8][0].value
         };
     }
 
-    public increase(update: UpdateData) {
-        return this.updateBalance(update, EventType.Increase);
+    public increase(update: UpdateData, date?: Date) {
+        return this.updateBalance(update, EventType.Increase, date);
     }
 
-    public decrease(data: UpdateData): Promise<Update> {
-        return this.updateBalance(data, EventType.Decrease);
+    public decrease(data: UpdateData, date?: Date): Promise<Update> {
+        return this.updateBalance(data, EventType.Decrease, date);
     }
 }

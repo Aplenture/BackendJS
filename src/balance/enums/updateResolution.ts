@@ -5,5 +5,10 @@
  * MIT License https://github.com/Aplenture/BackendJS/blob/main/LICENSE
  */
 
-export * from "./eventType";
-export * from "./updateResolution";
+export enum UpdateResolution {
+    None = 0,
+    Day,
+    Week,
+    Month,
+    Year
+}
