@@ -33,7 +33,7 @@ const log = Log.Log.createFileLog('./test.balance.log', true);
 
 CoreJS.GlobalEventManager.onMessage.on(message => log.write(message));
 
-describe.only("Balance Repository", () => {
+describe("Balance Repository", () => {
     const now = CoreJS.calcUTCDate({ year: 2022, month: CoreJS.Month.September, monthDay: 20 });
     const nextDay = CoreJS.addUTCDate({ date: now, days: 1 });
     const nextWeek = CoreJS.addUTCDate({ date: nextDay, days: 7 });
