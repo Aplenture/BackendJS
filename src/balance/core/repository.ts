@@ -42,6 +42,10 @@ interface EventOptions {
     readonly data?: string | readonly string[];
 }
 
+interface EventSumOptions extends EventOptions {
+    readonly groupDepots?: boolean;
+}
+
 export class Repository extends Database.Repository<Tables> {
     constructor(
         data: Tables,
@@ -80,12 +84,12 @@ export class Repository extends Database.Repository<Tables> {
             where.push('`timestamp`<=FROM_UNIXTIME(?)');
         }
 
-        if (options.depot) {
+        if (undefined != options.depot) {
             values.push(options.depot);
             where.push('`depot`=?');
         }
 
-        if (options.asset) {
+        if (undefined != options.asset) {
             values.push(options.asset);
             where.push('`asset`=?');
         }
@@ -132,12 +136,12 @@ export class Repository extends Database.Repository<Tables> {
             where.push('`timestamp`<=FROM_UNIXTIME(?)');
         }
 
-        if (options.depot) {
+        if (undefined != options.depot) {
             values.push(options.depot);
             where.push('`depot`=?');
         }
 
-        if (options.asset) {
+        if (undefined != options.asset) {
             values.push(options.asset);
             where.push('`asset`=?');
         }
@@ -149,6 +153,105 @@ export class Repository extends Database.Repository<Tables> {
             depot: data.depot,
             asset: data.asset,
             value: data.value
+        }, index), values);
+    }
+
+    public async getUpdateSum(account: number, options: UpdateOptions = {}): Promise<Update[]> {
+        const limit = Math.min(MAX_GET_LIMIT, options.limit || MAX_GET_LIMIT);
+
+        const resolution = options.start || options.end
+            ? options.resolution || UpdateResolution.Day
+            : options.resolution || UpdateResolution.None;
+
+        const values: any[] = [
+            account,
+            resolution
+        ];
+
+        const where = [
+            '`account`=?',
+            '`resolution`=?'
+        ];
+
+        if (options.start) {
+            values.push(Database.parseFromTime(options.start));
+            where.push('`timestamp`>=FROM_UNIXTIME(?)');
+        }
+
+        if (options.end) {
+            values.push(Database.parseFromTime(options.end));
+            where.push('`timestamp`<=FROM_UNIXTIME(?)');
+        }
+
+        if (undefined != options.depot) {
+            values.push(options.depot);
+            where.push('`depot`=?');
+        }
+
+        if (undefined != options.asset) {
+            values.push(options.asset);
+            where.push('`asset`=?');
+        }
+
+        const result = await this.database.query(`SELECT *,SUM(\`value\`) AS \`value\` FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`timestamp\`,\`asset\` ORDER BY \`timestamp\` ASC LIMIT ${limit}`, values);
+
+        if (!result.length)
+            return [];
+
+        return result.map(data => ({
+            timestamp: data.timestamp,
+            resolution: data.resolut,
+            account,
+            depot: options.depot ?? null,
+            asset: data.asset,
+            value: data.value || 0
+        }));
+    }
+
+    public async fetchUpdateSum(account: number, callback: (data: Update, index: number) => Promise<any>, options: UpdateOptions = {}): Promise<void> {
+        const limit = Math.min(MAX_FETCH_LIMIT, options.limit || MAX_FETCH_LIMIT);
+
+        const resolution = options.start || options.end
+            ? options.resolution || UpdateResolution.Day
+            : options.resolution || UpdateResolution.None;
+
+        const values: any[] = [
+            account,
+            resolution
+        ];
+
+        const where = [
+            '`account`=?',
+            '`resolution`=?'
+        ];
+
+        if (options.start) {
+            values.push(Database.parseFromTime(options.start));
+            where.push('`timestamp`>=FROM_UNIXTIME(?)');
+        }
+
+        if (options.end) {
+            values.push(Database.parseFromTime(options.end));
+            where.push('`timestamp`<=FROM_UNIXTIME(?)');
+        }
+
+        if (undefined != options.depot) {
+            values.push(options.depot);
+            where.push('`depot`=?');
+        }
+
+        if (undefined != options.asset) {
+            values.push(options.asset);
+            where.push('`asset`=?');
+        }
+
+        await this.database.fetch(`SELECT *,SUM(\`value\`) AS \`value\` FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`timestamp\`,\`asset\` ORDER BY \`timestamp\` ASC LIMIT ${limit}`, async (data, index) => callback({
+            timestamp: data.timestamp,
+            resolution: data.resolut,
+            account,
+            depot: options.depot ?? null,
+            asset: data.asset,
+            value: data.value || 0
         }, index), values);
     }
 
@@ -167,17 +270,17 @@ export class Repository extends Database.Repository<Tables> {
             where.push('`timestamp`<=FROM_UNIXTIME(?)');
         }
 
-        if (options.type) {
+        if (undefined != options.type) {
             values.push(options.type);
             where.push('`type`=?');
         }
 
-        if (options.depot) {
+        if (undefined != options.depot) {
             values.push(options.depot);
             where.push('`depot`=?');
         }
 
-        if (options.asset) {
+        if (undefined != options.asset) {
             values.push(options.asset);
             where.push('`asset`=?');
         }
@@ -225,17 +328,17 @@ export class Repository extends Database.Repository<Tables> {
             where.push('`timestamp`<=FROM_UNIXTIME(?)');
         }
 
-        if (options.type) {
+        if (undefined != options.type) {
             values.push(options.type);
             where.push('`type`=?');
         }
 
-        if (options.depot) {
+        if (undefined != options.depot) {
             values.push(options.depot);
             where.push('`depot`=?');
         }
 
-        if (options.asset) {
+        if (undefined != options.asset) {
             values.push(options.asset);
             where.push('`asset`=?');
         }
@@ -259,6 +362,125 @@ export class Repository extends Database.Repository<Tables> {
             asset: data.asset,
             order: data.order,
             value: data.value,
+            data: data.data
+        }, index), values);
+    }
+
+    public async getEventSum(account: number, options: EventSumOptions = {}): Promise<Event[]> {
+        const values: any[] = [account];
+        const where = ['`account`=?'];
+        const groups = ['`asset`'];
+
+        if (options.groupDepots) {
+            groups.push('`depot`');
+        }
+
+        if (options.start) {
+            values.push(Database.parseFromTime(options.start));
+            where.push('`timestamp`>=FROM_UNIXTIME(?)');
+        }
+
+        if (options.end) {
+            values.push(Database.parseFromTime(options.end));
+            where.push('`timestamp`<=FROM_UNIXTIME(?)');
+        }
+
+        if (undefined != options.type) {
+            values.push(options.type);
+            where.push('`type`=?');
+        }
+
+        if (undefined != options.depot) {
+            values.push(options.depot);
+            where.push('`depot`=?');
+        }
+
+        if (undefined != options.asset) {
+            values.push(options.asset);
+            where.push('`asset`=?');
+        }
+
+        if (undefined != options.data) {
+            if (Array.isArray(options.data)) {
+                values.push(...options.data);
+                where.push(`\`data\` IN (${options.data.map(() => '?').join(',')})`);
+            } else {
+                values.push(options.data);
+                where.push('`data`=?');
+            }
+        }
+
+        const result = await this.database.query(`SELECT \`depot\`,\`asset\`,SUM(IF(\`type\`>0,\`value\`,-\`value\`)) AS \`value\` FROM ${this.data.eventTable} WHERE ${where.join(' AND ')} GROUP BY ${groups.join(',')}`, values);
+
+        if (!result.length)
+            return [];
+
+        return result.map(data => ({
+            id: data.id,
+            timestamp: Database.parseToTime(data.timestamp),
+            type: data.type,
+            account,
+            depot: options.groupDepots ? data.depot : options.depot ?? null,
+            asset: data.asset,
+            order: data.order,
+            value: data.value || 0,
+            data: data.data
+        }));
+    }
+
+    public async fetchEventSum(account: number, callback: (data: Event, index: number) => Promise<any>, options: EventSumOptions = {}): Promise<void> {
+        const values: any[] = [account];
+        const where = ['`account`=?'];
+        const groups = ['`asset`'];
+
+        if (options.groupDepots) {
+            groups.push('`depot`');
+        }
+
+        if (options.start) {
+            values.push(Database.parseFromTime(options.start));
+            where.push('`timestamp`>=FROM_UNIXTIME(?)');
+        }
+
+        if (options.end) {
+            values.push(Database.parseFromTime(options.end));
+            where.push('`timestamp`<=FROM_UNIXTIME(?)');
+        }
+
+        if (undefined != options.type) {
+            values.push(options.type);
+            where.push('`type`=?');
+        }
+
+        if (undefined != options.depot) {
+            values.push(options.depot);
+            where.push('`depot`=?');
+        }
+
+        if (undefined != options.asset) {
+            values.push(options.asset);
+            where.push('`asset`=?');
+        }
+
+        if (undefined != options.data) {
+            if (Array.isArray(options.data)) {
+                values.push(...options.data);
+                where.push(`\`data\` IN (${options.data.map(() => '?').join(',')})`);
+            } else {
+                values.push(options.data);
+                where.push('`data`=?');
+            }
+        }
+
+        await this.database.fetch(`SELECT \`depot\`,\`asset\`,SUM(IF(\`type\`>0,\`value\`,-\`value\`)) AS \`value\` FROM ${this.data.eventTable} WHERE ${where.join(' AND ')} GROUP BY ${groups.join(',')}`, async (data, index) => callback({
+            id: data.id,
+            timestamp: Database.parseToTime(data.timestamp),
+            type: data.type,
+            account,
+            depot: options.groupDepots ? data.depot : options.depot ?? null,
+            asset: data.asset,
+            order: data.order,
+            value: data.value || 0,
             data: data.data
         }, index), values);
     }

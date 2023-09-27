@@ -7,6 +7,6 @@
 
 export enum EventType {
     Increase = 1,
-    Decrease,
+    Decrease = -1,
     // Set
 }
