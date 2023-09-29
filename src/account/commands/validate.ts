@@ -30,11 +30,13 @@ export class Validate extends Command<Context, Args, Options> {
     );
 
     public async execute(args: Args): Promise<CoreJS.Response> {
+        const debug = args.debug;
         const rights = args.rights;
         const api = args.api;
         const sign = args.sign;
 
         // prepare args
+        delete args.debug;
         delete args.account;
         delete args.access;
         delete args.api;
@@ -56,6 +58,7 @@ export class Validate extends Command<Context, Args, Options> {
             return new CoreJS.ErrorResponse(CoreJS.ResponseCode.Unauthorized, '#_signature_invalid');
 
         // update args
+        args.debug = debug;
         args.account = access.account;
         args.access = access.id;
         args.api = access.api;

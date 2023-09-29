@@ -28,9 +28,7 @@ export function validateSignature(signature: string, args: any, secret: string):
     if (isNaN(args.timestamp))
         return false;
 
-    const query = undefined === args.debug
-        ? CoreJS.parseArgsToString(args)
-        : CoreJS.parseArgsToString(Object.assign({}, args, { debug: undefined }));
+    const query = CoreJS.parseArgsToString(args);
 
     if (signature !== CoreJS.createSign(query, secret))
         return false;
