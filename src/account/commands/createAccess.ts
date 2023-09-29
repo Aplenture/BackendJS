@@ -10,7 +10,7 @@ import { Context, Args as ArgsData, Options } from "../core";
 import { Command } from "../../module";
 
 interface Args extends ArgsData {
-    readonly rights: number;
+    readonly with_rights: number;
     readonly label: string;
     readonly expiration_duration: number;
 }
@@ -19,7 +19,7 @@ export class CreateAccess extends Command<Context, Args, Options> {
     public readonly description = "Creates a new access."
     public readonly parameters = new CoreJS.ParameterList(
         new CoreJS.NumberParameter('account', "ID of account."),
-        new CoreJS.NumberParameter('rights', "of access.", null),
+        new CoreJS.NumberParameter('with_rights', "of access.", null),
         new CoreJS.StringParameter('label', "of the access.", null),
         new CoreJS.NumberParameter('expiration_duration', "of the access.", null)
     );
@@ -27,7 +27,7 @@ export class CreateAccess extends Command<Context, Args, Options> {
     public async execute(args: Args): Promise<CoreJS.Response> {
         const result = await this.context.accessRepository.create(args.account, {
             label: args.label,
-            rights: args.rights,
+            rights: args.with_rights,
             expirationDuration: args.expiration_duration
         });
 

@@ -236,7 +236,7 @@ describe("Account Module", () => {
             const rights = 97;
             const result = await m.execute('CreateAccess', {
                 account: accounts[0].id,
-                rights
+                with_rights: rights
             }) as CoreJS.Response;
 
             expect(result.code).equals(200, 'wrong response code');
