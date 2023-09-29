@@ -8,7 +8,6 @@
 import * as CoreJS from "corejs";
 import { Context, Args as ArgsData, Options } from "../core";
 import { Command } from "../../module";
-import { ErrorCode } from "../../database";
 
 const DURATION_ACCESS_EXPIRATION = CoreJS.Milliseconds.Hour;
 const LENGTH_PASSWORD_BLOCKS = 6;
