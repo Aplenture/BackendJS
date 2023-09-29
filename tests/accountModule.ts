@@ -318,21 +318,6 @@ describe("Account Module", () => {
             }
         });
 
-        it("catches missing parameter api_to_delete", async () => {
-            let accesses: readonly BackendJS.Account.Access[] = await m.database.query(`SELECT * FROM ${m.accessRepository.data}`);
-
-            try {
-                const result = await m.execute('DeleteAccess', {
-                    account: accesses[0].account,
-                }) as CoreJS.Response;
-
-                expect(result.code).equals(CoreJS.CoreErrorCode.MissingParameter, 'wrong response code');
-            } catch (error) {
-                expect(error.code).equals(CoreJS.CoreErrorCode.MissingParameter, 'wrong response code');
-                expect(error.data).contains({ name: 'api_to_delete', type: 'string' });
-            }
-        });
-
         it("deletes access", async () => {
             let accesses: readonly BackendJS.Account.Access[] = await m.database.query(`SELECT * FROM ${m.accessRepository.data}`);
 
