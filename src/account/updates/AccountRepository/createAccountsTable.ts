@@ -24,7 +24,7 @@ export class CreateAccountsTable extends Update<string> {
         this.update = `CREATE TABLE IF NOT EXISTS ${table} (
             \`id\` BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
             \`created\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            \`username\` VARCHAR(24) NOT NULL UNIQUE,
+            \`username\` VARCHAR(48) NOT NULL UNIQUE,
             \`key\` TEXT NOT NULL
         ) DEFAULT CHARSET=utf8`;
     }

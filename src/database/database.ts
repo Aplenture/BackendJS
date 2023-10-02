@@ -100,7 +100,7 @@ export class Database {
 
         await this.query(`CREATE TABLE IF NOT EXISTS \`updates\` (
             \`time\` TIMESTAMP NOT NULL,
-            \`name\` CHAR(48) NOT NULL,
+            \`name\` VARCHAR(96) NOT NULL,
             \`version\` BIGINT NOT NULL,
             PRIMARY KEY (\`time\`,\`name\`,\`version\`)
             ) DEFAULT CHARSET=utf8`);
