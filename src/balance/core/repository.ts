@@ -487,10 +487,10 @@ export class Repository extends Database.Repository<Tables> {
 
     public async updateBalance(data: UpdateData, type: EventType, date = new Date()): Promise<Update> {
         const now = Database.parseFromTime(Number(date));
-        const day = Database.parseFromTime(Number(CoreJS.calcUTCDate({ date })));
-        const week = Database.parseFromTime(Number(CoreJS.calcUTCDate({ date, weekDay: CoreJS.WeekDay.Monday })));
-        const month = Database.parseFromTime(Number(CoreJS.calcUTCDate({ date, monthDay: 1 })));
-        const year = Database.parseFromTime(Number(CoreJS.calcUTCDate({ date, monthDay: 1, month: CoreJS.Month.January })));
+        const day = Database.parseFromTime(Number(CoreJS.calcDate({ date })));
+        const week = Database.parseFromTime(Number(CoreJS.calcDate({ date, weekDay: CoreJS.WeekDay.Monday })));
+        const month = Database.parseFromTime(Number(CoreJS.calcDate({ date, monthDay: 1 })));
+        const year = Database.parseFromTime(Number(CoreJS.calcDate({ date, monthDay: 1, month: CoreJS.Month.January })));
 
         let change: number;
 
