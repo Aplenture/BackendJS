@@ -8,5 +8,6 @@
 import * as CoreJS from "corejs";
 
 export interface IApp extends CoreJS.IEventManager {
+    updateLoop: CoreJS.Updateloop;
     execute(route?: string, args?: NodeJS.ReadOnlyDict<any>): Promise<CoreJS.Response>;
 }

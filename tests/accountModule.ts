@@ -23,12 +23,14 @@ const config = {
     }
 };
 
-const app = {
+const app: any = {
     onMessage: new CoreJS.Event<any, string>('app.onMessage'),
     onError: new CoreJS.Event<any, Error>('app.onError'),
     config: new CoreJS.Config(),
     execute: async () => CoreJS.RESPONSE_OK
 };
+
+app.updateLoop = new CoreJS.Updateloop('update loop', app);
 
 const m = new BackendJS.Account.Module(app, args, config);
 const log = BackendJS.Log.Log.createFileLog('./test.account.log', true);
