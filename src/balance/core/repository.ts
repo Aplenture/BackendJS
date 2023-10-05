@@ -508,16 +508,14 @@ export class Repository extends Database.Repository<Tables> {
         }
 
         const result = await this.database.query(`
-        LOCK TABLES ${this.data.eventTable} WRITE, ${this.data.updateTable} WRITE;
-            START TRANSACTION;
-                INSERT INTO ${this.data.eventTable} (\`timestamp\`,\`type\`,\`account\`,\`depot\`,\`asset\`,\`order\`,\`value\`,\`data\`) VALUES (FROM_UNIXTIME(?),?,?,?,?,?,?,?);
-                INSERT INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) VALUES (?,0,?,?,?,?) ON DUPLICATE KEY UPDATE \`value\`=\`value\`+?,\`timestamp\`=0;
-                INSERT INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) SELECT ?,FROM_UNIXTIME(?),?,?,?,u.value FROM ${this.data.updateTable} u WHERE \`resolution\`=? AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ON DUPLICATE KEY UPDATE \`value\`=${this.data.updateTable}.value+?,\`timestamp\`=${this.data.updateTable}.timestamp;
-                INSERT INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) SELECT ?,FROM_UNIXTIME(?),?,?,?,u.value FROM ${this.data.updateTable} u WHERE \`resolution\`=? AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ON DUPLICATE KEY UPDATE \`value\`=${this.data.updateTable}.value+?,\`timestamp\`=${this.data.updateTable}.timestamp;
-                INSERT INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) SELECT ?,FROM_UNIXTIME(?),?,?,?,u.value FROM ${this.data.updateTable} u WHERE \`resolution\`=? AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ON DUPLICATE KEY UPDATE \`value\`=${this.data.updateTable}.value+?,\`timestamp\`=${this.data.updateTable}.timestamp;
-                INSERT INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) SELECT ?,FROM_UNIXTIME(?),?,?,?,u.value FROM ${this.data.updateTable} u WHERE \`resolution\`=? AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ON DUPLICATE KEY UPDATE \`value\`=${this.data.updateTable}.value+?,\`timestamp\`=${this.data.updateTable}.timestamp;
-                SELECT * FROM ${this.data.updateTable} WHERE \`resolution\`=? AND \`account\`=? AND \`depot\`=? AND \`asset\`=?;
-            COMMIT;
+        LOCK TABLES ${this.data.eventTable} WRITE, ${this.data.updateTable} WRITE, ${this.data.updateTable} u READ;
+            INSERT INTO ${this.data.eventTable} (\`timestamp\`,\`type\`,\`account\`,\`depot\`,\`asset\`,\`order\`,\`value\`,\`data\`) VALUES (FROM_UNIXTIME(?),?,?,?,?,?,?,?);
+            INSERT INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) VALUES (?,0,?,?,?,?) ON DUPLICATE KEY UPDATE \`value\`=\`value\`+?,\`timestamp\`=0;
+            INSERT INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) SELECT ?,FROM_UNIXTIME(?),?,?,?,u.value FROM ${this.data.updateTable} u WHERE \`resolution\`=? AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ON DUPLICATE KEY UPDATE \`value\`=${this.data.updateTable}.value+?,\`timestamp\`=${this.data.updateTable}.timestamp;
+            INSERT INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) SELECT ?,FROM_UNIXTIME(?),?,?,?,u.value FROM ${this.data.updateTable} u WHERE \`resolution\`=? AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ON DUPLICATE KEY UPDATE \`value\`=${this.data.updateTable}.value+?,\`timestamp\`=${this.data.updateTable}.timestamp;
+            INSERT INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) SELECT ?,FROM_UNIXTIME(?),?,?,?,u.value FROM ${this.data.updateTable} u WHERE \`resolution\`=? AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ON DUPLICATE KEY UPDATE \`value\`=${this.data.updateTable}.value+?,\`timestamp\`=${this.data.updateTable}.timestamp;
+            INSERT INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) SELECT ?,FROM_UNIXTIME(?),?,?,?,u.value FROM ${this.data.updateTable} u WHERE \`resolution\`=? AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ON DUPLICATE KEY UPDATE \`value\`=${this.data.updateTable}.value+?,\`timestamp\`=${this.data.updateTable}.timestamp;
+            SELECT * FROM ${this.data.updateTable} WHERE \`resolution\`=? AND \`account\`=? AND \`depot\`=? AND \`asset\`=?;
         UNLOCK TABLES;`, [
             now,
             type,
@@ -580,12 +578,12 @@ export class Repository extends Database.Repository<Tables> {
         ]);
 
         return {
-            timestamp: Database.parseToTime(result[8][0].timestamp),
-            resolution: result[8][0].resolution,
-            account: result[8][0].account,
-            depot: result[8][0].depot,
-            asset: result[8][0].asset,
-            value: result[8][0].value
+            timestamp: Database.parseToTime(result[7][0].timestamp),
+            resolution: result[7][0].resolution,
+            account: result[7][0].account,
+            depot: result[7][0].depot,
+            asset: result[7][0].asset,
+            value: result[7][0].value
         };
     }
 
