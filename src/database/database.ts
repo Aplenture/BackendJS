@@ -275,8 +275,26 @@ export class Database {
         query = Database.escapeQuery(query, values);
 
         let index = 0;
+        let streamFinished = false;
+        let callbackRunning = false;
 
         return new Promise<void>(async (resolve, reject) => {
+            const tryToFinishFetching = () => {
+                if (!streamFinished)
+                    return;
+
+                if (callbackRunning)
+                    return;
+
+                stopwatch.stop();
+                connection.release();
+
+                resolve();
+
+                if (this.debug || debug)
+                    this.eventManager.onMessage.emit(this, `fetched "${query}" in ${CoreJS.formatDuration(stopwatch.duration, { seconds: true, milliseconds: true })}`);
+            };
+
             const connection = await this.pool.getConnection();
             const stream = connection.queryStream({
                 sql: query,
@@ -286,23 +304,20 @@ export class Database {
                 bigIntAsNumber: true
             });
 
+            stream.on("end", () => streamFinished = true);
+            stream.on("end", tryToFinishFetching);
+            stream.on("resume", tryToFinishFetching);
+
             stream.on("error", error => {
                 connection.release();
                 this.eventManager.onMessage.emit(this, error.message);
                 reject(error);
             });
 
-            stream.on("end", () => {
-                stopwatch.stop();
-                connection.release();
-                resolve();
-
-                if (this.debug || debug)
-                    this.eventManager.onMessage.emit(this, `fetched "${query}" in ${CoreJS.formatDuration(stopwatch.duration, { seconds: true, milliseconds: true })}`);
-            });
-
             stream.on("data", async entry => {
                 try {
+                    callbackRunning = true;
+
                     stream.pause();
 
                     Database.decodeEntry(entry);
@@ -310,6 +325,8 @@ export class Database {
                     await callback(entry as any, index++);
 
                     stream.resume();
+
+                    callbackRunning = false;
                 } catch (error) {
                     stream.destroy(error);
                 }
