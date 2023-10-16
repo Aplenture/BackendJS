@@ -419,7 +419,7 @@ export class Repository extends Database.Repository<Tables> {
             }
         }
 
-        const result = await this.database.query(`SELECT \`depot\`,\`asset\`,SUM(IF(\`type\`>0,\`value\`,-\`value\`)) AS \`value\` FROM ${this.data.eventTable} WHERE ${where.join(' AND ')} GROUP BY ${groups.join(',')}`, values);
+        const result = await this.database.query(`SELECT \`depot\`,\`asset\`,SUM(IF(\`type\`>0,\`value\`,-\`value\`)) AS \`value\`,MAX(\`timestamp\`) as \`timestamp\` FROM ${this.data.eventTable} WHERE ${where.join(' AND ')} GROUP BY ${groups.join(',')}`, values);
 
         if (!result.length)
             return [];
@@ -481,7 +481,7 @@ export class Repository extends Database.Repository<Tables> {
             }
         }
 
-        await this.database.fetch(`SELECT \`depot\`,\`asset\`,SUM(IF(\`type\`>0,\`value\`,-\`value\`)) AS \`value\` FROM ${this.data.eventTable} WHERE ${where.join(' AND ')} GROUP BY ${groups.join(',')}`, async (data, index) => callback({
+        await this.database.fetch(`SELECT \`depot\`,\`asset\`,SUM(IF(\`type\`>0,\`value\`,-\`value\`)) AS \`value\`,MAX(\`timestamp\`) as \`timestamp\` FROM ${this.data.eventTable} WHERE ${where.join(' AND ')} GROUP BY ${groups.join(',')}`, async (data, index) => callback({
             id: data.id,
             timestamp: Database.parseToTime(data.timestamp),
             type: data.type,
