@@ -11,9 +11,6 @@ import { EventType, UpdateResolution } from "../enums";
 import { Event, Update } from "../models";
 import { Tables } from "../models/tables";
 
-const MAX_GET_LIMIT = 1000;
-const MAX_FETCH_LIMIT = 10000;
-
 interface UpdateData {
     readonly account: number;
     readonly depot: number;
@@ -58,7 +55,9 @@ export class Repository extends Database.Repository<Tables> {
     }
 
     public async getUpdates(account: number, options: UpdateOptions = {}): Promise<Update[]> {
-        const limit = Math.min(MAX_GET_LIMIT, options.limit || MAX_GET_LIMIT);
+        const limit = options.limit
+            ? "LIMIT " + options.limit
+            : "";
 
         const resolution = options.start || options.end
             ? options.resolution || UpdateResolution.Day
@@ -94,7 +93,7 @@ export class Repository extends Database.Repository<Tables> {
             where.push('`asset`=?');
         }
 
-        const result = await this.database.query(`SELECT * FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} ORDER BY \`timestamp\` ASC LIMIT ${limit}`, values);
+        const result = await this.database.query(`SELECT * FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} ORDER BY \`timestamp\` ASC ${limit}`, values);
 
         if (!result.length)
             return [];
@@ -110,7 +109,9 @@ export class Repository extends Database.Repository<Tables> {
     }
 
     public async fetchUpdates(account: number, callback: (data: Update, index: number) => Promise<any>, options: UpdateOptions = {}): Promise<void> {
-        const limit = Math.min(MAX_FETCH_LIMIT, options.limit || MAX_FETCH_LIMIT);
+        const limit = options.limit
+            ? "LIMIT " + options.limit
+            : "";
 
         const resolution = options.start || options.end
             ? options.resolution || UpdateResolution.Day
@@ -146,7 +147,7 @@ export class Repository extends Database.Repository<Tables> {
             where.push('`asset`=?');
         }
 
-        await this.database.fetch(`SELECT * FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} ORDER BY \`timestamp\` ASC LIMIT ${limit}`, async (data, index) => callback({
+        await this.database.fetch(`SELECT * FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} ORDER BY \`timestamp\` ASC ${limit}`, async (data, index) => callback({
             timestamp: Database.parseToTime(data.timestamp),
             resolution: data.resolution,
             account: data.account,
@@ -157,7 +158,9 @@ export class Repository extends Database.Repository<Tables> {
     }
 
     public async getUpdateSum(account: number, options: UpdateOptions = {}): Promise<Update[]> {
-        const limit = Math.min(MAX_GET_LIMIT, options.limit || MAX_GET_LIMIT);
+        const limit = options.limit
+            ? "LIMIT " + options.limit
+            : "";
 
         const resolution = options.start || options.end
             ? options.resolution || UpdateResolution.Day
@@ -193,7 +196,7 @@ export class Repository extends Database.Repository<Tables> {
             where.push('`asset`=?');
         }
 
-        const result = await this.database.query(`SELECT *,SUM(\`value\`) AS \`value\` FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`timestamp\`,\`asset\` ORDER BY \`timestamp\` ASC LIMIT ${limit}`, values);
+        const result = await this.database.query(`SELECT *,SUM(\`value\`) AS \`value\` FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`timestamp\`,\`asset\` ORDER BY \`timestamp\` ASC ${limit}`, values);
 
         if (!result.length)
             return [];
@@ -209,7 +212,9 @@ export class Repository extends Database.Repository<Tables> {
     }
 
     public async fetchUpdateSum(account: number, callback: (data: Update, index: number) => Promise<any>, options: UpdateOptions = {}): Promise<void> {
-        const limit = Math.min(MAX_FETCH_LIMIT, options.limit || MAX_FETCH_LIMIT);
+        const limit = options.limit
+            ? "LIMIT " + options.limit
+            : "";
 
         const resolution = options.start || options.end
             ? options.resolution || UpdateResolution.Day
@@ -245,7 +250,7 @@ export class Repository extends Database.Repository<Tables> {
             where.push('`asset`=?');
         }
 
-        await this.database.fetch(`SELECT *,SUM(\`value\`) AS \`value\` FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`timestamp\`,\`asset\` ORDER BY \`timestamp\` ASC LIMIT ${limit}`, async (data, index) => callback({
+        await this.database.fetch(`SELECT *,SUM(\`value\`) AS \`value\` FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`timestamp\`,\`asset\` ORDER BY \`timestamp\` ASC ${limit}`, async (data, index) => callback({
             timestamp: data.timestamp,
             resolution: data.resolut,
             account,
@@ -258,7 +263,9 @@ export class Repository extends Database.Repository<Tables> {
     public async getEvents(account: number, options: EventOptions = {}): Promise<Event[]> {
         const values: any[] = [account];
         const where = ['`account`=?'];
-        const limit = Math.min(MAX_GET_LIMIT, options.limit || MAX_GET_LIMIT);
+        const limit = options.limit
+            ? "LIMIT " + options.limit
+            : "";
 
         if (options.start) {
             values.push(Database.parseFromTime(options.start));
@@ -295,7 +302,7 @@ export class Repository extends Database.Repository<Tables> {
             }
         }
 
-        const result = await this.database.query(`SELECT * FROM ${this.data.eventTable} WHERE ${where.join(' AND ')} ORDER BY \`id\` ASC LIMIT ${limit}`, values);
+        const result = await this.database.query(`SELECT * FROM ${this.data.eventTable} WHERE ${where.join(' AND ')} ORDER BY \`id\` ASC ${limit}`, values);
 
         if (!result.length)
             return [];
@@ -316,7 +323,9 @@ export class Repository extends Database.Repository<Tables> {
     public async fetchEvents(account: number, callback: (data: Event, index: number) => Promise<any>, options: EventOptions = {}): Promise<void> {
         const values: any[] = [account];
         const where = ['`account`=?'];
-        const limit = Math.min(MAX_FETCH_LIMIT, options.limit || MAX_FETCH_LIMIT);
+        const limit = options.limit
+            ? "LIMIT " + options.limit
+            : "";
 
         if (options.start) {
             values.push(Database.parseFromTime(options.start));
@@ -353,7 +362,7 @@ export class Repository extends Database.Repository<Tables> {
             }
         }
 
-        await this.database.fetch(`SELECT * FROM ${this.data.eventTable} WHERE ${where.join(' AND ')} ORDER BY \`id\` ASC LIMIT ${limit}`, async (data, index) => callback({
+        await this.database.fetch(`SELECT * FROM ${this.data.eventTable} WHERE ${where.join(' AND ')} ORDER BY \`id\` ASC ${limit}`, async (data, index) => callback({
             id: data.id,
             timestamp: Database.parseToTime(data.timestamp),
             type: data.type,
