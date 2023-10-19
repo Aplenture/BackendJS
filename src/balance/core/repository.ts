@@ -494,12 +494,12 @@ export class Repository extends Database.Repository<Tables> {
         }, index), values);
     }
 
-    public async updateBalance(data: UpdateData, type: EventType, date = new Date()): Promise<Update> {
-        const now = Database.parseFromTime(Number(date));
-        const day = Database.parseFromTime(Number(CoreJS.calcDate({ date })));
-        const week = Database.parseFromTime(Number(CoreJS.calcDate({ date, weekDay: CoreJS.WeekDay.Monday })));
-        const month = Database.parseFromTime(Number(CoreJS.calcDate({ date, monthDay: 1 })));
-        const year = Database.parseFromTime(Number(CoreJS.calcDate({ date, monthDay: 1, month: CoreJS.Month.January })));
+    public async updateBalance(data: UpdateData, type: EventType, debugDate = new Date()): Promise<Update> {
+        const now = Database.parseFromTime(Number(debugDate));
+        const day = Database.parseFromTime(Number(CoreJS.calcDate({ date: debugDate })));
+        const week = Database.parseFromTime(Number(CoreJS.calcDate({ date: debugDate, weekDay: CoreJS.WeekDay.Monday })));
+        const month = Database.parseFromTime(Number(CoreJS.calcDate({ date: debugDate, monthDay: 1 })));
+        const year = Database.parseFromTime(Number(CoreJS.calcDate({ date: debugDate, monthDay: 1, month: CoreJS.Month.January })));
 
         let change: number;
 
@@ -596,11 +596,11 @@ export class Repository extends Database.Repository<Tables> {
         };
     }
 
-    public increase(update: UpdateData, date?: Date) {
-        return this.updateBalance(update, EventType.Increase, date);
+    public increase(update: UpdateData, debugDate?: Date) {
+        return this.updateBalance(update, EventType.Increase, debugDate);
     }
 
-    public decrease(data: UpdateData, date?: Date): Promise<Update> {
-        return this.updateBalance(data, EventType.Decrease, date);
+    public decrease(data: UpdateData, debugDate?: Date): Promise<Update> {
+        return this.updateBalance(data, EventType.Decrease, debugDate);
     }
 }
