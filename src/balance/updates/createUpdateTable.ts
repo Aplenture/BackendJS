@@ -23,13 +23,14 @@ export class CreateUpdateTable extends Database.Update<Tables> {
         this.reset = `TRUNCATE TABLE ${data.updateTable}`;
         this.revert = `DROP TABLE IF EXISTS ${data.updateTable}`;
         this.update = `CREATE TABLE IF NOT EXISTS ${data.updateTable} (
+            \`id\` BIGINT UNSIGNED UNIQUE AUTO_INCREMENT,
             \`timestamp\` TIMESTAMP NOT NULL,
             \`resolution\` INT NOT NULL,
             \`account\` BIGINT NOT NULL,
             \`depot\` BIGINT NOT NULL,
             \`asset\` BIGINT NOT NULL,
             \`value\` INT NOT NULL,
-            UNIQUE (\`timestamp\`,\`resolution\`,\`account\`,\`depot\`,\`asset\`)
+            PRIMARY KEY (\`timestamp\`,\`resolution\`,\`account\`,\`depot\`,\`asset\`)
         ) DEFAULT CHARSET=utf8`;
     }
 }

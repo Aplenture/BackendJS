@@ -8,6 +8,7 @@
 import { UpdateResolution } from "../enums";
 
 export interface Update {
+    readonly id: number;
     readonly timestamp: number;
     readonly resolution: UpdateResolution;
     readonly account: number;

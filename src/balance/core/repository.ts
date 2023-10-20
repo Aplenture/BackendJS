@@ -20,6 +20,13 @@ interface UpdateData {
     readonly data: string;
 }
 
+interface BalanceOptions {
+    readonly time?: number;
+    readonly depot?: number;
+    readonly asset?: number;
+    readonly limit?: number;
+}
+
 interface UpdateOptions {
     readonly start?: number;
     readonly end?: number;
@@ -52,6 +59,180 @@ export class Repository extends Database.Repository<Tables> {
 
         if (!database.allowsMultipleStatements)
             throw new Error('database needs to support multiple statements for Update repository');
+    }
+
+    public async getBalance(account: number, options: BalanceOptions = {}): Promise<Update[]> {
+        const limit = options.limit
+            ? "LIMIT " + options.limit
+            : "";
+
+        const values: any[] = [
+            account,
+            UpdateResolution.Day
+        ];
+
+        const where = [
+            '`account`=?',
+            '`resolution`=?'
+        ];
+
+        if (options.time) {
+            values.push(Database.parseFromTime(options.time));
+            where.push('`timestamp`<=FROM_UNIXTIME(?)');
+        }
+
+        if (undefined != options.depot) {
+            values.push(options.depot);
+            where.push('`depot`=?');
+        }
+
+        if (undefined != options.asset) {
+            values.push(options.asset);
+            where.push('`asset`=?');
+        }
+
+        const result = await this.database.query(`SELECT * FROM ${this.data.updateTable} WHERE \`id\` in (SELECT MAX(\`id\`) FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`asset\`,\`depot\`) ${limit}`, values);
+
+        if (!result.length)
+            return [];
+
+        return result.map(data => ({
+            id: data.id,
+            timestamp: Database.parseToTime(data.timestamp),
+            resolution: data.resolution,
+            account: data.account,
+            depot: data.depot,
+            asset: data.asset,
+            value: data.value
+        }));
+    }
+
+    public async fetchBalances(account: number, callback: (data: Update, index: number) => Promise<any>, options: BalanceOptions = {}): Promise<void> {
+        const limit = options.limit
+            ? "LIMIT " + options.limit
+            : "";
+
+        const values: any[] = [
+            account,
+            UpdateResolution.Day
+        ];
+
+        const where = [
+            '`account`=?',
+            '`resolution`=?'
+        ];
+
+        if (options.time) {
+            values.push(Database.parseFromTime(options.time));
+            where.push('`timestamp`<=FROM_UNIXTIME(?)');
+        }
+
+        if (undefined != options.depot) {
+            values.push(options.depot);
+            where.push('`depot`=?');
+        }
+
+        if (undefined != options.asset) {
+            values.push(options.asset);
+            where.push('`asset`=?');
+        }
+
+        await this.database.fetch(`SELECT * FROM ${this.data.updateTable} WHERE \`id\` in (SELECT MAX(\`id\`) FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`asset\`,\`depot\`) ${limit}`, async (data, index) => callback({
+            id: data.id,
+            timestamp: Database.parseToTime(data.timestamp),
+            resolution: data.resolution,
+            account: data.account,
+            depot: data.depot,
+            asset: data.asset,
+            value: data.value
+        }, index), values);
+    }
+
+    public async getBalanceSum(account: number, options: BalanceOptions = {}): Promise<Update[]> {
+        const limit = options.limit
+            ? "LIMIT " + options.limit
+            : "";
+
+        const values: any[] = [
+            account,
+            UpdateResolution.Day
+        ];
+
+        const where = [
+            '`account`=?',
+            '`resolution`=?'
+        ];
+
+        if (options.time) {
+            values.push(Database.parseFromTime(options.time));
+            where.push('`timestamp`<=FROM_UNIXTIME(?)');
+        }
+
+        if (undefined != options.depot) {
+            values.push(options.depot);
+            where.push('`depot`=?');
+        }
+
+        if (undefined != options.asset) {
+            values.push(options.asset);
+            where.push('`asset`=?');
+        }
+
+        const result = await this.database.query(`SELECT *,SUM(\`value\`) AS \`value\` FROM ${this.data.updateTable} WHERE \`id\` in (SELECT MAX(\`id\`) FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`asset\`,\`depot\`) GROUP BY \`timestamp\`,\`asset\` ORDER BY \`timestamp\` ASC ${limit}`, values);
+
+        if (!result.length)
+            return [];
+
+        return result.map(data => ({
+            id: data.id,
+            timestamp: data.timestamp,
+            resolution: data.resolut,
+            account,
+            depot: options.depot ?? null,
+            asset: data.asset,
+            value: data.value || 0
+        }));
+    }
+
+    public async fetchBalanceSum(account: number, callback: (data: Update, index: number) => Promise<any>, options: BalanceOptions = {}): Promise<void> {
+        const limit = options.limit
+            ? "LIMIT " + options.limit
+            : "";
+
+        const values: any[] = [
+            account,
+            UpdateResolution.Day
+        ];
+
+        const where = [
+            '`account`=?',
+            '`resolution`=?'
+        ];
+
+        if (options.time) {
+            values.push(Database.parseFromTime(options.time));
+            where.push('`timestamp`<=FROM_UNIXTIME(?)');
+        }
+
+        if (undefined != options.depot) {
+            values.push(options.depot);
+            where.push('`depot`=?');
+        }
+
+        if (undefined != options.asset) {
+            values.push(options.asset);
+            where.push('`asset`=?');
+        }
+
+        await this.database.fetch(`SELECT *,SUM(\`value\`) AS \`value\` FROM ${this.data.updateTable} WHERE \`id\` in (SELECT MAX(\`id\`) FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`asset\`,\`depot\`) GROUP BY \`timestamp\`,\`asset\` ORDER BY \`timestamp\` ASC ${limit}`, async (data, index) => callback({
+            id: data.id,
+            timestamp: data.timestamp,
+            resolution: data.resolut,
+            account,
+            depot: options.depot ?? null,
+            asset: data.asset,
+            value: data.value || 0
+        }, index), values);
     }
 
     public async getUpdates(account: number, options: UpdateOptions = {}): Promise<Update[]> {
@@ -99,6 +280,7 @@ export class Repository extends Database.Repository<Tables> {
             return [];
 
         return result.map(data => ({
+            id: data.id,
             timestamp: Database.parseToTime(data.timestamp),
             resolution: data.resolution,
             account: data.account,
@@ -148,6 +330,7 @@ export class Repository extends Database.Repository<Tables> {
         }
 
         await this.database.fetch(`SELECT * FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} ORDER BY \`timestamp\` ASC ${limit}`, async (data, index) => callback({
+            id: data.id,
             timestamp: Database.parseToTime(data.timestamp),
             resolution: data.resolution,
             account: data.account,
@@ -202,6 +385,7 @@ export class Repository extends Database.Repository<Tables> {
             return [];
 
         return result.map(data => ({
+            id: data.id,
             timestamp: data.timestamp,
             resolution: data.resolut,
             account,
@@ -251,6 +435,7 @@ export class Repository extends Database.Repository<Tables> {
         }
 
         await this.database.fetch(`SELECT *,SUM(\`value\`) AS \`value\` FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`timestamp\`,\`asset\` ORDER BY \`timestamp\` ASC ${limit}`, async (data, index) => callback({
+            id: data.id,
             timestamp: data.timestamp,
             resolution: data.resolut,
             account,
@@ -587,6 +772,7 @@ export class Repository extends Database.Repository<Tables> {
         ]);
 
         return {
+            id: result[7][0].id,
             timestamp: Database.parseToTime(result[7][0].timestamp),
             resolution: result[7][0].resolution,
             account: result[7][0].account,
