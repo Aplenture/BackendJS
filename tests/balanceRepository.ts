@@ -1269,7 +1269,6 @@ describe("Balance Repository", () => {
                     });
                 });
             });
-        });
 
         describe("fetch", () => {
             describe("current", () => {
@@ -1994,6 +1993,7 @@ describe("Balance Repository", () => {
                 expect(result[1]).deep.contains({ account: 1, depot: null, asset: 2, value: -10 });
                 expect(result[2]).deep.contains({ account: 1, depot: null, asset: 1, value: 37 });
                 expect(result[3]).deep.contains({ account: 1, depot: null, asset: 2, value: 13 });
+                    });
                 });
             });
         });
