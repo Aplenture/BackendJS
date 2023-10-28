@@ -91,7 +91,7 @@ export class Repository extends Database.Repository<Tables> {
             where.push('`asset`=?');
         }
 
-        const result = await this.database.query(`SELECT * FROM ${this.data.updateTable} WHERE \`timestamp\` in (SELECT MAX(\`timestamp\`) FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`asset\`,\`depot\`) AND ${where.join(' AND ')} ${limit}`, [].concat(values, values));
+        const result = await this.database.query(`SELECT * FROM ${this.data.updateTable} WHERE \`timestamp\` IN (SELECT MAX(\`timestamp\`) FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`asset\`,\`depot\`) AND ${where.join(' AND ')} ${limit}`, [].concat(values, values));
 
         if (!result.length)
             return [];
@@ -136,7 +136,7 @@ export class Repository extends Database.Repository<Tables> {
             where.push('`asset`=?');
         }
 
-        await this.database.fetch(`SELECT * FROM ${this.data.updateTable} WHERE \`timestamp\` in (SELECT MAX(\`timestamp\`) FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`asset\`,\`depot\`) AND ${where.join(' AND ')} ${limit}`, async (data, index) => callback({
+        await this.database.fetch(`SELECT * FROM ${this.data.updateTable} WHERE \`timestamp\` IN (SELECT MAX(\`timestamp\`) FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`asset\`,\`depot\`) AND ${where.join(' AND ')} ${limit}`, async (data, index) => callback({
             timestamp: Database.parseToTime(data.timestamp),
             resolution: data.resolution,
             account: data.account,
@@ -176,7 +176,7 @@ export class Repository extends Database.Repository<Tables> {
             where.push('`asset`=?');
         }
 
-        const result = await this.database.query(`SELECT *,SUM(\`value\`) AS \`value\` FROM ${this.data.updateTable} WHERE \`timestamp\` in (SELECT MAX(\`timestamp\`) FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`asset\`,\`depot\`) AND ${where.join(' AND ')} GROUP BY \`timestamp\`,\`asset\` ORDER BY \`timestamp\` ASC ${limit}`, [].concat(values, values));
+        const result = await this.database.query(`SELECT *,SUM(\`value\`) AS \`value\` FROM ${this.data.updateTable} WHERE \`timestamp\` IN (SELECT MAX(\`timestamp\`) FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`asset\`,\`depot\`) AND ${where.join(' AND ')} GROUP BY \`timestamp\`,\`asset\` ORDER BY \`timestamp\` ASC ${limit}`, [].concat(values, values));
 
         if (!result.length)
             return [];
@@ -221,7 +221,7 @@ export class Repository extends Database.Repository<Tables> {
             where.push('`asset`=?');
         }
 
-        await this.database.fetch(`SELECT *,SUM(\`value\`) AS \`value\` FROM ${this.data.updateTable} WHERE \`timestamp\` in (SELECT MAX(\`timestamp\`) FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`asset\`,\`depot\`) AND ${where.join(' AND ')} GROUP BY \`timestamp\`,\`asset\` ORDER BY \`timestamp\` ASC ${limit}`, async (data, index) => callback({
+        await this.database.fetch(`SELECT *,SUM(\`value\`) AS \`value\` FROM ${this.data.updateTable} WHERE \`timestamp\` IN (SELECT MAX(\`timestamp\`) FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`asset\`,\`depot\`) AND ${where.join(' AND ')} GROUP BY \`timestamp\`,\`asset\` ORDER BY \`timestamp\` ASC ${limit}`, async (data, index) => callback({
             timestamp: data.timestamp,
             resolution: data.resolut,
             account,
