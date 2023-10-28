@@ -98,7 +98,6 @@ export class Repository extends Database.Repository<Tables> {
             return [];
 
         return result.map(data => ({
-            id: data.id,
             timestamp: Database.parseToTime(data.timestamp),
             resolution: data.resolution,
             account: data.account,
@@ -139,7 +138,6 @@ export class Repository extends Database.Repository<Tables> {
         }
 
         await this.database.fetch(`SELECT * FROM ${this.data.updateTable} WHERE \`timestamp\` in (SELECT MAX(\`timestamp\`) FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`asset\`,\`depot\`) AND ${where.join(' AND ')} ${limit}`, async (data, index) => callback({
-            id: data.id,
             timestamp: Database.parseToTime(data.timestamp),
             resolution: data.resolution,
             account: data.account,
@@ -185,7 +183,6 @@ export class Repository extends Database.Repository<Tables> {
             return [];
 
         return result.map(data => ({
-            id: data.id,
             timestamp: data.timestamp,
             resolution: data.resolut,
             account,
@@ -226,7 +223,6 @@ export class Repository extends Database.Repository<Tables> {
         }
 
         await this.database.fetch(`SELECT *,SUM(\`value\`) AS \`value\` FROM ${this.data.updateTable} WHERE \`timestamp\` in (SELECT MAX(\`timestamp\`) FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`asset\`,\`depot\`) AND ${where.join(' AND ')} GROUP BY \`timestamp\`,\`asset\` ORDER BY \`timestamp\` ASC ${limit}`, async (data, index) => callback({
-            id: data.id,
             timestamp: data.timestamp,
             resolution: data.resolut,
             account,
@@ -281,7 +277,6 @@ export class Repository extends Database.Repository<Tables> {
             return [];
 
         return result.map(data => ({
-            id: data.id,
             timestamp: Database.parseToTime(data.timestamp),
             resolution: data.resolution,
             account: data.account,
@@ -331,7 +326,6 @@ export class Repository extends Database.Repository<Tables> {
         }
 
         await this.database.fetch(`SELECT * FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} ORDER BY \`timestamp\` ASC ${limit}`, async (data, index) => callback({
-            id: data.id,
             timestamp: Database.parseToTime(data.timestamp),
             resolution: data.resolution,
             account: data.account,
@@ -386,7 +380,6 @@ export class Repository extends Database.Repository<Tables> {
             return [];
 
         return result.map(data => ({
-            id: data.id,
             timestamp: data.timestamp,
             resolution: data.resolut,
             account,
@@ -436,7 +429,6 @@ export class Repository extends Database.Repository<Tables> {
         }
 
         await this.database.fetch(`SELECT *,SUM(\`value\`) AS \`value\` FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`timestamp\`,\`asset\` ORDER BY \`timestamp\` ASC ${limit}`, async (data, index) => callback({
-            id: data.id,
             timestamp: data.timestamp,
             resolution: data.resolut,
             account,
@@ -761,7 +753,6 @@ export class Repository extends Database.Repository<Tables> {
         const result = await this.database.query(query, values);
 
         return {
-            id: result[12][0].id,
             timestamp: Database.parseToTime(result[12][0].timestamp),
             resolution: result[12][0].resolution,
             account: result[12][0].account,
