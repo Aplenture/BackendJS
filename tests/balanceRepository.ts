@@ -51,87 +51,87 @@ describe("Balance Repository", () => {
     });
 
     describe("Increasing now", () => {
-        it("simple order", () => repository.increase({ account: 1, depot: 1, asset: 1, value: 1, order: 1, data: 'increase' }, now)
+        it("simple order", () => repository.increase({ date: now, account: 1, depot: 1, asset: 1, value: 1, order: 1, data: 'increase' })
             .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 1, value: 1 })));
 
-        it("second order", () => repository.increase({ account: 1, depot: 1, asset: 1, value: 2, order: 2, data: 'increase' }, now)
+        it("second order", () => repository.increase({ date: now, account: 1, depot: 1, asset: 1, value: 2, order: 2, data: 'increase' })
             .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 1, value: 3 })));
 
-        it("second asset", () => repository.increase({ account: 1, depot: 1, asset: 2, value: 3, order: 3, data: 'increase' }, now)
+        it("second asset", () => repository.increase({ date: now, account: 1, depot: 1, asset: 2, value: 3, order: 3, data: 'increase' })
             .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 2, value: 3 })));
 
-        it("second depot", () => repository.increase({ account: 1, depot: 2, asset: 1, value: 4, order: 4, data: 'increase' }, now)
+        it("second depot", () => repository.increase({ date: now, account: 1, depot: 2, asset: 1, value: 4, order: 4, data: 'increase' })
             .then(result => expect(result).deep.contains({ account: 1, depot: 2, asset: 1, value: 4 })));
 
-        it("second account", () => repository.increase({ account: 2, depot: 1, asset: 1, value: 5, order: 5, data: 'increase' }, now)
+        it("second account", () => repository.increase({ date: now, account: 2, depot: 1, asset: 1, value: 5, order: 5, data: 'increase' })
             .then(result => expect(result).deep.contains({ account: 2, depot: 1, asset: 1, value: 5 })));
     });
 
-    describe("Decreasing next day", () => {
-        it("simple order", () => repository.decrease({ account: 1, depot: 1, asset: 1, value: 6, order: 4, data: 'decrease' }, nextDay)
-            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 1, value: -3 })));
+    describe("Increasing next year", () => {
+        it("simple order", () => repository.increase({ date: nextYear, account: 1, depot: 1, asset: 1, value: 21, order: 1, data: 'increase' })
+            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 1, value: 24 })));
 
-        it("second order", () => repository.decrease({ account: 1, depot: 1, asset: 1, value: 7, order: 3, data: 'decrease' }, nextDay)
-            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 1, value: -10 })));
+        it("second order", () => repository.increase({ date: nextYear, account: 1, depot: 1, asset: 1, value: 22, order: 2, data: 'increase' })
+            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 1, value: 46 })));
 
-        it("second asset", () => repository.decrease({ account: 1, depot: 1, asset: 2, value: 8, order: 2, data: 'decrease' }, nextDay)
-            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 2, value: -5 })));
+        it("second asset", () => repository.increase({ date: nextYear, account: 1, depot: 1, asset: 2, value: 23, order: 3, data: 'increase' })
+            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 2, value: 26 })));
 
-        it("second depot", () => repository.decrease({ account: 1, depot: 2, asset: 1, value: 9, order: 1, data: 'decrease' }, nextDay)
-            .then(result => expect(result).deep.contains({ account: 1, depot: 2, asset: 1, value: -5 })));
+        it("second depot", () => repository.increase({ date: nextYear, account: 1, depot: 2, asset: 1, value: 24, order: 4, data: 'increase' })
+            .then(result => expect(result).deep.contains({ account: 1, depot: 2, asset: 1, value: 28 })));
 
-        it("second account", () => repository.decrease({ account: 2, depot: 1, asset: 1, value: 10, order: 6, data: 'decrease' }, nextDay)
-            .then(result => expect(result).deep.contains({ account: 2, depot: 1, asset: 1, value: -5 })));
+        it("second account", () => repository.increase({ date: nextYear, account: 2, depot: 1, asset: 1, value: 25, order: 5, data: 'increase' })
+            .then(result => expect(result).deep.contains({ account: 2, depot: 1, asset: 1, value: 30 })));
     });
 
-    describe("Increasing next week", () => {
-        it("simple order", () => repository.increase({ account: 1, depot: 1, asset: 1, value: 11, order: 1, data: 'increase' }, nextWeek)
-            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 1, value: 1 })));
+    describe("Decreasing next day", () => {
+        it("simple order", () => repository.decrease({ date: nextDay, account: 1, depot: 1, asset: 1, value: 6, order: 4, data: 'decrease' })
+            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 1, value: 40 })));
 
-        it("second order", () => repository.increase({ account: 1, depot: 1, asset: 1, value: 12, order: 2, data: 'increase' }, nextWeek)
-            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 1, value: 13 })));
+        it("second order", () => repository.decrease({ date: nextDay, account: 1, depot: 1, asset: 1, value: 7, order: 3, data: 'decrease' })
+            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 1, value: 33 })));
 
-        it("second asset", () => repository.increase({ account: 1, depot: 1, asset: 2, value: 13, order: 3, data: 'increase' }, nextWeek)
-            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 2, value: 8 })));
+        it("second asset", () => repository.decrease({ date: nextDay, account: 1, depot: 1, asset: 2, value: 8, order: 2, data: 'decrease' })
+            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 2, value: 18 })));
 
-        it("second depot", () => repository.increase({ account: 1, depot: 2, asset: 1, value: 14, order: 4, data: 'increase' }, nextWeek)
-            .then(result => expect(result).deep.contains({ account: 1, depot: 2, asset: 1, value: 9 })));
+        it("second depot", () => repository.decrease({ date: nextDay, account: 1, depot: 2, asset: 1, value: 9, order: 1, data: 'decrease' })
+            .then(result => expect(result).deep.contains({ account: 1, depot: 2, asset: 1, value: 19 })));
 
-        it("second account", () => repository.increase({ account: 2, depot: 1, asset: 1, value: 15, order: 5, data: 'increase' }, nextWeek)
-            .then(result => expect(result).deep.contains({ account: 2, depot: 1, asset: 1, value: 10 })));
+        it("second account", () => repository.decrease({ date: nextDay, account: 2, depot: 1, asset: 1, value: 10, order: 6, data: 'decrease' })
+            .then(result => expect(result).deep.contains({ account: 2, depot: 1, asset: 1, value: 20 })));
     });
 
     describe("Decreasing next month", () => {
-        it("simple order", () => repository.decrease({ account: 1, depot: 1, asset: 1, value: 16, order: 4, data: '' }, nextMonth)
-            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 1, value: -3 })));
+        it("simple order", () => repository.decrease({ date: nextMonth, account: 1, depot: 1, asset: 1, value: 16, order: 4, data: '' })
+            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 1, value: 17 })));
 
-        it("second order", () => repository.decrease({ account: 1, depot: 1, asset: 1, value: 17, order: 3, data: '' }, nextMonth)
-            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 1, value: -20 })));
+        it("second order", () => repository.decrease({ date: nextMonth, account: 1, depot: 1, asset: 1, value: 17, order: 3, data: '' })
+            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 1, value: 0 })));
 
-        it("second asset", () => repository.decrease({ account: 1, depot: 1, asset: 2, value: 18, order: 2, data: '' }, nextMonth)
-            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 2, value: -10 })));
+        it("second asset", () => repository.decrease({ date: nextMonth, account: 1, depot: 1, asset: 2, value: 18, order: 2, data: '' })
+            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 2, value: 0 })));
 
-        it("second depot", () => repository.decrease({ account: 1, depot: 2, asset: 1, value: 19, order: 1, data: '' }, nextMonth)
-            .then(result => expect(result).deep.contains({ account: 1, depot: 2, asset: 1, value: -10 })));
+        it("second depot", () => repository.decrease({ date: nextMonth, account: 1, depot: 2, asset: 1, value: 19, order: 1, data: '' })
+            .then(result => expect(result).deep.contains({ account: 1, depot: 2, asset: 1, value: 0 })));
 
-        it("second account", () => repository.decrease({ account: 2, depot: 1, asset: 1, value: 20, order: 6, data: '' }, nextMonth)
-            .then(result => expect(result).deep.contains({ account: 2, depot: 1, asset: 1, value: -10 })));
+        it("second account", () => repository.decrease({ date: nextMonth, account: 2, depot: 1, asset: 1, value: 20, order: 6, data: '' })
+            .then(result => expect(result).deep.contains({ account: 2, depot: 1, asset: 1, value: 0 })));
     });
 
-    describe("Increasing next year", () => {
-        it("simple order", () => repository.increase({ account: 1, depot: 1, asset: 1, value: 21, order: 1, data: 'increase' }, nextYear)
-            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 1, value: 1 })));
+    describe("Increasing next week", () => {
+        it("simple order", () => repository.increase({ date: nextWeek, account: 1, depot: 1, asset: 1, value: 11, order: 1, data: 'increase' })
+            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 1, value: 11 })));
 
-        it("second order", () => repository.increase({ account: 1, depot: 1, asset: 1, value: 22, order: 2, data: 'increase' }, nextYear)
+        it("second order", () => repository.increase({ date: nextWeek, account: 1, depot: 1, asset: 1, value: 12, order: 2, data: 'increase' })
             .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 1, value: 23 })));
 
-        it("second asset", () => repository.increase({ account: 1, depot: 1, asset: 2, value: 23, order: 3, data: 'increase' }, nextYear)
+        it("second asset", () => repository.increase({ date: nextWeek, account: 1, depot: 1, asset: 2, value: 13, order: 3, data: 'increase' })
             .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 2, value: 13 })));
 
-        it("second depot", () => repository.increase({ account: 1, depot: 2, asset: 1, value: 24, order: 4, data: 'increase' }, nextYear)
+        it("second depot", () => repository.increase({ date: nextWeek, account: 1, depot: 2, asset: 1, value: 14, order: 4, data: 'increase' })
             .then(result => expect(result).deep.contains({ account: 1, depot: 2, asset: 1, value: 14 })));
 
-        it("second account", () => repository.increase({ account: 2, depot: 1, asset: 1, value: 25, order: 5, data: 'increase' }, nextYear)
+        it("second account", () => repository.increase({ date: nextWeek, account: 2, depot: 1, asset: 1, value: 15, order: 5, data: 'increase' })
             .then(result => expect(result).deep.contains({ account: 2, depot: 1, asset: 1, value: 15 })));
     });
 
