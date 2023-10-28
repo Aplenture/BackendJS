@@ -34,7 +34,6 @@ interface UpdateOptions {
     readonly depot?: number;
     readonly asset?: number;
     readonly limit?: number;
-    readonly resolution?: UpdateResolution;
 }
 
 interface EventOptions {
@@ -232,14 +231,10 @@ export class Repository extends Database.Repository<Tables> {
         }, index), [].concat(values, values));
     }
 
-    public async getUpdates(account: number, options: UpdateOptions = {}): Promise<Update[]> {
+    public async getUpdates(account: number, resolution: UpdateResolution, options: UpdateOptions = {}): Promise<Update[]> {
         const limit = options.limit
             ? "LIMIT " + options.limit
             : "";
-
-        const resolution = options.start || options.end
-            ? options.resolution || UpdateResolution.Day
-            : options.resolution || UpdateResolution.None;
 
         const values: any[] = [
             account,
@@ -286,14 +281,10 @@ export class Repository extends Database.Repository<Tables> {
         }));
     }
 
-    public async fetchUpdates(account: number, callback: (data: Update, index: number) => Promise<any>, options: UpdateOptions = {}): Promise<void> {
+    public async fetchUpdates(account: number, resolution: UpdateResolution, callback: (data: Update, index: number) => Promise<any>, options: UpdateOptions = {}): Promise<void> {
         const limit = options.limit
             ? "LIMIT " + options.limit
             : "";
-
-        const resolution = options.start || options.end
-            ? options.resolution || UpdateResolution.Day
-            : options.resolution || UpdateResolution.None;
 
         const values: any[] = [
             account,
@@ -335,14 +326,10 @@ export class Repository extends Database.Repository<Tables> {
         }, index), values);
     }
 
-    public async getUpdateSum(account: number, options: UpdateOptions = {}): Promise<Update[]> {
+    public async getUpdateSum(account: number, resolution: UpdateResolution, options: UpdateOptions = {}): Promise<Update[]> {
         const limit = options.limit
             ? "LIMIT " + options.limit
             : "";
-
-        const resolution = options.start || options.end
-            ? options.resolution || UpdateResolution.Day
-            : options.resolution || UpdateResolution.None;
 
         const values: any[] = [
             account,
@@ -389,14 +376,10 @@ export class Repository extends Database.Repository<Tables> {
         }));
     }
 
-    public async fetchUpdateSum(account: number, callback: (data: Update, index: number) => Promise<any>, options: UpdateOptions = {}): Promise<void> {
+    public async fetchUpdateSum(account: number, resolution: UpdateResolution, callback: (data: Update, index: number) => Promise<any>, options: UpdateOptions = {}): Promise<void> {
         const limit = options.limit
             ? "LIMIT " + options.limit
             : "";
-
-        const resolution = options.start || options.end
-            ? options.resolution || UpdateResolution.Day
-            : options.resolution || UpdateResolution.None;
 
         const values: any[] = [
             account,
@@ -703,13 +686,9 @@ export class Repository extends Database.Repository<Tables> {
         query += `INSERT INTO ${this.data.eventTable} (\`timestamp\`,\`type\`,\`account\`,\`depot\`,\`asset\`,\`order\`,\`value\`,\`data\`) VALUES (FROM_UNIXTIME(?),?,?,?,?,?,?,?);`;
         values.push(now, type, data.account, data.depot, data.asset, data.order, data.value, data.data);
 
-        // insert or update resolution none
-        query += `INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) VALUES (?,0,?,?,?,0);`;
-        values.push(UpdateResolution.None, data.account, data.depot, data.asset);
-
         // insert resolution year if not exists
-        query += `INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) SELECT ?,FROM_UNIXTIME(?),u.account,u.depot,u.asset,u.value FROM ${this.data.updateTable} u WHERE \`timestamp\`<FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1;`;
-        values.push(UpdateResolution.Year, year, year, data.account, data.depot, data.asset);
+        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`timestamp\`<FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) VALUES (?,FROM_UNIXTIME(?),?,?,?,@value);`;
+        values.push(year, data.account, data.depot, data.asset, UpdateResolution.Year, year, data.account, data.depot, data.asset);
 
         // insert resolution month if not exists
         query += `INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) SELECT ?,FROM_UNIXTIME(?),u.account,u.depot,u.asset,u.value FROM ${this.data.updateTable} u WHERE \`timestamp\`<FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1;`;
@@ -722,10 +701,6 @@ export class Repository extends Database.Repository<Tables> {
         // insert resolution day if not exists
         query += `INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) SELECT ?,FROM_UNIXTIME(?),u.account,u.depot,u.asset,u.value FROM ${this.data.updateTable} u WHERE \`timestamp\`<FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1;`;
         values.push(UpdateResolution.Day, day, day, data.account, data.depot, data.asset);
-
-        // update resolution none
-        query += `UPDATE ${this.data.updateTable} SET \`value\`=\`value\`+?,\`timestamp\`=\`timestamp\` WHERE \`resolution\`=? AND \`account\`=? AND \`depot\`=? AND \`asset\`=?;`;
-        values.push(change, UpdateResolution.None, data.account, data.depot, data.asset);
 
         // update all existing subsequent updates with resolution day
         query += `UPDATE ${this.data.updateTable} SET \`value\`=\`value\`+?,\`timestamp\`=\`timestamp\` WHERE \`resolution\`=? AND \`timestamp\`>=FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=?;`;
@@ -744,8 +719,8 @@ export class Repository extends Database.Repository<Tables> {
         values.push(change, UpdateResolution.Year, year, data.account, data.depot, data.asset);
 
         // select latest update
-        query += `SELECT * FROM ${this.data.updateTable} WHERE \`resolution\`=? AND \`account\`=? AND \`depot\`=? AND \`asset\`=?;`;
-        values.push(UpdateResolution.None, data.account, data.depot, data.asset);
+        query += `SELECT * FROM ${this.data.updateTable} WHERE \`account\`=? AND \`depot\`=? AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1;`;
+        values.push(data.account, data.depot, data.asset);
 
         // finaly unlock tables
         query += `UNLOCK TABLES;`;
@@ -753,12 +728,12 @@ export class Repository extends Database.Repository<Tables> {
         const result = await this.database.query(query, values);
 
         return {
-            timestamp: Database.parseToTime(result[12][0].timestamp),
-            resolution: result[12][0].resolution,
-            account: result[12][0].account,
-            depot: result[12][0].depot,
-            asset: result[12][0].asset,
-            value: result[12][0].value
+            timestamp: Database.parseToTime(result[11][0].timestamp),
+            resolution: result[11][0].resolution,
+            account: result[11][0].account,
+            depot: result[11][0].depot,
+            asset: result[11][0].asset,
+            value: result[11][0].value
         };
     }
 

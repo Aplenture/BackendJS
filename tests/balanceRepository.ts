@@ -50,37 +50,37 @@ describe("Balance Repository", () => {
         it("resets", async () => expect(await repository.reset()).equals(undefined));
     });
 
-    describe("Increasing now", () => {
-        it("simple order", () => repository.increase({ date: now, account: 1, depot: 1, asset: 1, value: 1, order: 1, data: 'increase' })
-            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 1, value: 1 })));
-
-        it("second order", () => repository.increase({ date: now, account: 1, depot: 1, asset: 1, value: 2, order: 2, data: 'increase' })
-            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 1, value: 3 })));
-
-        it("second asset", () => repository.increase({ date: now, account: 1, depot: 1, asset: 2, value: 3, order: 3, data: 'increase' })
-            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 2, value: 3 })));
-
-        it("second depot", () => repository.increase({ date: now, account: 1, depot: 2, asset: 1, value: 4, order: 4, data: 'increase' })
-            .then(result => expect(result).deep.contains({ account: 1, depot: 2, asset: 1, value: 4 })));
-
-        it("second account", () => repository.increase({ date: now, account: 2, depot: 1, asset: 1, value: 5, order: 5, data: 'increase' })
-            .then(result => expect(result).deep.contains({ account: 2, depot: 1, asset: 1, value: 5 })));
-    });
-
     describe("Increasing next year", () => {
         it("simple order", () => repository.increase({ date: nextYear, account: 1, depot: 1, asset: 1, value: 21, order: 1, data: 'increase' })
-            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 1, value: 24 })));
+            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 1, value: 21 })));
 
         it("second order", () => repository.increase({ date: nextYear, account: 1, depot: 1, asset: 1, value: 22, order: 2, data: 'increase' })
-            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 1, value: 46 })));
+            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 1, value: 43 })));
 
         it("second asset", () => repository.increase({ date: nextYear, account: 1, depot: 1, asset: 2, value: 23, order: 3, data: 'increase' })
-            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 2, value: 26 })));
+            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 2, value: 23 })));
 
         it("second depot", () => repository.increase({ date: nextYear, account: 1, depot: 2, asset: 1, value: 24, order: 4, data: 'increase' })
-            .then(result => expect(result).deep.contains({ account: 1, depot: 2, asset: 1, value: 28 })));
+            .then(result => expect(result).deep.contains({ account: 1, depot: 2, asset: 1, value: 24 })));
 
         it("second account", () => repository.increase({ date: nextYear, account: 2, depot: 1, asset: 1, value: 25, order: 5, data: 'increase' })
+            .then(result => expect(result).deep.contains({ account: 2, depot: 1, asset: 1, value: 25 })));
+    });
+
+    describe("Increasing now", () => {
+        it("simple order", () => repository.increase({ date: now, account: 1, depot: 1, asset: 1, value: 1, order: 1, data: 'increase' })
+            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 1, value: 44 })));
+
+        it("second order", () => repository.increase({ date: now, account: 1, depot: 1, asset: 1, value: 2, order: 2, data: 'increase' })
+            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 1, value: 46 })));
+
+        it("second asset", () => repository.increase({ date: now, account: 1, depot: 1, asset: 2, value: 3, order: 3, data: 'increase' })
+            .then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 2, value: 26 })));
+
+        it("second depot", () => repository.increase({ date: now, account: 1, depot: 2, asset: 1, value: 4, order: 4, data: 'increase' })
+            .then(result => expect(result).deep.contains({ account: 1, depot: 2, asset: 1, value: 28 })));
+
+        it("second account", () => repository.increase({ date: now, account: 2, depot: 1, asset: 1, value: 5, order: 5, data: 'increase' })
             .then(result => expect(result).deep.contains({ account: 2, depot: 1, asset: 1, value: 30 })));
     });
 
@@ -1599,271 +1599,195 @@ describe("Balance Repository", () => {
     describe("Updates", () => {
         describe("history", () => {
             describe("get", () => {
-                describe("current", () => {
-                    it("all from account 1", () => repository.getUpdates(1).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([23, 13, 14])));
-                    it("all from account 2", () => repository.getUpdates(2).then(result => expect(result.map(data => data.value)).has.length(1).deep.equals([15])));
-                    it("all from account 3", () => repository.getUpdates(3).then(result => expect(result.map(data => data.value)).has.length(0).deep.equals([])));
-
-                    it("account 1, depot 1", () => repository.getUpdates(1, { depot: 1 }).then(result => expect(result.map(data => data.value)).has.length(2).deep.equals([23, 13])));
-                    it("account 1, depot 2", () => repository.getUpdates(1, { depot: 2 }).then(result => expect(result.map(data => data.value)).has.length(1).deep.equals([14])));
-
-                    it("account 1, asset 1", () => repository.getUpdates(1, { asset: 1 }).then(result => expect(result.map(data => data.value)).has.length(2).deep.equals([23, 14])));
-                    it("account 1, asset 2", () => repository.getUpdates(1, { asset: 2 }).then(result => expect(result.map(data => data.value)).has.length(1).deep.equals([13])));
-                });
-
                 describe("history with end", () => {
-                    it("all from account 1", () => repository.getUpdates(1, { end }).then(result => expect(result.map(data => data.value)).has.length(15).deep.equals([3, 3, 4, -10, -5, -5, 13, 8, 9, -20, -10, -10, 23, 13, 14])));
-                    it("all from account 2", () => repository.getUpdates(2, { end }).then(result => expect(result.map(data => data.value)).has.length(5).deep.equals([5, -5, 10, -10, 15])));
-                    it("all from account 3", () => repository.getUpdates(3, { end }).then(result => expect(result.map(data => data.value)).has.length(0).deep.equals([])));
+                    it("all from account 1", () => repository.getUpdates(1, UpdateResolution.Day, { end }).then(result => expect(result.map(data => data.value)).has.length(15).deep.equals([3, 3, 4, -10, -5, -5, 13, 8, 9, -20, -10, -10, 23, 13, 14])));
+                    it("all from account 2", () => repository.getUpdates(2, UpdateResolution.Day, { end }).then(result => expect(result.map(data => data.value)).has.length(5).deep.equals([5, -5, 10, -10, 15])));
+                    it("all from account 3", () => repository.getUpdates(3, UpdateResolution.Day, { end }).then(result => expect(result.map(data => data.value)).has.length(0).deep.equals([])));
 
-                    it("account 1, depot 1", () => repository.getUpdates(1, { depot: 1, end }).then(result => expect(result.map(data => data.value)).has.length(10).deep.equals([3, 3, -10, -5, 13, 8, -20, -10, 23, 13])));
-                    it("account 1, depot 2", () => repository.getUpdates(1, { depot: 2, end }).then(result => expect(result.map(data => data.value)).has.length(5).deep.equals([4, -5, 9, -10, 14])));
+                    it("account 1, depot 1", () => repository.getUpdates(1, UpdateResolution.Day, { depot: 1, end }).then(result => expect(result.map(data => data.value)).has.length(10).deep.equals([3, 3, -10, -5, 13, 8, -20, -10, 23, 13])));
+                    it("account 1, depot 2", () => repository.getUpdates(1, UpdateResolution.Day, { depot: 2, end }).then(result => expect(result.map(data => data.value)).has.length(5).deep.equals([4, -5, 9, -10, 14])));
 
-                    it("account 1, asset 1", () => repository.getUpdates(1, { asset: 1, end }).then(result => expect(result.map(data => data.value)).has.length(10).deep.equals([3, 4, -10, -5, 13, 9, -20, -10, 23, 14])));
-                    it("account 1, asset 2", () => repository.getUpdates(1, { asset: 2, end }).then(result => expect(result.map(data => data.value)).has.length(5).deep.equals([3, -5, 8, -10, 13])));
+                    it("account 1, asset 1", () => repository.getUpdates(1, UpdateResolution.Day, { asset: 1, end }).then(result => expect(result.map(data => data.value)).has.length(10).deep.equals([3, 4, -10, -5, 13, 9, -20, -10, 23, 14])));
+                    it("account 1, asset 2", () => repository.getUpdates(1, UpdateResolution.Day, { asset: 2, end }).then(result => expect(result.map(data => data.value)).has.length(5).deep.equals([3, -5, 8, -10, 13])));
 
-                    it("with start", () => repository.getUpdates(1, { start: end }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([23, 13, 14])));
-                    it("with end", () => repository.getUpdates(1, { end: start }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([3, 3, 4])));
+                    it("with start", () => repository.getUpdates(1, UpdateResolution.Day, { start: end }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([23, 13, 14])));
+                    it("with end", () => repository.getUpdates(1, UpdateResolution.Day, { end: start }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([3, 3, 4])));
 
-                    it("with limit 1", () => repository.getUpdates(1, { limit: 1, end }).then(result => expect(result.map(data => data.value)).has.length(1).deep.equals([3])));
-                    it("with limit 1000", () => repository.getUpdates(1, { limit: 1000, end }).then(result => expect(result.map(data => data.value)).has.length(15).deep.equals([3, 3, 4, -10, -5, -5, 13, 8, 9, -20, -10, -10, 23, 13, 14])));
+                    it("with limit 1", () => repository.getUpdates(1, UpdateResolution.Day, { limit: 1, end }).then(result => expect(result.map(data => data.value)).has.length(1).deep.equals([3])));
+                    it("with limit 1000", () => repository.getUpdates(1, UpdateResolution.Day, { limit: 1000, end }).then(result => expect(result.map(data => data.value)).has.length(15).deep.equals([3, 3, 4, -10, -5, -5, 13, 8, 9, -20, -10, -10, 23, 13, 14])));
                 });
 
                 describe("history for days", () => {
-                    it("all from account 1", () => repository.getUpdates(1, { resolution: UpdateResolution.Day }).then(result => expect(result.map(data => data.value)).has.length(15).deep.equals([3, 3, 4, -10, -5, -5, 13, 8, 9, -20, -10, -10, 23, 13, 14])));
-                    it("all from account 2", () => repository.getUpdates(2, { resolution: UpdateResolution.Day }).then(result => expect(result.map(data => data.value)).has.length(5).deep.equals([5, -5, 10, -10, 15])));
-                    it("all from account 3", () => repository.getUpdates(3, { resolution: UpdateResolution.Day }).then(result => expect(result.map(data => data.value)).has.length(0).deep.equals([])));
+                    it("all from account 1", () => repository.getUpdates(1, UpdateResolution.Day).then(result => expect(result.map(data => data.value)).has.length(15).deep.equals([3, 3, 4, -10, -5, -5, 13, 8, 9, -20, -10, -10, 23, 13, 14])));
+                    it("all from account 2", () => repository.getUpdates(2, UpdateResolution.Day).then(result => expect(result.map(data => data.value)).has.length(5).deep.equals([5, -5, 10, -10, 15])));
+                    it("all from account 3", () => repository.getUpdates(3, UpdateResolution.Day).then(result => expect(result.map(data => data.value)).has.length(0).deep.equals([])));
 
-                    it("account 1, depot 1", () => repository.getUpdates(1, { depot: 1, resolution: UpdateResolution.Day }).then(result => expect(result.map(data => data.value)).has.length(10).deep.equals([3, 3, -10, -5, 13, 8, -20, -10, 23, 13])));
-                    it("account 1, depot 2", () => repository.getUpdates(1, { depot: 2, resolution: UpdateResolution.Day }).then(result => expect(result.map(data => data.value)).has.length(5).deep.equals([4, -5, 9, -10, 14])));
+                    it("account 1, depot 1", () => repository.getUpdates(1, UpdateResolution.Day, { depot: 1 }).then(result => expect(result.map(data => data.value)).has.length(10).deep.equals([3, 3, -10, -5, 13, 8, -20, -10, 23, 13])));
+                    it("account 1, depot 2", () => repository.getUpdates(1, UpdateResolution.Day, { depot: 2 }).then(result => expect(result.map(data => data.value)).has.length(5).deep.equals([4, -5, 9, -10, 14])));
 
-                    it("account 1, asset 1", () => repository.getUpdates(1, { asset: 1, resolution: UpdateResolution.Day }).then(result => expect(result.map(data => data.value)).has.length(10).deep.equals([3, 4, -10, -5, 13, 9, -20, -10, 23, 14])));
-                    it("account 1, asset 2", () => repository.getUpdates(1, { asset: 2, resolution: UpdateResolution.Day }).then(result => expect(result.map(data => data.value)).has.length(5).deep.equals([3, -5, 8, -10, 13])));
+                    it("account 1, asset 1", () => repository.getUpdates(1, UpdateResolution.Day, { asset: 1 }).then(result => expect(result.map(data => data.value)).has.length(10).deep.equals([3, 4, -10, -5, 13, 9, -20, -10, 23, 14])));
+                    it("account 1, asset 2", () => repository.getUpdates(1, UpdateResolution.Day, { asset: 2 }).then(result => expect(result.map(data => data.value)).has.length(5).deep.equals([3, -5, 8, -10, 13])));
 
-                    it("with start", () => repository.getUpdates(1, { start: end }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([23, 13, 14])));
-                    it("with end", () => repository.getUpdates(1, { end: start }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([3, 3, 4])));
+                    it("with start", () => repository.getUpdates(1, UpdateResolution.Day, { start: end }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([23, 13, 14])));
+                    it("with end", () => repository.getUpdates(1, UpdateResolution.Day, { end: start }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([3, 3, 4])));
 
-                    it("with limit 1", () => repository.getUpdates(1, { limit: 1, resolution: UpdateResolution.Day }).then(result => expect(result.map(data => data.value)).has.length(1).deep.equals([3])));
-                    it("with limit 1000", () => repository.getUpdates(1, { limit: 1000, resolution: UpdateResolution.Day }).then(result => expect(result.map(data => data.value)).has.length(15).deep.equals([3, 3, 4, -10, -5, -5, 13, 8, 9, -20, -10, -10, 23, 13, 14])));
+                    it("with limit 1", () => repository.getUpdates(1, UpdateResolution.Day, { limit: 1 }).then(result => expect(result.map(data => data.value)).has.length(1).deep.equals([3])));
+                    it("with limit 1000", () => repository.getUpdates(1, UpdateResolution.Day, { limit: 1000 }).then(result => expect(result.map(data => data.value)).has.length(15).deep.equals([3, 3, 4, -10, -5, -5, 13, 8, 9, -20, -10, -10, 23, 13, 14])));
                 });
 
                 describe("history for weeks", () => {
-                    it("all from account 1", () => repository.getUpdates(1, { resolution: UpdateResolution.Week }).then(result => expect(result.map(data => data.value)).has.length(12).deep.equals([-10, -5, -5, 13, 8, 9, -20, -10, -10, 23, 13, 14])));
-                    it("all from account 2", () => repository.getUpdates(2, { resolution: UpdateResolution.Week }).then(result => expect(result.map(data => data.value)).has.length(4).deep.equals([-5, 10, -10, 15])));
-                    it("all from account 3", () => repository.getUpdates(3, { resolution: UpdateResolution.Week }).then(result => expect(result.map(data => data.value)).has.length(0).deep.equals([])));
+                    it("all from account 1", () => repository.getUpdates(1, UpdateResolution.Week).then(result => expect(result.map(data => data.value)).has.length(12).deep.equals([-10, -5, -5, 13, 8, 9, -20, -10, -10, 23, 13, 14])));
+                    it("all from account 2", () => repository.getUpdates(2, UpdateResolution.Week).then(result => expect(result.map(data => data.value)).has.length(4).deep.equals([-5, 10, -10, 15])));
+                    it("all from account 3", () => repository.getUpdates(3, UpdateResolution.Week).then(result => expect(result.map(data => data.value)).has.length(0).deep.equals([])));
 
-                    it("account 1, depot 1", () => repository.getUpdates(1, { depot: 1, resolution: UpdateResolution.Week }).then(result => expect(result.map(data => data.value)).has.length(8).deep.equals([-10, -5, 13, 8, -20, -10, 23, 13])));
-                    it("account 1, depot 2", () => repository.getUpdates(1, { depot: 2, resolution: UpdateResolution.Week }).then(result => expect(result.map(data => data.value)).has.length(4).deep.equals([-5, 9, -10, 14])));
+                    it("account 1, depot 1", () => repository.getUpdates(1, UpdateResolution.Week, { depot: 1 }).then(result => expect(result.map(data => data.value)).has.length(8).deep.equals([-10, -5, 13, 8, -20, -10, 23, 13])));
+                    it("account 1, depot 2", () => repository.getUpdates(1, UpdateResolution.Week, { depot: 2 }).then(result => expect(result.map(data => data.value)).has.length(4).deep.equals([-5, 9, -10, 14])));
 
-                    it("account 1, asset 1", () => repository.getUpdates(1, { asset: 1, resolution: UpdateResolution.Week }).then(result => expect(result.map(data => data.value)).has.length(8).deep.equals([-10, -5, 13, 9, -20, -10, 23, 14])));
-                    it("account 1, asset 2", () => repository.getUpdates(1, { asset: 2, resolution: UpdateResolution.Week }).then(result => expect(result.map(data => data.value)).has.length(4).deep.equals([-5, 8, -10, 13])));
+                    it("account 1, asset 1", () => repository.getUpdates(1, UpdateResolution.Week, { asset: 1 }).then(result => expect(result.map(data => data.value)).has.length(8).deep.equals([-10, -5, 13, 9, -20, -10, 23, 14])));
+                    it("account 1, asset 2", () => repository.getUpdates(1, UpdateResolution.Week, { asset: 2 }).then(result => expect(result.map(data => data.value)).has.length(4).deep.equals([-5, 8, -10, 13])));
 
-                    it("with start", () => repository.getUpdates(1, { resolution: UpdateResolution.Week, start: end }).then(result => expect(result.map(data => data.value)).has.length(0).deep.equals([])));
-                    it("with end", () => repository.getUpdates(1, { resolution: UpdateResolution.Week, end: start }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([-10, -5, -5])));
+                    it("with start", () => repository.getUpdates(1, UpdateResolution.Week, { start: end }).then(result => expect(result.map(data => data.value)).has.length(0).deep.equals([])));
+                    it("with end", () => repository.getUpdates(1, UpdateResolution.Week, { end: start }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([-10, -5, -5])));
 
-                    it("with limit 1", () => repository.getUpdates(1, { limit: 1, resolution: UpdateResolution.Week }).then(result => expect(result.map(data => data.value)).has.length(1).deep.equals([-10])));
-                    it("with limit 1000", () => repository.getUpdates(1, { limit: 1000, resolution: UpdateResolution.Week }).then(result => expect(result.map(data => data.value)).has.length(12).deep.equals([-10, -5, -5, 13, 8, 9, -20, -10, -10, 23, 13, 14])));
+                    it("with limit 1", () => repository.getUpdates(1, UpdateResolution.Week, { limit: 1 }).then(result => expect(result.map(data => data.value)).has.length(1).deep.equals([-10])));
+                    it("with limit 1000", () => repository.getUpdates(1, UpdateResolution.Week, { limit: 1000 }).then(result => expect(result.map(data => data.value)).has.length(12).deep.equals([-10, -5, -5, 13, 8, 9, -20, -10, -10, 23, 13, 14])));
                 });
 
                 describe("history for months", () => {
-                    it("all from account 1", () => repository.getUpdates(1, { resolution: UpdateResolution.Month }).then(result => expect(result.map(data => data.value)).has.length(9).deep.equals([13, 8, 9, -20, -10, -10, 23, 13, 14])));
-                    it("all from account 2", () => repository.getUpdates(2, { resolution: UpdateResolution.Month }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([10, -10, 15])));
-                    it("all from account 3", () => repository.getUpdates(3, { resolution: UpdateResolution.Month }).then(result => expect(result.map(data => data.value)).has.length(0).deep.equals([])));
+                    it("all from account 1", () => repository.getUpdates(1, UpdateResolution.Month).then(result => expect(result.map(data => data.value)).has.length(9).deep.equals([13, 8, 9, -20, -10, -10, 23, 13, 14])));
+                    it("all from account 2", () => repository.getUpdates(2, UpdateResolution.Month).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([10, -10, 15])));
+                    it("all from account 3", () => repository.getUpdates(3, UpdateResolution.Month).then(result => expect(result.map(data => data.value)).has.length(0).deep.equals([])));
 
-                    it("account 1, depot 1", () => repository.getUpdates(1, { depot: 1, resolution: UpdateResolution.Month }).then(result => expect(result.map(data => data.value)).has.length(6).deep.equals([13, 8, -20, -10, 23, 13])));
-                    it("account 1, depot 2", () => repository.getUpdates(1, { depot: 2, resolution: UpdateResolution.Month }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([9, -10, 14])));
+                    it("account 1, depot 1", () => repository.getUpdates(1, UpdateResolution.Month, { depot: 1 }).then(result => expect(result.map(data => data.value)).has.length(6).deep.equals([13, 8, -20, -10, 23, 13])));
+                    it("account 1, depot 2", () => repository.getUpdates(1, UpdateResolution.Month, { depot: 2 }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([9, -10, 14])));
 
-                    it("account 1, asset 1", () => repository.getUpdates(1, { asset: 1, resolution: UpdateResolution.Month }).then(result => expect(result.map(data => data.value)).has.length(6).deep.equals([13, 9, -20, -10, 23, 14])));
-                    it("account 1, asset 2", () => repository.getUpdates(1, { asset: 2, resolution: UpdateResolution.Month }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([8, -10, 13])));
+                    it("account 1, asset 1", () => repository.getUpdates(1, UpdateResolution.Month, { asset: 1 }).then(result => expect(result.map(data => data.value)).has.length(6).deep.equals([13, 9, -20, -10, 23, 14])));
+                    it("account 1, asset 2", () => repository.getUpdates(1, UpdateResolution.Month, { asset: 2 }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([8, -10, 13])));
 
-                    it("with start", () => repository.getUpdates(1, { resolution: UpdateResolution.Month, start: end }).then(result => expect(result.map(data => data.value)).has.length(0).deep.equals([])));
-                    it("with end", () => repository.getUpdates(1, { resolution: UpdateResolution.Month, end: start }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([13, 8, 9])));
+                    it("with start", () => repository.getUpdates(1, UpdateResolution.Month, { start: end }).then(result => expect(result.map(data => data.value)).has.length(0).deep.equals([])));
+                    it("with end", () => repository.getUpdates(1, UpdateResolution.Month, { end: start }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([13, 8, 9])));
 
-                    it("with limit 1", () => repository.getUpdates(1, { limit: 1, resolution: UpdateResolution.Month }).then(result => expect(result.map(data => data.value)).has.length(1).deep.equals([13])));
-                    it("with limit 1000", () => repository.getUpdates(1, { limit: 1000, resolution: UpdateResolution.Month }).then(result => expect(result.map(data => data.value)).has.length(9).deep.equals([13, 8, 9, -20, -10, -10, 23, 13, 14])));
+                    it("with limit 1", () => repository.getUpdates(1, UpdateResolution.Month, { limit: 1 }).then(result => expect(result.map(data => data.value)).has.length(1).deep.equals([13])));
+                    it("with limit 1000", () => repository.getUpdates(1, UpdateResolution.Month, { limit: 1000 }).then(result => expect(result.map(data => data.value)).has.length(9).deep.equals([13, 8, 9, -20, -10, -10, 23, 13, 14])));
                 });
 
                 describe("history for years", () => {
-                    it("all from account 1", () => repository.getUpdates(1, { resolution: UpdateResolution.Year }).then(result => expect(result.map(data => data.value)).has.length(6).deep.equals([-20, -10, -10, 23, 13, 14])));
-                    it("all from account 2", () => repository.getUpdates(2, { resolution: UpdateResolution.Year }).then(result => expect(result.map(data => data.value)).has.length(2).deep.equals([-10, 15])));
-                    it("all from account 3", () => repository.getUpdates(3, { resolution: UpdateResolution.Year }).then(result => expect(result.map(data => data.value)).has.length(0).deep.equals([])));
+                    it("all from account 1", () => repository.getUpdates(1, UpdateResolution.Year).then(result => expect(result.map(data => data.value)).has.length(6).deep.equals([-20, -10, -10, 23, 13, 14])));
+                    it("all from account 2", () => repository.getUpdates(2, UpdateResolution.Year).then(result => expect(result.map(data => data.value)).has.length(2).deep.equals([-10, 15])));
+                    it("all from account 3", () => repository.getUpdates(3, UpdateResolution.Year).then(result => expect(result.map(data => data.value)).has.length(0).deep.equals([])));
 
-                    it("account 1, depot 1", () => repository.getUpdates(1, { depot: 1, resolution: UpdateResolution.Year }).then(result => expect(result.map(data => data.value)).has.length(4).deep.equals([-20, -10, 23, 13])));
-                    it("account 1, depot 2", () => repository.getUpdates(1, { depot: 2, resolution: UpdateResolution.Year }).then(result => expect(result.map(data => data.value)).has.length(2).deep.equals([-10, 14])));
+                    it("account 1, depot 1", () => repository.getUpdates(1, UpdateResolution.Year, { depot: 1 }).then(result => expect(result.map(data => data.value)).has.length(4).deep.equals([-20, -10, 23, 13])));
+                    it("account 1, depot 2", () => repository.getUpdates(1, UpdateResolution.Year, { depot: 2 }).then(result => expect(result.map(data => data.value)).has.length(2).deep.equals([-10, 14])));
 
-                    it("account 1, asset 1", () => repository.getUpdates(1, { asset: 1, resolution: UpdateResolution.Year }).then(result => expect(result.map(data => data.value)).has.length(4).deep.equals([-20, -10, 23, 14])));
-                    it("account 1, asset 2", () => repository.getUpdates(1, { asset: 2, resolution: UpdateResolution.Year }).then(result => expect(result.map(data => data.value)).has.length(2).deep.equals([-10, 13])));
+                    it("account 1, asset 1", () => repository.getUpdates(1, UpdateResolution.Year, { asset: 1 }).then(result => expect(result.map(data => data.value)).has.length(4).deep.equals([-20, -10, 23, 14])));
+                    it("account 1, asset 2", () => repository.getUpdates(1, UpdateResolution.Year, { asset: 2 }).then(result => expect(result.map(data => data.value)).has.length(2).deep.equals([-10, 13])));
 
-                    it("with start", () => repository.getUpdates(1, { resolution: UpdateResolution.Year, start: end }).then(result => expect(result.map(data => data.value)).has.length(0).deep.equals([])));
-                    it("with end", () => repository.getUpdates(1, { resolution: UpdateResolution.Year, end: start }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([-20, -10, -10])));
+                    it("with start", () => repository.getUpdates(1, UpdateResolution.Year, { start: end }).then(result => expect(result.map(data => data.value)).has.length(0).deep.equals([])));
+                    it("with end", () => repository.getUpdates(1, UpdateResolution.Year, { end: start }).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([-20, -10, -10])));
 
-                    it("with limit 1", () => repository.getUpdates(1, { limit: 1, resolution: UpdateResolution.Year }).then(result => expect(result.map(data => data.value)).has.length(1).deep.equals([-20])));
-                    it("with limit 1000", () => repository.getUpdates(1, { limit: 1000, resolution: UpdateResolution.Year }).then(result => expect(result.map(data => data.value)).has.length(6).deep.equals([-20, -10, -10, 23, 13, 14])));
+                    it("with limit 1", () => repository.getUpdates(1, UpdateResolution.Year, { limit: 1 }).then(result => expect(result.map(data => data.value)).has.length(1).deep.equals([-20])));
+                    it("with limit 1000", () => repository.getUpdates(1, UpdateResolution.Year, { limit: 1000 }).then(result => expect(result.map(data => data.value)).has.length(6).deep.equals([-20, -10, -10, 23, 13, 14])));
                 });
             });
 
             describe("fetch", () => {
-                describe("current", () => {
-                    it("all from account 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data)).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([23, 13, 14])) });
-                    it("all from account 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(2, async data => array.push(data)).then(() => expect(array.map(data => data.value)).has.length(1).deep.equals([15])) });
-                    it("all from account 3", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(3, async data => array.push(data)).then(() => expect(array.map(data => data.value)).has.length(0).deep.equals([])) });
-
-                    it("account 1, depot 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { depot: 1 }).then(() => expect(array.map(data => data.value)).has.length(2).deep.equals([23, 13])) });
-                    it("account 1, depot 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { depot: 2 }).then(() => expect(array.map(data => data.value)).has.length(1).deep.equals([14])) });
-
-                    it("account 1, asset 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { asset: 1 }).then(() => expect(array.map(data => data.value)).has.length(2).deep.equals([23, 14])) });
-                    it("account 1, asset 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { asset: 2 }).then(() => expect(array.map(data => data.value)).has.length(1).deep.equals([13])) });
-                });
-
                 describe("history with end", () => {
-                    it("all from account 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { end }).then(() => expect(array.map(data => data.value)).has.length(15).deep.equals([3, 3, 4, -10, -5, -5, 13, 8, 9, -20, -10, -10, 23, 13, 14])) });
-                    it("all from account 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(2, async data => array.push(data), { end }).then(() => expect(array.map(data => data.value)).has.length(5).deep.equals([5, -5, 10, -10, 15])) });
-                    it("all from account 3", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(3, async data => array.push(data), { end }).then(() => expect(array.map(data => data.value)).has.length(0).deep.equals([])) });
+                    it("all from account 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Day, async data => array.push(data), { end }).then(() => expect(array.map(data => data.value)).has.length(15).deep.equals([3, 3, 4, -10, -5, -5, 13, 8, 9, -20, -10, -10, 23, 13, 14])) });
+                    it("all from account 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(2, UpdateResolution.Day, async data => array.push(data), { end }).then(() => expect(array.map(data => data.value)).has.length(5).deep.equals([5, -5, 10, -10, 15])) });
+                    it("all from account 3", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(3, UpdateResolution.Day, async data => array.push(data), { end }).then(() => expect(array.map(data => data.value)).has.length(0).deep.equals([])) });
 
-                    it("account 1, depot 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { depot: 1, end }).then(() => expect(array.map(data => data.value)).has.length(10).deep.equals([3, 3, -10, -5, 13, 8, -20, -10, 23, 13])) });
-                    it("account 1, depot 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { depot: 2, end }).then(() => expect(array.map(data => data.value)).has.length(5).deep.equals([4, -5, 9, -10, 14])) });
+                    it("account 1, depot 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Day, async data => array.push(data), { depot: 1, end }).then(() => expect(array.map(data => data.value)).has.length(10).deep.equals([3, 3, -10, -5, 13, 8, -20, -10, 23, 13])) });
+                    it("account 1, depot 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Day, async data => array.push(data), { depot: 2, end }).then(() => expect(array.map(data => data.value)).has.length(5).deep.equals([4, -5, 9, -10, 14])) });
 
-                    it("account 1, asset 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { asset: 1, end }).then(() => expect(array.map(data => data.value)).has.length(10).deep.equals([3, 4, -10, -5, 13, 9, -20, -10, 23, 14])) });
-                    it("account 1, asset 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { asset: 2, end }).then(() => expect(array.map(data => data.value)).has.length(5).deep.equals([3, -5, 8, -10, 13])) });
+                    it("account 1, asset 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Day, async data => array.push(data), { asset: 1, end }).then(() => expect(array.map(data => data.value)).has.length(10).deep.equals([3, 4, -10, -5, 13, 9, -20, -10, 23, 14])) });
+                    it("account 1, asset 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Day, async data => array.push(data), { asset: 2, end }).then(() => expect(array.map(data => data.value)).has.length(5).deep.equals([3, -5, 8, -10, 13])) });
 
-                    it("with start", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { start: end }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([23, 13, 14])) });
-                    it("with end", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { end: start }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([3, 3, 4])) });
+                    it("with start", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Day, async data => array.push(data), { start: end }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([23, 13, 14])) });
+                    it("with end", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Day, async data => array.push(data), { end: start }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([3, 3, 4])) });
 
-                    it("with limit 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { limit: 1, end }).then(() => expect(array.map(data => data.value)).has.length(1).deep.equals([3])) });
-                    it("with limit 1000", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { limit: 1000, end }).then(() => expect(array.map(data => data.value)).has.length(15).deep.equals([3, 3, 4, -10, -5, -5, 13, 8, 9, -20, -10, -10, 23, 13, 14])) });
+                    it("with limit 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Day, async data => array.push(data), { limit: 1, end }).then(() => expect(array.map(data => data.value)).has.length(1).deep.equals([3])) });
+                    it("with limit 1000", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Day, async data => array.push(data), { limit: 1000, end }).then(() => expect(array.map(data => data.value)).has.length(15).deep.equals([3, 3, 4, -10, -5, -5, 13, 8, 9, -20, -10, -10, 23, 13, 14])) });
                 });
 
                 describe("history for days", () => {
-                    it("all from account 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { resolution: UpdateResolution.Day }).then(() => expect(array.map(data => data.value)).has.length(15).deep.equals([3, 3, 4, -10, -5, -5, 13, 8, 9, -20, -10, -10, 23, 13, 14])) });
-                    it("all from account 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(2, async data => array.push(data), { resolution: UpdateResolution.Day }).then(() => expect(array.map(data => data.value)).has.length(5).deep.equals([5, -5, 10, -10, 15])) });
-                    it("all from account 3", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(3, async data => array.push(data), { resolution: UpdateResolution.Day }).then(() => expect(array.map(data => data.value)).has.length(0).deep.equals([])) });
+                    it("all from account 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Day, async data => array.push(data)).then(() => expect(array.map(data => data.value)).has.length(15).deep.equals([3, 3, 4, -10, -5, -5, 13, 8, 9, -20, -10, -10, 23, 13, 14])) });
+                    it("all from account 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(2, UpdateResolution.Day, async data => array.push(data)).then(() => expect(array.map(data => data.value)).has.length(5).deep.equals([5, -5, 10, -10, 15])) });
+                    it("all from account 3", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(3, UpdateResolution.Day, async data => array.push(data)).then(() => expect(array.map(data => data.value)).has.length(0).deep.equals([])) });
 
-                    it("account 1, depot 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { depot: 1, resolution: UpdateResolution.Day }).then(() => expect(array.map(data => data.value)).has.length(10).deep.equals([3, 3, -10, -5, 13, 8, -20, -10, 23, 13])) });
-                    it("account 1, depot 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { depot: 2, resolution: UpdateResolution.Day }).then(() => expect(array.map(data => data.value)).has.length(5).deep.equals([4, -5, 9, -10, 14])) });
+                    it("account 1, depot 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Day, async data => array.push(data), { depot: 1 }).then(() => expect(array.map(data => data.value)).has.length(10).deep.equals([3, 3, -10, -5, 13, 8, -20, -10, 23, 13])) });
+                    it("account 1, depot 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Day, async data => array.push(data), { depot: 2 }).then(() => expect(array.map(data => data.value)).has.length(5).deep.equals([4, -5, 9, -10, 14])) });
 
-                    it("account 1, asset 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { asset: 1, resolution: UpdateResolution.Day }).then(() => expect(array.map(data => data.value)).has.length(10).deep.equals([3, 4, -10, -5, 13, 9, -20, -10, 23, 14])) });
-                    it("account 1, asset 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { asset: 2, resolution: UpdateResolution.Day }).then(() => expect(array.map(data => data.value)).has.length(5).deep.equals([3, -5, 8, -10, 13])) });
+                    it("account 1, asset 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Day, async data => array.push(data), { asset: 1 }).then(() => expect(array.map(data => data.value)).has.length(10).deep.equals([3, 4, -10, -5, 13, 9, -20, -10, 23, 14])) });
+                    it("account 1, asset 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Day, async data => array.push(data), { asset: 2 }).then(() => expect(array.map(data => data.value)).has.length(5).deep.equals([3, -5, 8, -10, 13])) });
 
-                    it("with start", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { resolution: UpdateResolution.Day, start: end }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([23, 13, 14])) });
-                    it("with end", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { resolution: UpdateResolution.Day, end: start }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([3, 3, 4])) });
+                    it("with start", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Day, async data => array.push(data), { start: end }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([23, 13, 14])) });
+                    it("with end", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Day, async data => array.push(data), { end: start }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([3, 3, 4])) });
 
-                    it("with limit 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { limit: 1, resolution: UpdateResolution.Day }).then(() => expect(array.map(data => data.value)).has.length(1).deep.equals([3])) });
-                    it("with limit 1000", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { limit: 1000, resolution: UpdateResolution.Day }).then(() => expect(array.map(data => data.value)).has.length(15).deep.equals([3, 3, 4, -10, -5, -5, 13, 8, 9, -20, -10, -10, 23, 13, 14])) });
+                    it("with limit 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Day, async data => array.push(data), { limit: 1 }).then(() => expect(array.map(data => data.value)).has.length(1).deep.equals([3])) });
+                    it("with limit 1000", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Day, async data => array.push(data), { limit: 1000 }).then(() => expect(array.map(data => data.value)).has.length(15).deep.equals([3, 3, 4, -10, -5, -5, 13, 8, 9, -20, -10, -10, 23, 13, 14])) });
                 });
 
                 describe("history for weeks", () => {
-                    it("all from account 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { resolution: UpdateResolution.Week }).then(() => expect(array.map(data => data.value)).has.length(12).deep.equals([-10, -5, -5, 13, 8, 9, -20, -10, -10, 23, 13, 14])) });
-                    it("all from account 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(2, async data => array.push(data), { resolution: UpdateResolution.Week }).then(() => expect(array.map(data => data.value)).has.length(4).deep.equals([-5, 10, -10, 15])) });
-                    it("all from account 3", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(3, async data => array.push(data), { resolution: UpdateResolution.Week }).then(() => expect(array.map(data => data.value)).has.length(0).deep.equals([])) });
+                    it("all from account 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Week, async data => array.push(data)).then(() => expect(array.map(data => data.value)).has.length(12).deep.equals([-10, -5, -5, 13, 8, 9, -20, -10, -10, 23, 13, 14])) });
+                    it("all from account 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(2, UpdateResolution.Week, async data => array.push(data)).then(() => expect(array.map(data => data.value)).has.length(4).deep.equals([-5, 10, -10, 15])) });
+                    it("all from account 3", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(3, UpdateResolution.Week, async data => array.push(data)).then(() => expect(array.map(data => data.value)).has.length(0).deep.equals([])) });
 
-                    it("account 1, depot 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { depot: 1, resolution: UpdateResolution.Week }).then(() => expect(array.map(data => data.value)).has.length(8).deep.equals([-10, -5, 13, 8, -20, -10, 23, 13])) });
-                    it("account 1, depot 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { depot: 2, resolution: UpdateResolution.Week }).then(() => expect(array.map(data => data.value)).has.length(4).deep.equals([-5, 9, -10, 14])) });
+                    it("account 1, depot 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Week, async data => array.push(data), { depot: 1 }).then(() => expect(array.map(data => data.value)).has.length(8).deep.equals([-10, -5, 13, 8, -20, -10, 23, 13])) });
+                    it("account 1, depot 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Week, async data => array.push(data), { depot: 2 }).then(() => expect(array.map(data => data.value)).has.length(4).deep.equals([-5, 9, -10, 14])) });
 
-                    it("account 1, asset 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { asset: 1, resolution: UpdateResolution.Week }).then(() => expect(array.map(data => data.value)).has.length(8).deep.equals([-10, -5, 13, 9, -20, -10, 23, 14])) });
-                    it("account 1, asset 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { asset: 2, resolution: UpdateResolution.Week }).then(() => expect(array.map(data => data.value)).has.length(4).deep.equals([-5, 8, -10, 13])) });
+                    it("account 1, asset 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Week, async data => array.push(data), { asset: 1 }).then(() => expect(array.map(data => data.value)).has.length(8).deep.equals([-10, -5, 13, 9, -20, -10, 23, 14])) });
+                    it("account 1, asset 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Week, async data => array.push(data), { asset: 2 }).then(() => expect(array.map(data => data.value)).has.length(4).deep.equals([-5, 8, -10, 13])) });
 
-                    it("with start", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { resolution: UpdateResolution.Week, start: end }).then(() => expect(array.map(data => data.value)).has.length(0).deep.equals([])) });
-                    it("with end", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { resolution: UpdateResolution.Week, end: start }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([-10, -5, -5])) });
+                    it("with start", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Week, async data => array.push(data), { start: end }).then(() => expect(array.map(data => data.value)).has.length(0).deep.equals([])) });
+                    it("with end", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Week, async data => array.push(data), { end: start }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([-10, -5, -5])) });
 
-                    it("with limit 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { limit: 1, resolution: UpdateResolution.Week }).then(() => expect(array.map(data => data.value)).has.length(1).deep.equals([-10])) });
-                    it("with limit 1000", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { limit: 1000, resolution: UpdateResolution.Week }).then(() => expect(array.map(data => data.value)).has.length(12).deep.equals([-10, -5, -5, 13, 8, 9, -20, -10, -10, 23, 13, 14])) });
+                    it("with limit 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Week, async data => array.push(data), { limit: 1 }).then(() => expect(array.map(data => data.value)).has.length(1).deep.equals([-10])) });
+                    it("with limit 1000", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Week, async data => array.push(data), { limit: 1000 }).then(() => expect(array.map(data => data.value)).has.length(12).deep.equals([-10, -5, -5, 13, 8, 9, -20, -10, -10, 23, 13, 14])) });
                 });
 
                 describe("history for months", () => {
-                    it("all from account 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { resolution: UpdateResolution.Month }).then(() => expect(array.map(data => data.value)).has.length(9).deep.equals([13, 8, 9, -20, -10, -10, 23, 13, 14])) });
-                    it("all from account 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(2, async data => array.push(data), { resolution: UpdateResolution.Month }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([10, -10, 15])) });
-                    it("all from account 3", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(3, async data => array.push(data), { resolution: UpdateResolution.Month }).then(() => expect(array.map(data => data.value)).has.length(0).deep.equals([])) });
+                    it("all from account 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Month, async data => array.push(data)).then(() => expect(array.map(data => data.value)).has.length(9).deep.equals([13, 8, 9, -20, -10, -10, 23, 13, 14])) });
+                    it("all from account 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(2, UpdateResolution.Month, async data => array.push(data)).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([10, -10, 15])) });
+                    it("all from account 3", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(3, UpdateResolution.Month, async data => array.push(data)).then(() => expect(array.map(data => data.value)).has.length(0).deep.equals([])) });
 
-                    it("account 1, depot 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { depot: 1, resolution: UpdateResolution.Month }).then(() => expect(array.map(data => data.value)).has.length(6).deep.equals([13, 8, -20, -10, 23, 13])) });
-                    it("account 1, depot 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { depot: 2, resolution: UpdateResolution.Month }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([9, -10, 14])) });
+                    it("account 1, depot 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Month, async data => array.push(data), { depot: 1 }).then(() => expect(array.map(data => data.value)).has.length(6).deep.equals([13, 8, -20, -10, 23, 13])) });
+                    it("account 1, depot 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Month, async data => array.push(data), { depot: 2 }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([9, -10, 14])) });
 
-                    it("account 1, asset 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { asset: 1, resolution: UpdateResolution.Month }).then(() => expect(array.map(data => data.value)).has.length(6).deep.equals([13, 9, -20, -10, 23, 14])) });
-                    it("account 1, asset 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { asset: 2, resolution: UpdateResolution.Month }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([8, -10, 13])) });
+                    it("account 1, asset 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Month, async data => array.push(data), { asset: 1 }).then(() => expect(array.map(data => data.value)).has.length(6).deep.equals([13, 9, -20, -10, 23, 14])) });
+                    it("account 1, asset 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Month, async data => array.push(data), { asset: 2 }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([8, -10, 13])) });
 
-                    it("with start", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { resolution: UpdateResolution.Month, start: end }).then(() => expect(array.map(data => data.value)).has.length(0).deep.equals([])) });
-                    it("with end", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { resolution: UpdateResolution.Month, end: start }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([13, 8, 9])) });
+                    it("with start", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Month, async data => array.push(data), { start: end }).then(() => expect(array.map(data => data.value)).has.length(0).deep.equals([])) });
+                    it("with end", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Month, async data => array.push(data), { end: start }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([13, 8, 9])) });
 
-                    it("with limit 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { limit: 1, resolution: UpdateResolution.Month }).then(() => expect(array.map(data => data.value)).has.length(1).deep.equals([13])) });
-                    it("with limit 1000", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { limit: 1000, resolution: UpdateResolution.Month }).then(() => expect(array.map(data => data.value)).has.length(9).deep.equals([13, 8, 9, -20, -10, -10, 23, 13, 14])) });
+                    it("with limit 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Month, async data => array.push(data), { limit: 1 }).then(() => expect(array.map(data => data.value)).has.length(1).deep.equals([13])) });
+                    it("with limit 1000", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Month, async data => array.push(data), { limit: 1000 }).then(() => expect(array.map(data => data.value)).has.length(9).deep.equals([13, 8, 9, -20, -10, -10, 23, 13, 14])) });
                 });
 
                 describe("history for years", () => {
-                    it("all from account 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { resolution: UpdateResolution.Year }).then(() => expect(array.map(data => data.value)).has.length(6).deep.equals([-20, -10, -10, 23, 13, 14])) });
-                    it("all from account 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(2, async data => array.push(data), { resolution: UpdateResolution.Year }).then(() => expect(array.map(data => data.value)).has.length(2).deep.equals([-10, 15])) });
-                    it("all from account 3", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(3, async data => array.push(data), { resolution: UpdateResolution.Year }).then(() => expect(array.map(data => data.value)).has.length(0).deep.equals([])) });
+                    it("all from account 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Year, async data => array.push(data)).then(() => expect(array.map(data => data.value)).has.length(6).deep.equals([-20, -10, -10, 23, 13, 14])) });
+                    it("all from account 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(2, UpdateResolution.Year, async data => array.push(data)).then(() => expect(array.map(data => data.value)).has.length(2).deep.equals([-10, 15])) });
+                    it("all from account 3", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(3, UpdateResolution.Year, async data => array.push(data)).then(() => expect(array.map(data => data.value)).has.length(0).deep.equals([])) });
 
-                    it("account 1, depot 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { depot: 1, resolution: UpdateResolution.Year }).then(() => expect(array.map(data => data.value)).has.length(4).deep.equals([-20, -10, 23, 13])) });
-                    it("account 1, depot 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { depot: 2, resolution: UpdateResolution.Year }).then(() => expect(array.map(data => data.value)).has.length(2).deep.equals([-10, 14])) });
+                    it("account 1, depot 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Year, async data => array.push(data), { depot: 1 }).then(() => expect(array.map(data => data.value)).has.length(4).deep.equals([-20, -10, 23, 13])) });
+                    it("account 1, depot 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Year, async data => array.push(data), { depot: 2 }).then(() => expect(array.map(data => data.value)).has.length(2).deep.equals([-10, 14])) });
 
-                    it("account 1, asset 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { asset: 1, resolution: UpdateResolution.Year }).then(() => expect(array.map(data => data.value)).has.length(4).deep.equals([-20, -10, 23, 14])) });
-                    it("account 1, asset 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { asset: 2, resolution: UpdateResolution.Year }).then(() => expect(array.map(data => data.value)).has.length(2).deep.equals([-10, 13])) });
+                    it("account 1, asset 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Year, async data => array.push(data), { asset: 1 }).then(() => expect(array.map(data => data.value)).has.length(4).deep.equals([-20, -10, 23, 14])) });
+                    it("account 1, asset 2", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Year, async data => array.push(data), { asset: 2 }).then(() => expect(array.map(data => data.value)).has.length(2).deep.equals([-10, 13])) });
 
-                    it("with start", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { resolution: UpdateResolution.Year, start: end }).then(() => expect(array.map(data => data.value)).has.length(0).deep.equals([])) });
-                    it("with end", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { resolution: UpdateResolution.Year, end: start }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([-20, -10, -10])) });
+                    it("with start", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Year, async data => array.push(data), { start: end }).then(() => expect(array.map(data => data.value)).has.length(0).deep.equals([])) });
+                    it("with end", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Year, async data => array.push(data), { end: start }).then(() => expect(array.map(data => data.value)).has.length(3).deep.equals([-20, -10, -10])) });
 
-                    it("with limit 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { limit: 1, resolution: UpdateResolution.Year }).then(() => expect(array.map(data => data.value)).has.length(1).deep.equals([-20])) });
-                    it("with limit 1000", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, async data => array.push(data), { limit: 1000, resolution: UpdateResolution.Year }).then(() => expect(array.map(data => data.value)).has.length(6).deep.equals([-20, -10, -10, 23, 13, 14])) });
+                    it("with limit 1", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Year, async data => array.push(data), { limit: 1 }).then(() => expect(array.map(data => data.value)).has.length(1).deep.equals([-20])) });
+                    it("with limit 1000", async () => { const array = new Array<Balance.Update>; await repository.fetchUpdates(1, UpdateResolution.Year, async data => array.push(data), { limit: 1000 }).then(() => expect(array.map(data => data.value)).has.length(6).deep.equals([-20, -10, -10, 23, 13, 14])) });
                 });
             });
         });
 
         describe("sum", () => {
             describe("get", () => {
-                describe("current", () => {
-                    it("all from account 1", async () => {
-                        const result = await repository.getUpdateSum(1);
-
-                        expect(result).has.length(2);
-                        expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 37 });
-                        expect(result[1]).deep.contains({ account: 1, depot: null, asset: 2, value: 13 });
-                    });
-
-                    it("all from account 2", async () => {
-                        const result = await repository.getUpdateSum(2);
-
-                        expect(result).has.length(1);
-                        expect(result[0]).deep.contains({ account: 2, depot: null, asset: 1, value: 15 });
-                    });
-
-                    it("all from account 3", async () => {
-                        const result = await repository.getUpdateSum(3);
-
-                        expect(result).has.length(0);
-                    });
-
-                    it("account 1, depot 1", async () => {
-                        const result = await repository.getUpdateSum(1, { depot: 1 });
-
-                        expect(result).has.length(2);
-                        expect(result[0]).deep.contains({ account: 1, depot: 1, asset: 1, value: 23 });
-                        expect(result[1]).deep.contains({ account: 1, depot: 1, asset: 2, value: 13 });
-                    });
-
-                    it("account 1, depot 2", async () => {
-                        const result = await repository.getUpdateSum(1, { depot: 2 });
-
-                        expect(result).has.length(1);
-                        expect(result[0]).deep.contains({ account: 1, depot: 2, asset: 1, value: 14 });
-                    });
-
-                    it("account 1, asset 1", async () => {
-                        const result = await repository.getUpdateSum(1, { asset: 1 });
-
-                        expect(result).has.length(1);
-                        expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 37 });
-                    });
-
-                    it("account 1, asset 2", async () => {
-                        const result = await repository.getUpdateSum(1, { asset: 2 });
-
-                        expect(result).has.length(1);
-                        expect(result[0]).deep.contains({ account: 1, depot: null, asset: 2, value: 13 });
-                    });
-                });
-
                 describe("history with end", () => {
                     it("all from account 1", async () => {
-                        const result = await repository.getUpdateSum(1, { end });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Day, { end });
 
                         expect(result).has.length(10);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 7 });
@@ -1879,7 +1803,7 @@ describe("Balance Repository", () => {
                     });
 
                     it("all from account 2", async () => {
-                        const result = await repository.getUpdateSum(2, { end });
+                        const result = await repository.getUpdateSum(2, UpdateResolution.Day, { end });
 
                         expect(result).has.length(5);
                         expect(result[0]).deep.contains({ account: 2, depot: null, asset: 1, value: 5 });
@@ -1890,13 +1814,13 @@ describe("Balance Repository", () => {
                     });
 
                     it("all from account 3", async () => {
-                        const result = await repository.getUpdateSum(3, { end });
+                        const result = await repository.getUpdateSum(3, UpdateResolution.Day, { end });
 
                         expect(result).has.length(0);
                     });
 
                     it("account 1, depot 1", async () => {
-                        const result = await repository.getUpdateSum(1, { depot: 1, end });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Day, { depot: 1, end });
 
                         expect(result).has.length(10);
                         expect(result[0]).deep.contains({ account: 1, depot: 1, asset: 1, value: 3 });
@@ -1912,7 +1836,7 @@ describe("Balance Repository", () => {
                     });
 
                     it("account 1, depot 2", async () => {
-                        const result = await repository.getUpdateSum(1, { depot: 2, end });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Day, { depot: 2, end });
 
                         expect(result).has.length(5);
                         expect(result[0]).deep.contains({ account: 1, depot: 2, asset: 1, value: 4 });
@@ -1923,7 +1847,7 @@ describe("Balance Repository", () => {
                     });
 
                     it("account 1, asset 1", async () => {
-                        const result = await repository.getUpdateSum(1, { asset: 1, end });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Day, { asset: 1, end });
 
                         expect(result).has.length(5);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 7 });
@@ -1934,7 +1858,7 @@ describe("Balance Repository", () => {
                     });
 
                     it("account 1, asset 2", async () => {
-                        const result = await repository.getUpdateSum(1, { asset: 2, end });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Day, { asset: 2, end });
 
                         expect(result).has.length(5);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 2, value: 3 });
@@ -1945,7 +1869,7 @@ describe("Balance Repository", () => {
                     });
 
                     it("with start", async () => {
-                        const result = await repository.getUpdateSum(1, { start: end });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Day, { start: end });
 
                         expect(result).has.length(2);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 37 });
@@ -1953,7 +1877,7 @@ describe("Balance Repository", () => {
                     });
 
                     it("with end", async () => {
-                        const result = await repository.getUpdateSum(1, { end: start });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Day, { end: start });
 
                         expect(result).has.length(2);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 7 });
@@ -1961,14 +1885,14 @@ describe("Balance Repository", () => {
                     });
 
                     it("with limit 1", async () => {
-                        const result = await repository.getUpdateSum(1, { limit: 1, end });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Day, { limit: 1, end });
 
                         expect(result).has.length(1);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 7 });
                     });
 
                     it("with limit 1000", async () => {
-                        const result = await repository.getUpdateSum(1, { limit: 1000, end });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Day, { limit: 1000, end });
 
                         expect(result).has.length(10);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 7 });
@@ -1986,7 +1910,7 @@ describe("Balance Repository", () => {
 
                 describe("history for days", () => {
                     it("all from account 1", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Day });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Day);
 
                         expect(result).has.length(10);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 7 });
@@ -2002,7 +1926,7 @@ describe("Balance Repository", () => {
                     });
 
                     it("all from account 2", async () => {
-                        const result = await repository.getUpdateSum(2, { resolution: UpdateResolution.Day });
+                        const result = await repository.getUpdateSum(2, UpdateResolution.Day);
 
                         expect(result).has.length(5);
                         expect(result[0]).deep.contains({ account: 2, depot: null, asset: 1, value: 5 });
@@ -2013,13 +1937,13 @@ describe("Balance Repository", () => {
                     });
 
                     it("all from account 3", async () => {
-                        const result = await repository.getUpdateSum(3, { resolution: UpdateResolution.Day });
+                        const result = await repository.getUpdateSum(3, UpdateResolution.Day);
 
                         expect(result).has.length(0);
                     });
 
                     it("account 1, depot 1", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Day, depot: 1 });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Day, { depot: 1 });
 
                         expect(result).has.length(10);
                         expect(result[0]).deep.contains({ account: 1, depot: 1, asset: 1, value: 3 });
@@ -2035,7 +1959,7 @@ describe("Balance Repository", () => {
                     });
 
                     it("account 1, depot 2", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Day, depot: 2 });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Day, { depot: 2 });
 
                         expect(result).has.length(5);
                         expect(result[0]).deep.contains({ account: 1, depot: 2, asset: 1, value: 4 });
@@ -2046,7 +1970,7 @@ describe("Balance Repository", () => {
                     });
 
                     it("account 1, asset 1", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Day, asset: 1 });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Day, { asset: 1 });
 
                         expect(result).has.length(5);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 7 });
@@ -2057,7 +1981,7 @@ describe("Balance Repository", () => {
                     });
 
                     it("account 1, asset 2", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Day, asset: 2 });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Day, { asset: 2 });
 
                         expect(result).has.length(5);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 2, value: 3 });
@@ -2068,7 +1992,7 @@ describe("Balance Repository", () => {
                     });
 
                     it("with start", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Day, start: end });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Day, { start: end });
 
                         expect(result).has.length(2);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 37 });
@@ -2076,7 +2000,7 @@ describe("Balance Repository", () => {
                     });
 
                     it("with end", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Day, end: start });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Day, { end: start });
 
                         expect(result).has.length(2);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 7 });
@@ -2084,14 +2008,14 @@ describe("Balance Repository", () => {
                     });
 
                     it("with limit 1", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Day, limit: 1 });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Day, { limit: 1 });
 
                         expect(result).has.length(1);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 7 });
                     });
 
                     it("with limit 1000", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Day, limit: 1000 });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Day, { limit: 1000 });
 
                         expect(result).has.length(10);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 7 });
@@ -2109,7 +2033,7 @@ describe("Balance Repository", () => {
 
                 describe("history for weeks", () => {
                     it("all from account 1", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Week });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Week);
 
                         expect(result).has.length(8);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: -15 });
@@ -2123,7 +2047,7 @@ describe("Balance Repository", () => {
                     });
 
                     it("all from account 2", async () => {
-                        const result = await repository.getUpdateSum(2, { resolution: UpdateResolution.Week });
+                        const result = await repository.getUpdateSum(2, UpdateResolution.Week);
 
                         expect(result).has.length(4);
                         expect(result[0]).deep.contains({ account: 2, depot: null, asset: 1, value: -5 });
@@ -2133,13 +2057,13 @@ describe("Balance Repository", () => {
                     });
 
                     it("all from account 3", async () => {
-                        const result = await repository.getUpdateSum(3, { resolution: UpdateResolution.Week });
+                        const result = await repository.getUpdateSum(3, UpdateResolution.Week);
 
                         expect(result).has.length(0);
                     });
 
                     it("account 1, depot 1", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Week, depot: 1 });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Week, { depot: 1 });
 
                         expect(result).has.length(8);
                         expect(result[0]).deep.contains({ account: 1, depot: 1, asset: 1, value: -10 });
@@ -2153,7 +2077,7 @@ describe("Balance Repository", () => {
                     });
 
                     it("account 1, depot 2", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Week, depot: 2 });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Week, { depot: 2 });
 
                         expect(result).has.length(4);
                         expect(result[0]).deep.contains({ account: 1, depot: 2, asset: 1, value: -5 });
@@ -2163,7 +2087,7 @@ describe("Balance Repository", () => {
                     });
 
                     it("account 1, asset 1", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Week, asset: 1 });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Week, { asset: 1 });
 
                         expect(result).has.length(4);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: -15 });
@@ -2173,7 +2097,7 @@ describe("Balance Repository", () => {
                     });
 
                     it("account 1, asset 2", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Week, asset: 2 });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Week, { asset: 2 });
 
                         expect(result).has.length(4);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 2, value: -5 });
@@ -2183,13 +2107,13 @@ describe("Balance Repository", () => {
                     });
 
                     it("with start", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Week, start: end });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Week, { start: end });
 
                         expect(result).has.length(0);
                     });
 
                     it("with end", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Week, end: start });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Week, { end: start });
 
                         expect(result).has.length(2);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: -15 });
@@ -2197,14 +2121,14 @@ describe("Balance Repository", () => {
                     });
 
                     it("with limit 1", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Week, limit: 1 });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Week, { limit: 1 });
 
                         expect(result).has.length(1);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: -15 });
                     });
 
                     it("with limit 1000", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Week, limit: 1000 });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Week, { limit: 1000 });
 
                         expect(result).has.length(8);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: -15 });
@@ -2220,7 +2144,7 @@ describe("Balance Repository", () => {
 
                 describe("history for months", () => {
                     it("all from account 1", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Month });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Month);
 
                         expect(result).has.length(6);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 22 });
@@ -2232,7 +2156,7 @@ describe("Balance Repository", () => {
                     });
 
                     it("all from account 2", async () => {
-                        const result = await repository.getUpdateSum(2, { resolution: UpdateResolution.Month });
+                        const result = await repository.getUpdateSum(2, UpdateResolution.Month);
 
                         expect(result).has.length(3);
                         expect(result[0]).deep.contains({ account: 2, depot: null, asset: 1, value: 10 });
@@ -2241,13 +2165,13 @@ describe("Balance Repository", () => {
                     });
 
                     it("all from account 3", async () => {
-                        const result = await repository.getUpdateSum(3, { resolution: UpdateResolution.Month });
+                        const result = await repository.getUpdateSum(3, UpdateResolution.Month);
 
                         expect(result).has.length(0);
                     });
 
                     it("account 1, depot 1", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Month, depot: 1 });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Month, { depot: 1 });
 
                         expect(result).has.length(6);
                         expect(result[0]).deep.contains({ account: 1, depot: 1, asset: 1, value: 13 });
@@ -2259,7 +2183,7 @@ describe("Balance Repository", () => {
                     });
 
                     it("account 1, depot 2", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Month, depot: 2 });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Month, { depot: 2 });
 
                         expect(result).has.length(3);
                         expect(result[0]).deep.contains({ account: 1, depot: 2, asset: 1, value: 9 });
@@ -2268,7 +2192,7 @@ describe("Balance Repository", () => {
                     });
 
                     it("account 1, asset 1", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Month, asset: 1 });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Month, { asset: 1 });
 
                         expect(result).has.length(3);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 22 });
@@ -2277,7 +2201,7 @@ describe("Balance Repository", () => {
                     });
 
                     it("account 1, asset 2", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Month, asset: 2 });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Month, { asset: 2 });
 
                         expect(result).has.length(3);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 2, value: 8 });
@@ -2286,13 +2210,13 @@ describe("Balance Repository", () => {
                     });
 
                     it("with start", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Month, start: end });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Month, { start: end });
 
                         expect(result).has.length(0);
                     });
 
                     it("with end", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Month, end: start });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Month, { end: start });
 
                         expect(result).has.length(2);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 22 });
@@ -2300,14 +2224,14 @@ describe("Balance Repository", () => {
                     });
 
                     it("with limit 1", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Month, limit: 1 });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Month, { limit: 1 });
 
                         expect(result).has.length(1);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 22 });
                     });
 
                     it("with limit 1000", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Month, limit: 1000 });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Month, { limit: 1000 });
 
                         expect(result).has.length(6);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 22 });
@@ -2321,7 +2245,7 @@ describe("Balance Repository", () => {
 
                 describe("history for years", () => {
                     it("all from account 1", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Year });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Year);
 
                         expect(result).has.length(4);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: -30 });
@@ -2331,7 +2255,7 @@ describe("Balance Repository", () => {
                     });
 
                     it("all from account 2", async () => {
-                        const result = await repository.getUpdateSum(2, { resolution: UpdateResolution.Year });
+                        const result = await repository.getUpdateSum(2, UpdateResolution.Year);
 
                         expect(result).has.length(2);
                         expect(result[0]).deep.contains({ account: 2, depot: null, asset: 1, value: -10 });
@@ -2339,13 +2263,13 @@ describe("Balance Repository", () => {
                     });
 
                     it("all from account 3", async () => {
-                        const result = await repository.getUpdateSum(3, { resolution: UpdateResolution.Year });
+                        const result = await repository.getUpdateSum(3, UpdateResolution.Year);
 
                         expect(result).has.length(0);
                     });
 
                     it("account 1, depot 1", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Year, depot: 1 });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Year, { depot: 1 });
 
                         expect(result).has.length(4);
                         expect(result[0]).deep.contains({ account: 1, depot: 1, asset: 1, value: -20 });
@@ -2355,7 +2279,7 @@ describe("Balance Repository", () => {
                     });
 
                     it("account 1, depot 2", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Year, depot: 2 });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Year, { depot: 2 });
 
                         expect(result).has.length(2);
                         expect(result[0]).deep.contains({ account: 1, depot: 2, asset: 1, value: -10 });
@@ -2363,7 +2287,7 @@ describe("Balance Repository", () => {
                     });
 
                     it("account 1, asset 1", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Year, asset: 1 });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Year, { asset: 1 });
 
                         expect(result).has.length(2);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: -30 });
@@ -2371,7 +2295,7 @@ describe("Balance Repository", () => {
                     });
 
                     it("account 1, asset 2", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Year, asset: 2 });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Year, { asset: 2 });
 
                         expect(result).has.length(2);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 2, value: -10 });
@@ -2379,13 +2303,13 @@ describe("Balance Repository", () => {
                     });
 
                     it("with start", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Year, start: end });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Year, { start: end });
 
                         expect(result).has.length(0);
                     });
 
                     it("with end", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Year, end: start });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Year, { end: start });
 
                         expect(result).has.length(2);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: -30 });
@@ -2393,14 +2317,14 @@ describe("Balance Repository", () => {
                     });
 
                     it("with limit 1", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Year, limit: 1 });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Year, { limit: 1 });
 
                         expect(result).has.length(1);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: -30 });
                     });
 
                     it("with limit 1000", async () => {
-                        const result = await repository.getUpdateSum(1, { resolution: UpdateResolution.Year, limit: 1000 });
+                        const result = await repository.getUpdateSum(1, UpdateResolution.Year, { limit: 1000 });
 
                         expect(result).has.length(4);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: -30 });
@@ -2412,77 +2336,11 @@ describe("Balance Repository", () => {
             });
 
             describe("fetch", () => {
-                describe("current", () => {
-                    it("all from account 1", async () => {
-                        const result: Array<Update> = [];
-
-                        await repository.fetchUpdateSum(1, async data => result.push(data));
-
-                        expect(result).has.length(2);
-                        expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 37 });
-                        expect(result[1]).deep.contains({ account: 1, depot: null, asset: 2, value: 13 });
-                    });
-
-                    it("all from account 2", async () => {
-                        const result: Array<Update> = [];
-
-                        await repository.fetchUpdateSum(2, async data => result.push(data));
-
-                        expect(result).has.length(1);
-                        expect(result[0]).deep.contains({ account: 2, depot: null, asset: 1, value: 15 });
-                    });
-
-                    it("all from account 3", async () => {
-                        const result: Array<Update> = [];
-
-                        await repository.fetchUpdateSum(3, async data => result.push(data));
-
-                        expect(result).has.length(0);
-                    });
-
-                    it("account 1, depot 1", async () => {
-                        const result: Array<Update> = [];
-
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { depot: 1 });
-
-                        expect(result).has.length(2);
-                        expect(result[0]).deep.contains({ account: 1, depot: 1, asset: 1, value: 23 });
-                        expect(result[1]).deep.contains({ account: 1, depot: 1, asset: 2, value: 13 });
-                    });
-
-                    it("account 1, depot 2", async () => {
-                        const result: Array<Update> = [];
-
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { depot: 2 });
-
-                        expect(result).has.length(1);
-                        expect(result[0]).deep.contains({ account: 1, depot: 2, asset: 1, value: 14 });
-                    });
-
-                    it("account 1, asset 1", async () => {
-                        const result: Array<Update> = [];
-
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { asset: 1 });
-
-                        expect(result).has.length(1);
-                        expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 37 });
-                    });
-
-                    it("account 1, asset 2", async () => {
-                        const result: Array<Update> = [];
-
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { asset: 2 });
-
-                        expect(result).has.length(1);
-                        expect(result[0]).deep.contains({ account: 1, depot: null, asset: 2, value: 13 });
-                    });
-                });
-
                 describe("history with end", () => {
                     it("all from account 1", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { end });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Day, async data => result.push(data), { end });
 
                         expect(result).has.length(10);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 7 });
@@ -2500,7 +2358,7 @@ describe("Balance Repository", () => {
                     it("all from account 2", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(2, async data => result.push(data), { end });
+                        await repository.fetchUpdateSum(2, UpdateResolution.Day, async data => result.push(data), { end });
 
                         expect(result).has.length(5);
                         expect(result[0]).deep.contains({ account: 2, depot: null, asset: 1, value: 5 });
@@ -2513,7 +2371,7 @@ describe("Balance Repository", () => {
                     it("all from account 3", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(3, async data => result.push(data), { end });
+                        await repository.fetchUpdateSum(3, UpdateResolution.Day, async data => result.push(data), { end });
 
                         expect(result).has.length(0);
                     });
@@ -2521,7 +2379,7 @@ describe("Balance Repository", () => {
                     it("account 1, depot 1", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { depot: 1, end });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Day, async data => result.push(data), { depot: 1, end });
 
                         expect(result).has.length(10);
                         expect(result[0]).deep.contains({ account: 1, depot: 1, asset: 1, value: 3 });
@@ -2539,7 +2397,7 @@ describe("Balance Repository", () => {
                     it("account 1, depot 2", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { depot: 2, end });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Day, async data => result.push(data), { depot: 2, end });
 
                         expect(result).has.length(5);
                         expect(result[0]).deep.contains({ account: 1, depot: 2, asset: 1, value: 4 });
@@ -2552,7 +2410,7 @@ describe("Balance Repository", () => {
                     it("account 1, asset 1", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { asset: 1, end });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Day, async data => result.push(data), { asset: 1, end });
 
                         expect(result).has.length(5);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 7 });
@@ -2565,7 +2423,7 @@ describe("Balance Repository", () => {
                     it("account 1, asset 2", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { asset: 2, end });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Day, async data => result.push(data), { asset: 2, end });
 
                         expect(result).has.length(5);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 2, value: 3 });
@@ -2578,7 +2436,7 @@ describe("Balance Repository", () => {
                     it("with start", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { start: end });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Day, async data => result.push(data), { start: end });
 
                         expect(result).has.length(2);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 37 });
@@ -2588,7 +2446,7 @@ describe("Balance Repository", () => {
                     it("with end", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { end: start });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Day, async data => result.push(data), { end: start });
 
                         expect(result).has.length(2);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 7 });
@@ -2598,7 +2456,7 @@ describe("Balance Repository", () => {
                     it("with limit 1", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { limit: 1, end });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Day, async data => result.push(data), { limit: 1, end });
 
                         expect(result).has.length(1);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 7 });
@@ -2607,7 +2465,7 @@ describe("Balance Repository", () => {
                     it("with limit 1000", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { limit: 1000, end });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Day, async data => result.push(data), { limit: 1000, end });
 
                         expect(result).has.length(10);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 7 });
@@ -2627,7 +2485,7 @@ describe("Balance Repository", () => {
                     it("all from account 1", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Day });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Day, async data => result.push(data));
 
                         expect(result).has.length(10);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 7 });
@@ -2645,7 +2503,7 @@ describe("Balance Repository", () => {
                     it("all from account 2", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(2, async data => result.push(data), { resolution: UpdateResolution.Day });
+                        await repository.fetchUpdateSum(2, UpdateResolution.Day, async data => result.push(data));
 
                         expect(result).has.length(5);
                         expect(result[0]).deep.contains({ account: 2, depot: null, asset: 1, value: 5 });
@@ -2658,7 +2516,7 @@ describe("Balance Repository", () => {
                     it("all from account 3", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(3, async data => result.push(data), { resolution: UpdateResolution.Day });
+                        await repository.fetchUpdateSum(3, UpdateResolution.Day, async data => result.push(data));
 
                         expect(result).has.length(0);
                     });
@@ -2666,7 +2524,7 @@ describe("Balance Repository", () => {
                     it("account 1, depot 1", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Day, depot: 1 });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Day, async data => result.push(data), { depot: 1 });
 
                         expect(result).has.length(10);
                         expect(result[0]).deep.contains({ account: 1, depot: 1, asset: 1, value: 3 });
@@ -2684,7 +2542,7 @@ describe("Balance Repository", () => {
                     it("account 1, depot 2", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Day, depot: 2 });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Day, async data => result.push(data), { depot: 2 });
 
                         expect(result).has.length(5);
                         expect(result[0]).deep.contains({ account: 1, depot: 2, asset: 1, value: 4 });
@@ -2697,7 +2555,7 @@ describe("Balance Repository", () => {
                     it("account 1, asset 1", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Day, asset: 1 });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Day, async data => result.push(data), { asset: 1 });
 
                         expect(result).has.length(5);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 7 });
@@ -2710,7 +2568,7 @@ describe("Balance Repository", () => {
                     it("account 1, asset 2", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Day, asset: 2 });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Day, async data => result.push(data), { asset: 2 });
 
                         expect(result).has.length(5);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 2, value: 3 });
@@ -2723,7 +2581,7 @@ describe("Balance Repository", () => {
                     it("with start", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Day, start: end });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Day, async data => result.push(data), { start: end });
 
                         expect(result).has.length(2);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 37 });
@@ -2733,7 +2591,7 @@ describe("Balance Repository", () => {
                     it("with end", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Day, end: start });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Day, async data => result.push(data), { end: start });
 
                         expect(result).has.length(2);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 7 });
@@ -2743,7 +2601,7 @@ describe("Balance Repository", () => {
                     it("with limit 1", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Day, limit: 1 });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Day, async data => result.push(data), { limit: 1 });
 
                         expect(result).has.length(1);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 7 });
@@ -2752,7 +2610,7 @@ describe("Balance Repository", () => {
                     it("with limit 1000", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Day, limit: 1000 });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Day, async data => result.push(data), { limit: 1000 });
 
                         expect(result).has.length(10);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 7 });
@@ -2772,7 +2630,7 @@ describe("Balance Repository", () => {
                     it("all from account 1", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Week });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Week, async data => result.push(data));
 
                         expect(result).has.length(8);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: -15 });
@@ -2788,7 +2646,7 @@ describe("Balance Repository", () => {
                     it("all from account 2", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(2, async data => result.push(data), { resolution: UpdateResolution.Week });
+                        await repository.fetchUpdateSum(2, UpdateResolution.Week, async data => result.push(data));
 
                         expect(result).has.length(4);
                         expect(result[0]).deep.contains({ account: 2, depot: null, asset: 1, value: -5 });
@@ -2800,7 +2658,7 @@ describe("Balance Repository", () => {
                     it("all from account 3", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(3, async data => result.push(data), { resolution: UpdateResolution.Week });
+                        await repository.fetchUpdateSum(3, UpdateResolution.Week, async data => result.push(data));
 
                         expect(result).has.length(0);
                     });
@@ -2808,7 +2666,7 @@ describe("Balance Repository", () => {
                     it("account 1, depot 1", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Week, depot: 1 });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Week, async data => result.push(data), { depot: 1 });
 
                         expect(result).has.length(8);
                         expect(result[0]).deep.contains({ account: 1, depot: 1, asset: 1, value: -10 });
@@ -2824,7 +2682,7 @@ describe("Balance Repository", () => {
                     it("account 1, depot 2", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Week, depot: 2 });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Week, async data => result.push(data), { depot: 2 });
 
                         expect(result).has.length(4);
                         expect(result[0]).deep.contains({ account: 1, depot: 2, asset: 1, value: -5 });
@@ -2836,7 +2694,7 @@ describe("Balance Repository", () => {
                     it("account 1, asset 1", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Week, asset: 1 });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Week, async data => result.push(data), { asset: 1 });
 
                         expect(result).has.length(4);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: -15 });
@@ -2848,7 +2706,7 @@ describe("Balance Repository", () => {
                     it("account 1, asset 2", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Week, asset: 2 });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Week, async data => result.push(data), { asset: 2 });
 
                         expect(result).has.length(4);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 2, value: -5 });
@@ -2860,7 +2718,7 @@ describe("Balance Repository", () => {
                     it("with start", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Week, start: end });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Week, async data => result.push(data), { start: end });
 
                         expect(result).has.length(0);
                     });
@@ -2868,7 +2726,7 @@ describe("Balance Repository", () => {
                     it("with end", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Week, end: start });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Week, async data => result.push(data), { end: start });
 
                         expect(result).has.length(2);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: -15 });
@@ -2878,7 +2736,7 @@ describe("Balance Repository", () => {
                     it("with limit 1", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Week, limit: 1 });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Week, async data => result.push(data), { limit: 1 });
 
                         expect(result).has.length(1);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: -15 });
@@ -2887,7 +2745,7 @@ describe("Balance Repository", () => {
                     it("with limit 1000", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Week, limit: 1000 });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Week, async data => result.push(data), { limit: 1000 });
 
                         expect(result).has.length(8);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: -15 });
@@ -2905,7 +2763,7 @@ describe("Balance Repository", () => {
                     it("all from account 1", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Month });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Month, async data => result.push(data));
 
                         expect(result).has.length(6);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 22 });
@@ -2919,7 +2777,7 @@ describe("Balance Repository", () => {
                     it("all from account 2", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(2, async data => result.push(data), { resolution: UpdateResolution.Month });
+                        await repository.fetchUpdateSum(2, UpdateResolution.Month, async data => result.push(data));
 
                         expect(result).has.length(3);
                         expect(result[0]).deep.contains({ account: 2, depot: null, asset: 1, value: 10 });
@@ -2930,7 +2788,7 @@ describe("Balance Repository", () => {
                     it("all from account 3", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(3, async data => result.push(data), { resolution: UpdateResolution.Month });
+                        await repository.fetchUpdateSum(3, UpdateResolution.Month, async data => result.push(data));
 
                         expect(result).has.length(0);
                     });
@@ -2938,7 +2796,7 @@ describe("Balance Repository", () => {
                     it("account 1, depot 1", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Month, depot: 1 });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Month, async data => result.push(data), { depot: 1 });
 
                         expect(result).has.length(6);
                         expect(result[0]).deep.contains({ account: 1, depot: 1, asset: 1, value: 13 });
@@ -2952,7 +2810,7 @@ describe("Balance Repository", () => {
                     it("account 1, depot 2", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Month, depot: 2 });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Month, async data => result.push(data), { depot: 2 });
 
                         expect(result).has.length(3);
                         expect(result[0]).deep.contains({ account: 1, depot: 2, asset: 1, value: 9 });
@@ -2963,7 +2821,7 @@ describe("Balance Repository", () => {
                     it("account 1, asset 1", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Month, asset: 1 });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Month, async data => result.push(data), { asset: 1 });
 
                         expect(result).has.length(3);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 22 });
@@ -2974,7 +2832,7 @@ describe("Balance Repository", () => {
                     it("account 1, asset 2", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Month, asset: 2 });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Month, async data => result.push(data), { asset: 2 });
 
                         expect(result).has.length(3);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 2, value: 8 });
@@ -2985,7 +2843,7 @@ describe("Balance Repository", () => {
                     it("with start", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Month, start: end });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Month, async data => result.push(data), { start: end });
 
                         expect(result).has.length(0);
                     });
@@ -2993,7 +2851,7 @@ describe("Balance Repository", () => {
                     it("with end", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Month, end: start });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Month, async data => result.push(data), { end: start });
 
                         expect(result).has.length(2);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 22 });
@@ -3003,7 +2861,7 @@ describe("Balance Repository", () => {
                     it("with limit 1", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Month, limit: 1 });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Month, async data => result.push(data), { limit: 1 });
 
                         expect(result).has.length(1);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 22 });
@@ -3012,7 +2870,7 @@ describe("Balance Repository", () => {
                     it("with limit 1000", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Month, limit: 1000 });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Month, async data => result.push(data), { limit: 1000 });
 
                         expect(result).has.length(6);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: 22 });
@@ -3028,7 +2886,7 @@ describe("Balance Repository", () => {
                     it("all from account 1", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Year });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Year, async data => result.push(data));
 
                         expect(result).has.length(4);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: -30 });
@@ -3040,7 +2898,7 @@ describe("Balance Repository", () => {
                     it("all from account 2", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(2, async data => result.push(data), { resolution: UpdateResolution.Year });
+                        await repository.fetchUpdateSum(2, UpdateResolution.Year, async data => result.push(data));
 
                         expect(result).has.length(2);
                         expect(result[0]).deep.contains({ account: 2, depot: null, asset: 1, value: -10 });
@@ -3050,7 +2908,7 @@ describe("Balance Repository", () => {
                     it("all from account 3", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(3, async data => result.push(data), { resolution: UpdateResolution.Year });
+                        await repository.fetchUpdateSum(3, UpdateResolution.Year, async data => result.push(data));
 
                         expect(result).has.length(0);
                     });
@@ -3058,7 +2916,7 @@ describe("Balance Repository", () => {
                     it("account 1, depot 1", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Year, depot: 1 });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Year, async data => result.push(data), { depot: 1 });
 
                         expect(result).has.length(4);
                         expect(result[0]).deep.contains({ account: 1, depot: 1, asset: 1, value: -20 });
@@ -3070,7 +2928,7 @@ describe("Balance Repository", () => {
                     it("account 1, depot 2", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Year, depot: 2 });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Year, async data => result.push(data), { depot: 2 });
 
                         expect(result).has.length(2);
                         expect(result[0]).deep.contains({ account: 1, depot: 2, asset: 1, value: -10 });
@@ -3080,7 +2938,7 @@ describe("Balance Repository", () => {
                     it("account 1, asset 1", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Year, asset: 1 });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Year, async data => result.push(data), { asset: 1 });
 
                         expect(result).has.length(2);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: -30 });
@@ -3090,7 +2948,7 @@ describe("Balance Repository", () => {
                     it("account 1, asset 2", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Year, asset: 2 });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Year, async data => result.push(data), { asset: 2 });
 
                         expect(result).has.length(2);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 2, value: -10 });
@@ -3100,7 +2958,7 @@ describe("Balance Repository", () => {
                     it("with start", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Year, start: end });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Year, async data => result.push(data), { start: end });
 
                         expect(result).has.length(0);
                     });
@@ -3108,7 +2966,7 @@ describe("Balance Repository", () => {
                     it("with end", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Year, end: start });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Year, async data => result.push(data), { end: start });
 
                         expect(result).has.length(2);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: -30 });
@@ -3118,7 +2976,7 @@ describe("Balance Repository", () => {
                     it("with limit 1", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Year, limit: 1 });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Year, async data => result.push(data), { limit: 1 });
 
                         expect(result).has.length(1);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: -30 });
@@ -3127,7 +2985,7 @@ describe("Balance Repository", () => {
                     it("with limit 1000", async () => {
                         const result: Array<Update> = [];
 
-                        await repository.fetchUpdateSum(1, async data => result.push(data), { resolution: UpdateResolution.Year, limit: 1000 });
+                        await repository.fetchUpdateSum(1, UpdateResolution.Year, async data => result.push(data), { limit: 1000 });
 
                         expect(result).has.length(4);
                         expect(result[0]).deep.contains({ account: 1, depot: null, asset: 1, value: -30 });

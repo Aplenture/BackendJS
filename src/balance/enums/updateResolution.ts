@@ -6,8 +6,7 @@
  */
 
 export enum UpdateResolution {
-    None = 0,
-    Day,
+    Day = 1,
     Week,
     Month,
     Year
