@@ -695,20 +695,20 @@ export class Repository extends Database.Repository<Tables> {
         values.push(now, type, data.account, data.depot, data.asset, data.order, data.value, data.data);
 
         // insert resolution year if not exists
-        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`timestamp\`<FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) VALUES (?,FROM_UNIXTIME(?),?,?,?,@value);`;
-        values.push(year, data.account, data.depot, data.asset, UpdateResolution.Year, year, data.account, data.depot, data.asset);
+        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) VALUES (?,FROM_UNIXTIME(?),?,?,?,@value);`;
+        values.push(UpdateResolution.Year, year, data.account, data.depot, data.asset, UpdateResolution.Year, year, data.account, data.depot, data.asset);
 
         // insert resolution month if not exists
-        query += `INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) SELECT ?,FROM_UNIXTIME(?),u.account,u.depot,u.asset,u.value FROM ${this.data.updateTable} u WHERE \`timestamp\`<FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1;`;
-        values.push(UpdateResolution.Month, month, month, data.account, data.depot, data.asset);
+        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) VALUES (?,FROM_UNIXTIME(?),?,?,?,@value);`;
+        values.push(UpdateResolution.Month, month, data.account, data.depot, data.asset, UpdateResolution.Month, month, data.account, data.depot, data.asset);
 
         // insert resolution week if not exists
-        query += `INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) SELECT ?,FROM_UNIXTIME(?),u.account,u.depot,u.asset,u.value FROM ${this.data.updateTable} u WHERE \`timestamp\`<FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1;`;
-        values.push(UpdateResolution.Week, week, week, data.account, data.depot, data.asset);
+        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) VALUES (?,FROM_UNIXTIME(?),?,?,?,@value);`;
+        values.push(UpdateResolution.Week, week, data.account, data.depot, data.asset, UpdateResolution.Week, week, data.account, data.depot, data.asset);
 
         // insert resolution day if not exists
-        query += `INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) SELECT ?,FROM_UNIXTIME(?),u.account,u.depot,u.asset,u.value FROM ${this.data.updateTable} u WHERE \`timestamp\`<FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1;`;
-        values.push(UpdateResolution.Day, day, day, data.account, data.depot, data.asset);
+        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) VALUES (?,FROM_UNIXTIME(?),?,?,?,@value);`;
+        values.push(UpdateResolution.Day, day, data.account, data.depot, data.asset, UpdateResolution.Day, day, data.account, data.depot, data.asset);
 
         // update all existing subsequent updates with resolution day
         query += `UPDATE ${this.data.updateTable} SET \`value\`=\`value\`+?,\`timestamp\`=\`timestamp\` WHERE \`resolution\`=? AND \`timestamp\`>=FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=?;`;
@@ -736,12 +736,12 @@ export class Repository extends Database.Repository<Tables> {
         const result = await this.database.query(query, values);
 
         return {
-            timestamp: Database.parseToTime(result[11][0].timestamp),
-            resolution: result[11][0].resolution,
-            account: result[11][0].account,
-            depot: result[11][0].depot,
-            asset: result[11][0].asset,
-            value: result[11][0].value
+            timestamp: Database.parseToTime(result[14][0].timestamp),
+            resolution: result[14][0].resolution,
+            account: result[14][0].account,
+            depot: result[14][0].depot,
+            asset: result[14][0].asset,
+            value: result[14][0].value
         };
     }
 
