@@ -84,6 +84,8 @@ export class Repository extends Database.Repository<Tables> {
         if (undefined != options.depot) {
             values.push(options.depot);
             where.push('`depot`=?');
+        } else {
+            where.push('`depot`!=0');
         }
 
         if (undefined != options.asset) {
@@ -131,6 +133,8 @@ export class Repository extends Database.Repository<Tables> {
         if (undefined != options.depot) {
             values.push(options.depot);
             where.push('`depot`=?');
+        } else {
+            where.push('`depot`!=0');
         }
 
         if (undefined != options.asset) {
@@ -147,95 +151,6 @@ export class Repository extends Database.Repository<Tables> {
             depot: data.depot,
             asset: data.asset,
             value: data.value
-        }, index), values);
-    }
-
-    public async getBalanceSum(account: number, options: BalanceOptions = {}): Promise<Update[]> {
-        const limit = options.limit
-            ? "LIMIT " + options.limit
-            : "";
-
-        const values: any[] = [
-            account,
-            UpdateResolution.Day
-        ];
-
-        const where = [
-            '`account`=?',
-            '`resolution`=?'
-        ];
-
-        if (options.time) {
-            values.push(Database.parseFromTime(options.time));
-            where.push('`timestamp`<=FROM_UNIXTIME(?)');
-        }
-
-        if (undefined != options.depot) {
-            values.push(options.depot);
-            where.push('`depot`=?');
-        }
-
-        if (undefined != options.asset) {
-            values.push(options.asset);
-            where.push('`asset`=?');
-        }
-
-        values.push(account, UpdateResolution.Day);
-
-        const result = await this.database.query(`SELECT *,SUM(\`value\`) AS \`value\` FROM ${this.data.updateTable} tmp1, (SELECT MAX(\`timestamp\`) AS \`timestamp\`,\`depot\`,\`asset\` FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`asset\`,\`depot\`) AS tmp2 WHERE tmp1.account=? AND tmp1.resolution=? AND tmp1.timestamp=tmp2.timestamp AND tmp1.depot=tmp2.depot AND tmp1.asset=tmp2.asset GROUP BY tmp1.asset ${limit}`, values);
-
-        if (!result.length)
-            return [];
-
-        return result.map(data => ({
-            timestamp: data.timestamp,
-            resolution: data.resolut,
-            account,
-            depot: options.depot ?? null,
-            asset: data.asset,
-            value: data.value || 0
-        }));
-    }
-
-    public async fetchBalanceSum(account: number, callback: (data: Update, index: number) => Promise<any>, options: BalanceOptions = {}): Promise<void> {
-        const limit = options.limit
-            ? "LIMIT " + options.limit
-            : "";
-
-        const values: any[] = [
-            account,
-            UpdateResolution.Day
-        ];
-
-        const where = [
-            '`account`=?',
-            '`resolution`=?'
-        ];
-
-        if (options.time) {
-            values.push(Database.parseFromTime(options.time));
-            where.push('`timestamp`<=FROM_UNIXTIME(?)');
-        }
-
-        if (undefined != options.depot) {
-            values.push(options.depot);
-            where.push('`depot`=?');
-        }
-
-        if (undefined != options.asset) {
-            values.push(options.asset);
-            where.push('`asset`=?');
-        }
-
-        values.push(account, UpdateResolution.Day);
-
-        await this.database.fetch(`SELECT *,SUM(\`value\`) AS \`value\` FROM ${this.data.updateTable} tmp1, (SELECT MAX(\`timestamp\`) AS \`timestamp\`,\`depot\`,\`asset\` FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`asset\`,\`depot\`) AS tmp2 WHERE tmp1.account=? AND tmp1.resolution=? AND tmp1.timestamp=tmp2.timestamp AND tmp1.depot=tmp2.depot AND tmp1.asset=tmp2.asset GROUP BY tmp1.asset ${limit}`, async (data, index) => callback({
-            timestamp: data.timestamp,
-            resolution: data.resolut,
-            account,
-            depot: options.depot ?? null,
-            asset: data.asset,
-            value: data.value || 0
         }, index), values);
     }
 
@@ -267,6 +182,8 @@ export class Repository extends Database.Repository<Tables> {
         if (undefined != options.depot) {
             values.push(options.depot);
             where.push('`depot`=?');
+        } else {
+            where.push('`depot`!=0');
         }
 
         if (undefined != options.asset) {
@@ -317,6 +234,8 @@ export class Repository extends Database.Repository<Tables> {
         if (undefined != options.depot) {
             values.push(options.depot);
             where.push('`depot`=?');
+        } else {
+            where.push('`depot`!=0');
         }
 
         if (undefined != options.asset) {
@@ -331,101 +250,6 @@ export class Repository extends Database.Repository<Tables> {
             depot: data.depot,
             asset: data.asset,
             value: data.value
-        }, index), values);
-    }
-
-    public async getUpdateSum(account: number, resolution: UpdateResolution, options: UpdateOptions = {}): Promise<Update[]> {
-        const limit = options.limit
-            ? "LIMIT " + options.limit
-            : "";
-
-        const values: any[] = [
-            account,
-            resolution
-        ];
-
-        const where = [
-            '`account`=?',
-            '`resolution`=?'
-        ];
-
-        if (options.start) {
-            values.push(Database.parseFromTime(options.start));
-            where.push('`timestamp`>=FROM_UNIXTIME(?)');
-        }
-
-        if (options.end) {
-            values.push(Database.parseFromTime(options.end));
-            where.push('`timestamp`<=FROM_UNIXTIME(?)');
-        }
-
-        if (undefined != options.depot) {
-            values.push(options.depot);
-            where.push('`depot`=?');
-        }
-
-        if (undefined != options.asset) {
-            values.push(options.asset);
-            where.push('`asset`=?');
-        }
-
-        const result = await this.database.query(`SELECT *,SUM(\`value\`) AS \`value\` FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`timestamp\`,\`asset\` ORDER BY \`timestamp\` ASC ${limit}`, values);
-
-        if (!result.length)
-            return [];
-
-        return result.map(data => ({
-            timestamp: data.timestamp,
-            resolution: data.resolut,
-            account,
-            depot: options.depot ?? null,
-            asset: data.asset,
-            value: data.value || 0
-        }));
-    }
-
-    public async fetchUpdateSum(account: number, resolution: UpdateResolution, callback: (data: Update, index: number) => Promise<any>, options: UpdateOptions = {}): Promise<void> {
-        const limit = options.limit
-            ? "LIMIT " + options.limit
-            : "";
-
-        const values: any[] = [
-            account,
-            resolution
-        ];
-
-        const where = [
-            '`account`=?',
-            '`resolution`=?'
-        ];
-
-        if (options.start) {
-            values.push(Database.parseFromTime(options.start));
-            where.push('`timestamp`>=FROM_UNIXTIME(?)');
-        }
-
-        if (options.end) {
-            values.push(Database.parseFromTime(options.end));
-            where.push('`timestamp`<=FROM_UNIXTIME(?)');
-        }
-
-        if (undefined != options.depot) {
-            values.push(options.depot);
-            where.push('`depot`=?');
-        }
-
-        if (undefined != options.asset) {
-            values.push(options.asset);
-            where.push('`asset`=?');
-        }
-
-        await this.database.fetch(`SELECT *,SUM(\`value\`) AS \`value\` FROM ${this.data.updateTable} WHERE ${where.join(' AND ')} GROUP BY \`timestamp\`,\`asset\` ORDER BY \`timestamp\` ASC ${limit}`, async (data, index) => callback({
-            timestamp: data.timestamp,
-            resolution: data.resolut,
-            account,
-            depot: options.depot ?? null,
-            asset: data.asset,
-            value: data.value || 0
         }, index), values);
     }
 
@@ -664,6 +488,15 @@ export class Repository extends Database.Repository<Tables> {
     }
 
     public async addEvent(data: UpdateData, type: EventType): Promise<Update> {
+        if (!data.account)
+            throw new Error(`invalid account '${data.account}'`);
+
+        if (!data.depot)
+            throw new Error(`invalid depot '${data.depot}'`);
+
+        if (!data.asset)
+            throw new Error(`invalid asset '${data.asset}'`);
+
         const date = data.date ?? new Date();
         const now = Database.parseFromTime(Number(date));
         const day = Database.parseFromTime(Number(CoreJS.calcDate({ date })));
@@ -694,35 +527,67 @@ export class Repository extends Database.Repository<Tables> {
         query += `INSERT INTO ${this.data.eventTable} (\`timestamp\`,\`type\`,\`account\`,\`depot\`,\`asset\`,\`order\`,\`value\`,\`data\`) VALUES (FROM_UNIXTIME(?),?,?,?,?,?,?,?);`;
         values.push(now, type, data.account, data.depot, data.asset, data.order, data.value, data.data);
 
-        // insert resolution year if not exists
+        // insert resolution year for depot 0 if not exists
+        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=0 AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`asset\`,\`value\`) VALUES (?,FROM_UNIXTIME(?),?,?,@value);`;
+        values.push(UpdateResolution.Year, year, data.account, data.asset, UpdateResolution.Year, year, data.account, data.asset);
+
+        // insert resolution year for depot x if not exists
         query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) VALUES (?,FROM_UNIXTIME(?),?,?,?,@value);`;
         values.push(UpdateResolution.Year, year, data.account, data.depot, data.asset, UpdateResolution.Year, year, data.account, data.depot, data.asset);
 
-        // insert resolution month if not exists
+        // insert resolution month for depot 0 if not exists
+        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=0 AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`asset\`,\`value\`) VALUES (?,FROM_UNIXTIME(?),?,?,@value);`;
+        values.push(UpdateResolution.Month, month, data.account, data.asset, UpdateResolution.Month, month, data.account, data.asset);
+
+        // insert resolution month for depot x if not exists
         query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) VALUES (?,FROM_UNIXTIME(?),?,?,?,@value);`;
         values.push(UpdateResolution.Month, month, data.account, data.depot, data.asset, UpdateResolution.Month, month, data.account, data.depot, data.asset);
 
-        // insert resolution week if not exists
+        // insert resolution week for depot 0 if not exists
+        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=0 AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`asset\`,\`value\`) VALUES (?,FROM_UNIXTIME(?),?,?,@value);`;
+        values.push(UpdateResolution.Week, week, data.account, data.asset, UpdateResolution.Week, week, data.account, data.asset);
+
+        // insert resolution week for depot x if not exists
         query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) VALUES (?,FROM_UNIXTIME(?),?,?,?,@value);`;
         values.push(UpdateResolution.Week, week, data.account, data.depot, data.asset, UpdateResolution.Week, week, data.account, data.depot, data.asset);
 
-        // insert resolution day if not exists
+        // insert resolution day for depot 0 if not exists
+        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=0 AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`asset\`,\`value\`) VALUES (?,FROM_UNIXTIME(?),?,?,@value);`;
+        values.push(UpdateResolution.Day, day, data.account, data.asset, UpdateResolution.Day, day, data.account, data.asset);
+
+        // insert resolution day for depot x if not exists
         query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) VALUES (?,FROM_UNIXTIME(?),?,?,?,@value);`;
         values.push(UpdateResolution.Day, day, data.account, data.depot, data.asset, UpdateResolution.Day, day, data.account, data.depot, data.asset);
 
-        // update all existing subsequent updates with resolution day
+        // update all existing subsequent updates with resolution day for depot 0
+        query += `UPDATE ${this.data.updateTable} SET \`value\`=\`value\`+?,\`timestamp\`=\`timestamp\` WHERE \`resolution\`=? AND \`timestamp\`>=FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=0 AND \`asset\`=?;`;
+        values.push(change, UpdateResolution.Day, day, data.account, data.asset);
+
+        // update all existing subsequent updates with resolution day for depot x
         query += `UPDATE ${this.data.updateTable} SET \`value\`=\`value\`+?,\`timestamp\`=\`timestamp\` WHERE \`resolution\`=? AND \`timestamp\`>=FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=?;`;
         values.push(change, UpdateResolution.Day, day, data.account, data.depot, data.asset);
 
-        // update all existing subsequent updates with resolution day
+        // update all existing subsequent updates with resolution week for depot 0
+        query += `UPDATE ${this.data.updateTable} SET \`value\`=\`value\`+?,\`timestamp\`=\`timestamp\` WHERE \`resolution\`=? AND \`timestamp\`>=FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=0 AND \`asset\`=?;`;
+        values.push(change, UpdateResolution.Week, week, data.account, data.asset);
+
+        // update all existing subsequent updates with resolution week for depot x
         query += `UPDATE ${this.data.updateTable} SET \`value\`=\`value\`+?,\`timestamp\`=\`timestamp\` WHERE \`resolution\`=? AND \`timestamp\`>=FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=?;`;
         values.push(change, UpdateResolution.Week, week, data.account, data.depot, data.asset);
 
-        // update all existing subsequent updates with resolution day
+        // update all existing subsequent updates with resolution month for depot 0
+        query += `UPDATE ${this.data.updateTable} SET \`value\`=\`value\`+?,\`timestamp\`=\`timestamp\` WHERE \`resolution\`=? AND \`timestamp\`>=FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=0 AND \`asset\`=?;`;
+        values.push(change, UpdateResolution.Month, month, data.account, data.asset);
+
+        // update all existing subsequent updates with resolution month for depot x
         query += `UPDATE ${this.data.updateTable} SET \`value\`=\`value\`+?,\`timestamp\`=\`timestamp\` WHERE \`resolution\`=? AND \`timestamp\`>=FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=?;`;
         values.push(change, UpdateResolution.Month, month, data.account, data.depot, data.asset);
 
-        // update all existing subsequent updates with resolution day
+        // update all existing subsequent updates with resolution year for depot 0
+        query += `UPDATE ${this.data.updateTable} SET \`value\`=\`value\`+?,\`timestamp\`=\`timestamp\` WHERE \`resolution\`=? AND \`timestamp\`>=FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=0 AND \`asset\`=?;`;
+        values.push(change, UpdateResolution.Year, year, data.account, data.asset);
+
+        // update all existing subsequent updates with resolution year for depot x
         query += `UPDATE ${this.data.updateTable} SET \`value\`=\`value\`+?,\`timestamp\`=\`timestamp\` WHERE \`resolution\`=? AND \`timestamp\`>=FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=?;`;
         values.push(change, UpdateResolution.Year, year, data.account, data.depot, data.asset);
 
@@ -736,12 +601,12 @@ export class Repository extends Database.Repository<Tables> {
         const result = await this.database.query(query, values);
 
         return {
-            timestamp: Database.parseToTime(result[14][0].timestamp),
-            resolution: result[14][0].resolution,
-            account: result[14][0].account,
-            depot: result[14][0].depot,
-            asset: result[14][0].asset,
-            value: result[14][0].value
+            timestamp: Database.parseToTime(result[26][0].timestamp),
+            resolution: result[26][0].resolution,
+            account: result[26][0].account,
+            depot: result[26][0].depot,
+            asset: result[26][0].asset,
+            value: result[26][0].value
         };
     }
 

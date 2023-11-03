@@ -26,7 +26,7 @@ export class CreateUpdateTable extends Database.Update<Tables> {
             \`timestamp\` TIMESTAMP NOT NULL,
             \`resolution\` INT NOT NULL,
             \`account\` BIGINT NOT NULL,
-            \`depot\` BIGINT NOT NULL,
+            \`depot\` BIGINT DEFAULT 0,
             \`asset\` BIGINT NOT NULL,
             \`value\` INT NOT NULL,
             PRIMARY KEY (\`timestamp\`,\`resolution\`,\`account\`,\`depot\`,\`asset\`)
