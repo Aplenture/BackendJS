@@ -521,7 +521,7 @@ export class Repository extends Database.Repository<Tables> {
         }
 
         // first lock tables
-        let query = `LOCK TABLES ${this.data.eventTable} WRITE, ${this.data.updateTable} WRITE, ${this.data.updateTable} u READ;`;
+        let query = `LOCK TABLES ${this.data.eventTable} WRITE, ${this.data.updateTable} WRITE;`;
 
         // insert new event
         query += `INSERT INTO ${this.data.eventTable} (\`timestamp\`,\`type\`,\`account\`,\`depot\`,\`asset\`,\`order\`,\`value\`,\`data\`) VALUES (FROM_UNIXTIME(?),?,?,?,?,?,?,?);`;
