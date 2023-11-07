@@ -1203,6 +1203,66 @@ describe("Balance Repository", () => {
         });
     });
 
+    describe("Removing Events", () => {
+        describe("Removing", () => {
+            describe("first by id", () => {
+                it("remove event", () => repository.removeEvent(1).then(result => expect(result).contains({ account: 1, depot: 2, asset: 1, value: -41 })));
+                it("get events", () => repository.getEvents(1, { depot: 2 }).then(result => expect(result.map(data => data.value)).has.length(6).deep.equals([18, 11, 6, 22, 30, 34])));
+                it("get updates", () => repository.getUpdates(1, UpdateResolution.Day, { depot: 2 }).then(result => expect(result.map(data => data.value)).has.length(7).deep.equals([-18, -29, -23, -23, -45, -75, -41])));
+                it("all events", () => repository.getEvents(1).then(result => expect(result.map(data => data.value)).has.length(28).deep.equals([17, 18, 13, 14, 15, 9, 10, 11, 12, 4, 5, 6, 7, 2, 20, 21, 22, 24, 25, 26, 28, 29, 30, 31, 32, 33, 34, 35])));
+                it("balances of account 1", () => repository.getBalance(1).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([16, -41, 42])));
+                it("balances of account 2", () => repository.getBalance(2).then(result => expect(result.map(data => data.value)).has.length(1).deep.equals([48])));
+            });
+
+            describe("first by timestamp", () => {
+                it("remove event", () => repository.removeEvent(17).then(result => expect(result).contains({ account: 1, depot: 1, asset: 1, value: 33 })));
+                it("get events", () => repository.getEvents(1, { depot: 1, asset: 1 }).then(result => expect(result.map(data => data.value)).has.length(14).deep.equals([13, 14, 9, 10, 4, 5, 20, 21, 24, 25, 28, 29, 32, 33])));
+                it("get updates", () => repository.getUpdates(1, UpdateResolution.Day, { depot: 1, asset: 1 }).then(result => expect(result.map(data => data.value)).has.length(8).deep.equals([0, 27, 8, 17, -24, 25, -32, 33])));
+                it("all events", () => repository.getEvents(1).then(result => expect(result.map(data => data.value)).has.length(27).deep.equals([18, 13, 14, 15, 9, 10, 11, 12, 4, 5, 6, 7, 2, 20, 21, 22, 24, 25, 26, 28, 29, 30, 31, 32, 33, 34, 35])));
+                it("balances of account 1", () => repository.getBalance(1).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([33, -41, 42])));
+                it("balances of account 2", () => repository.getBalance(2).then(result => expect(result.map(data => data.value)).has.length(1).deep.equals([48])));
+            });
+
+            describe("last", () => {
+                it("remove event", () => repository.removeEvent(35).then(result => expect(result).contains({ account: 1, depot: 1, asset: 2, value: 7 })));
+                it("get events", () => repository.getEvents(1, { depot: 1, asset: 2 }).then(result => expect(result.map(data => data.value)).has.length(6).deep.equals([15, 12, 7, 2, 26, 31])));
+                it("get updates", () => repository.getUpdates(1, UpdateResolution.Day, { depot: 1, asset: 2 }).then(result => expect(result.map(data => data.value)).has.length(7).deep.equals([15, 3, 10, 12, 38, 7, 7])));
+                it("all events", () => repository.getEvents(1).then(result => expect(result.map(data => data.value)).has.length(26).deep.equals([18, 13, 14, 15, 9, 10, 11, 12, 4, 5, 6, 7, 2, 20, 21, 22, 24, 25, 26, 28, 29, 30, 31, 32, 33, 34])));
+                it("balances of account 1", () => repository.getBalance(1).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([33, -41, 7])));
+                it("balances of account 2", () => repository.getBalance(2).then(result => expect(result.map(data => data.value)).has.length(1).deep.equals([48])));
+            });
+        });
+
+        describe("Adding", () => {
+            describe("for depot 1", () => {
+                it("decrease", () => repository.decrease({ account: 1, depot: 2, asset: 1, value: 101, order: 4, data: '' }).then(result => expect(result).deep.contains({ account: 1, depot: 2, asset: 1, value: -142 })));
+                it("get events", () => repository.getEvents(1, { depot: 2 }).then(result => expect(result.map(data => data.value)).has.length(7).deep.equals([18, 11, 6, 22, 30, 34, 101])));
+                it("get updates", () => repository.getUpdates(1, UpdateResolution.Day, { depot: 2 }).then(result => expect(result.map(data => data.value)).has.length(8).deep.equals([-18, -29, -23, -23, -45, -75, -41, -142])));
+                it("all events", () => repository.getEvents(1).then(result => expect(result.map(data => data.value)).has.length(27).deep.equals([18, 13, 14, 15, 9, 10, 11, 12, 4, 5, 6, 7, 2, 20, 21, 22, 24, 25, 26, 28, 29, 30, 31, 32, 33, 34, 101])));
+                it("balances of account 1", () => repository.getBalance(1).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([33, -142, 7])));
+                it("balances of account 2", () => repository.getBalance(2).then(result => expect(result.map(data => data.value)).has.length(1).deep.equals([48])));
+            });
+
+            describe("for asset 1", () => {
+                it("increase", () => repository.increase({ date: now, account: 1, depot: 1, asset: 1, value: 102, order: 1, data: 'test' }).then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 1, value: 135 })));
+                it("get events", () => repository.getEvents(1, { depot: 1, asset: 1 }).then(result => expect(result.map(data => data.value)).has.length(15).deep.equals([13, 14, 9, 10, 4, 5, 102, 20, 21, 24, 25, 28, 29, 32, 33])));
+                it("get updates", () => repository.getUpdates(1, UpdateResolution.Day, { depot: 1, asset: 1 }).then(result => expect(result.map(data => data.value)).has.length(9).deep.equals([0, 27, 8, 17, 119, 78, 127, 70, 135])));
+                it("all events", () => repository.getEvents(1).then(result => expect(result.map(data => data.value)).has.length(28).deep.equals([18, 13, 14, 15, 9, 10, 11, 12, 4, 5, 6, 7, 2, 102, 20, 21, 22, 24, 25, 26, 28, 29, 30, 31, 32, 33, 34, 101])));
+                it("balances of account 1", () => repository.getBalance(1).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([135, -142, 7])));
+                it("balances of account 2", () => repository.getBalance(2).then(result => expect(result.map(data => data.value)).has.length(1).deep.equals([48])));
+            });
+
+            describe("for asset 2", () => {
+                it("increase", () => repository.increase({ date: prevYear, account: 1, depot: 1, asset: 2, value: 103, order: 3, data: '' }).then(result => expect(result).deep.contains({ account: 1, depot: 1, asset: 2, value: 110 })));
+                it("get events", () => repository.getEvents(1, { depot: 1, asset: 2 }).then(result => expect(result.map(data => data.value)).has.length(7).deep.equals([103, 15, 12, 7, 2, 26, 31])));
+                it("get updates", () => repository.getUpdates(1, UpdateResolution.Day, { depot: 1, asset: 2 }).then(result => expect(result.map(data => data.value)).has.length(8).deep.equals([103, 118, 106, 113, 115, 141, 110, 110])));
+                it("all events", () => repository.getEvents(1).then(result => expect(result.map(data => data.value)).has.length(29).deep.equals([18, 103, 13, 14, 15, 9, 10, 11, 12, 4, 5, 6, 7, 2, 102, 20, 21, 22, 24, 25, 26, 28, 29, 30, 31, 32, 33, 34, 101])));
+                it("balances of account 1", () => repository.getBalance(1).then(result => expect(result.map(data => data.value)).has.length(3).deep.equals([135, -142, 110])));
+                it("balances of account 2", () => repository.getBalance(2).then(result => expect(result.map(data => data.value)).has.length(1).deep.equals([48])));
+            });
+        });
+    });
+
     describe("closing", () => {
         it("reverts", async () => expect(await repository.revert()).equals(0));
         it("deinitializes", () => repository.deinit());
