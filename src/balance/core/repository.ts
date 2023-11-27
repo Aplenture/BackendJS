@@ -253,6 +253,25 @@ export class Repository extends Database.Repository<Tables> {
         }, index), values);
     }
 
+    public async getEventWithID(id: number): Promise<Event | null> {
+        const result = await this.database.query(`SELECT * FROM ${this.data.eventTable} WHERE \`id\`=? LIMIT 1`, [id]);
+
+        if (!result.length)
+            return null;
+
+        return {
+            id: result[0].id,
+            timestamp: Database.parseToTime(result[0].timestamp),
+            type: result[0].type,
+            account: result[0].account,
+            depot: result[0].depot,
+            asset: result[0].asset,
+            order: result[0].order,
+            value: result[0].value,
+            data: result[0].data
+        };
+    }
+
     public async getEvents(account: number, options: EventOptions = {}): Promise<Event[]> {
         const values: any[] = [account];
         const where = ['`account`=?'];
