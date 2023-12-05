@@ -337,7 +337,12 @@ export class Database {
     private static escapeQuery(query: string, values: readonly Type[]): string {
         let result = query;
 
-        values.forEach(value => result = result.replace('?', typeof value === 'string' ? "'" + CoreJS.encodeString(value) + "'" : value.toString()))
+        values.forEach(value => result = result.replace('?', undefined == value
+            ? "NULL"
+            : typeof value === 'string'
+                ? "'" + CoreJS.encodeString(value) + "'"
+                : value.toString()
+        ));
 
         return result;
     }
