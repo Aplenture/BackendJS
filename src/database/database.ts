@@ -251,7 +251,7 @@ export class Database {
             connection.release();
 
             if (Array.isArray(result))
-                result.forEach(entry => Database.decodeEntry(entry));
+                result.forEach(entry => Database.decode(entry));
 
             if (this.debug || debug)
                 this.eventManager.onMessage.emit(this, `executed "${query}" in ${CoreJS.formatDuration(stopwatch.duration, { seconds: true, milliseconds: true })}`);
@@ -320,7 +320,7 @@ export class Database {
 
                     stream.pause();
 
-                    Database.decodeEntry(entry);
+                    Database.decode(entry);
 
                     await callback(entry as any, index++);
 
@@ -347,7 +347,23 @@ export class Database {
         return result;
     }
 
-    private static decodeEntry(entry: Entry): void {
-        Object.keys(entry).forEach(key => (entry[key] as any) = typeof entry[key] === 'string' ? CoreJS.decodeString(entry[key] as string) : entry[key]);
+    private static decode(data: any) {
+        if (undefined == data)
+            return null;
+
+        switch (data.constructor) {
+            case String:
+                return CoreJS.decodeString(data);
+
+            case Array:
+                return data.map(data => this.decode(data));
+
+            case Object:
+                Object.keys(data).forEach(key => data[key] = this.decode(data[key]));
+                return data;
+
+            default:
+                return data;
+        }
     }
 }
