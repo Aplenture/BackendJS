@@ -13,6 +13,9 @@ export function trimTime(time?: number): number {
 }
 
 export function parseFromTime(time?: number): number {
+    if (!time)
+        return null;
+
     return trimTime(time) / 1000;
 }
 
