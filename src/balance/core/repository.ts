@@ -78,7 +78,7 @@ export class Repository extends Database.Repository<Tables> {
 
         if (options.time) {
             values.push(Database.parseFromTime(options.time));
-            where.push('`timestamp`<=FROM_UNIXTIME(?)');
+            where.push('`timestamp`<=?');
         }
 
         if (undefined != options.depot) {
@@ -127,7 +127,7 @@ export class Repository extends Database.Repository<Tables> {
 
         if (options.time) {
             values.push(Database.parseFromTime(options.time));
-            where.push('`timestamp`<=FROM_UNIXTIME(?)');
+            where.push('`timestamp`<=?');
         }
 
         if (undefined != options.depot) {
@@ -171,12 +171,12 @@ export class Repository extends Database.Repository<Tables> {
 
         if (options.start) {
             values.push(Database.parseFromTime(options.start));
-            where.push('`timestamp`>=FROM_UNIXTIME(?)');
+            where.push('`timestamp`>=?');
         }
 
         if (options.end) {
             values.push(Database.parseFromTime(options.end));
-            where.push('`timestamp`<=FROM_UNIXTIME(?)');
+            where.push('`timestamp`<=?');
         }
 
         if (undefined != options.depot) {
@@ -223,12 +223,12 @@ export class Repository extends Database.Repository<Tables> {
 
         if (options.start) {
             values.push(Database.parseFromTime(options.start));
-            where.push('`timestamp`>=FROM_UNIXTIME(?)');
+            where.push('`timestamp`>=?');
         }
 
         if (options.end) {
             values.push(Database.parseFromTime(options.end));
-            where.push('`timestamp`<=FROM_UNIXTIME(?)');
+            where.push('`timestamp`<=?');
         }
 
         if (undefined != options.depot) {
@@ -281,12 +281,12 @@ export class Repository extends Database.Repository<Tables> {
 
         if (options.start) {
             values.push(Database.parseFromTime(options.start));
-            where.push('`timestamp`>=FROM_UNIXTIME(?)');
+            where.push('`timestamp`>=?');
         }
 
         if (options.end) {
             values.push(Database.parseFromTime(options.end));
-            where.push('`timestamp`<=FROM_UNIXTIME(?)');
+            where.push('`timestamp`<=?');
         }
 
         if (undefined != options.type) {
@@ -341,12 +341,12 @@ export class Repository extends Database.Repository<Tables> {
 
         if (options.start) {
             values.push(Database.parseFromTime(options.start));
-            where.push('`timestamp`>=FROM_UNIXTIME(?)');
+            where.push('`timestamp`>=?');
         }
 
         if (options.end) {
             values.push(Database.parseFromTime(options.end));
-            where.push('`timestamp`<=FROM_UNIXTIME(?)');
+            where.push('`timestamp`<=?');
         }
 
         if (undefined != options.type) {
@@ -398,12 +398,12 @@ export class Repository extends Database.Repository<Tables> {
 
         if (options.start) {
             values.push(Database.parseFromTime(options.start));
-            where.push('`timestamp`>=FROM_UNIXTIME(?)');
+            where.push('`timestamp`>=?');
         }
 
         if (options.end) {
             values.push(Database.parseFromTime(options.end));
-            where.push('`timestamp`<=FROM_UNIXTIME(?)');
+            where.push('`timestamp`<=?');
         }
 
         if (undefined != options.type) {
@@ -460,12 +460,12 @@ export class Repository extends Database.Repository<Tables> {
 
         if (options.start) {
             values.push(Database.parseFromTime(options.start));
-            where.push('`timestamp`>=FROM_UNIXTIME(?)');
+            where.push('`timestamp`>=?');
         }
 
         if (options.end) {
             values.push(Database.parseFromTime(options.end));
-            where.push('`timestamp`<=FROM_UNIXTIME(?)');
+            where.push('`timestamp`<=?');
         }
 
         if (undefined != options.type) {
@@ -543,71 +543,71 @@ export class Repository extends Database.Repository<Tables> {
         let query = `LOCK TABLES ${this.data.eventTable} WRITE, ${this.data.updateTable} WRITE;`;
 
         // insert new event
-        query += `INSERT INTO ${this.data.eventTable} (\`timestamp\`,\`type\`,\`account\`,\`depot\`,\`asset\`,\`order\`,\`value\`,\`data\`) VALUES (FROM_UNIXTIME(?),?,?,?,?,?,?,?);`;
+        query += `INSERT INTO ${this.data.eventTable} (\`timestamp\`,\`type\`,\`account\`,\`depot\`,\`asset\`,\`order\`,\`value\`,\`data\`) VALUES (?,?,?,?,?,?,?,?);`;
         values.push(now, type, data.account, data.depot, data.asset, data.order, data.value, data.data);
 
         // insert resolution year for depot 0 if not exists
-        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=0 AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`asset\`,\`value\`) VALUES (?,FROM_UNIXTIME(?),?,?,@value);`;
+        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<? AND \`account\`=? AND \`depot\`=0 AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`asset\`,\`value\`) VALUES (?,?,?,?,@value);`;
         values.push(UpdateResolution.Year, year, data.account, data.asset, UpdateResolution.Year, year, data.account, data.asset);
 
         // insert resolution year for depot x if not exists
-        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) VALUES (?,FROM_UNIXTIME(?),?,?,?,@value);`;
+        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<? AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) VALUES (?,?,?,?,?,@value);`;
         values.push(UpdateResolution.Year, year, data.account, data.depot, data.asset, UpdateResolution.Year, year, data.account, data.depot, data.asset);
 
         // insert resolution month for depot 0 if not exists
-        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=0 AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`asset\`,\`value\`) VALUES (?,FROM_UNIXTIME(?),?,?,@value);`;
+        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<? AND \`account\`=? AND \`depot\`=0 AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`asset\`,\`value\`) VALUES (?,?,?,?,@value);`;
         values.push(UpdateResolution.Month, month, data.account, data.asset, UpdateResolution.Month, month, data.account, data.asset);
 
         // insert resolution month for depot x if not exists
-        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) VALUES (?,FROM_UNIXTIME(?),?,?,?,@value);`;
+        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<? AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) VALUES (?,?,?,?,?,@value);`;
         values.push(UpdateResolution.Month, month, data.account, data.depot, data.asset, UpdateResolution.Month, month, data.account, data.depot, data.asset);
 
         // insert resolution week for depot 0 if not exists
-        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=0 AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`asset\`,\`value\`) VALUES (?,FROM_UNIXTIME(?),?,?,@value);`;
+        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<? AND \`account\`=? AND \`depot\`=0 AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`asset\`,\`value\`) VALUES (?,?,?,?,@value);`;
         values.push(UpdateResolution.Week, week, data.account, data.asset, UpdateResolution.Week, week, data.account, data.asset);
 
         // insert resolution week for depot x if not exists
-        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) VALUES (?,FROM_UNIXTIME(?),?,?,?,@value);`;
+        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<? AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) VALUES (?,?,?,?,?,@value);`;
         values.push(UpdateResolution.Week, week, data.account, data.depot, data.asset, UpdateResolution.Week, week, data.account, data.depot, data.asset);
 
         // insert resolution day for depot 0 if not exists
-        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=0 AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`asset\`,\`value\`) VALUES (?,FROM_UNIXTIME(?),?,?,@value);`;
+        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<? AND \`account\`=? AND \`depot\`=0 AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`asset\`,\`value\`) VALUES (?,?,?,?,@value);`;
         values.push(UpdateResolution.Day, day, data.account, data.asset, UpdateResolution.Day, day, data.account, data.asset);
 
         // insert resolution day for depot x if not exists
-        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) VALUES (?,FROM_UNIXTIME(?),?,?,?,@value);`;
+        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<? AND \`account\`=? AND \`depot\`=? AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) VALUES (?,?,?,?,?,@value);`;
         values.push(UpdateResolution.Day, day, data.account, data.depot, data.asset, UpdateResolution.Day, day, data.account, data.depot, data.asset);
 
         // update all existing subsequent updates with resolution day for depot 0
-        query += `UPDATE ${this.data.updateTable} SET \`value\`=\`value\`+?,\`timestamp\`=\`timestamp\` WHERE \`resolution\`=? AND \`timestamp\`>=FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=0 AND \`asset\`=?;`;
+        query += `UPDATE ${this.data.updateTable} SET \`value\`=\`value\`+?,\`timestamp\`=\`timestamp\` WHERE \`resolution\`=? AND \`timestamp\`>=? AND \`account\`=? AND \`depot\`=0 AND \`asset\`=?;`;
         values.push(change, UpdateResolution.Day, day, data.account, data.asset);
 
         // update all existing subsequent updates with resolution day for depot x
-        query += `UPDATE ${this.data.updateTable} SET \`value\`=\`value\`+?,\`timestamp\`=\`timestamp\` WHERE \`resolution\`=? AND \`timestamp\`>=FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=?;`;
+        query += `UPDATE ${this.data.updateTable} SET \`value\`=\`value\`+?,\`timestamp\`=\`timestamp\` WHERE \`resolution\`=? AND \`timestamp\`>=? AND \`account\`=? AND \`depot\`=? AND \`asset\`=?;`;
         values.push(change, UpdateResolution.Day, day, data.account, data.depot, data.asset);
 
         // update all existing subsequent updates with resolution week for depot 0
-        query += `UPDATE ${this.data.updateTable} SET \`value\`=\`value\`+?,\`timestamp\`=\`timestamp\` WHERE \`resolution\`=? AND \`timestamp\`>=FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=0 AND \`asset\`=?;`;
+        query += `UPDATE ${this.data.updateTable} SET \`value\`=\`value\`+?,\`timestamp\`=\`timestamp\` WHERE \`resolution\`=? AND \`timestamp\`>=? AND \`account\`=? AND \`depot\`=0 AND \`asset\`=?;`;
         values.push(change, UpdateResolution.Week, week, data.account, data.asset);
 
         // update all existing subsequent updates with resolution week for depot x
-        query += `UPDATE ${this.data.updateTable} SET \`value\`=\`value\`+?,\`timestamp\`=\`timestamp\` WHERE \`resolution\`=? AND \`timestamp\`>=FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=?;`;
+        query += `UPDATE ${this.data.updateTable} SET \`value\`=\`value\`+?,\`timestamp\`=\`timestamp\` WHERE \`resolution\`=? AND \`timestamp\`>=? AND \`account\`=? AND \`depot\`=? AND \`asset\`=?;`;
         values.push(change, UpdateResolution.Week, week, data.account, data.depot, data.asset);
 
         // update all existing subsequent updates with resolution month for depot 0
-        query += `UPDATE ${this.data.updateTable} SET \`value\`=\`value\`+?,\`timestamp\`=\`timestamp\` WHERE \`resolution\`=? AND \`timestamp\`>=FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=0 AND \`asset\`=?;`;
+        query += `UPDATE ${this.data.updateTable} SET \`value\`=\`value\`+?,\`timestamp\`=\`timestamp\` WHERE \`resolution\`=? AND \`timestamp\`>=? AND \`account\`=? AND \`depot\`=0 AND \`asset\`=?;`;
         values.push(change, UpdateResolution.Month, month, data.account, data.asset);
 
         // update all existing subsequent updates with resolution month for depot x
-        query += `UPDATE ${this.data.updateTable} SET \`value\`=\`value\`+?,\`timestamp\`=\`timestamp\` WHERE \`resolution\`=? AND \`timestamp\`>=FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=?;`;
+        query += `UPDATE ${this.data.updateTable} SET \`value\`=\`value\`+?,\`timestamp\`=\`timestamp\` WHERE \`resolution\`=? AND \`timestamp\`>=? AND \`account\`=? AND \`depot\`=? AND \`asset\`=?;`;
         values.push(change, UpdateResolution.Month, month, data.account, data.depot, data.asset);
 
         // update all existing subsequent updates with resolution year for depot 0
-        query += `UPDATE ${this.data.updateTable} SET \`value\`=\`value\`+?,\`timestamp\`=\`timestamp\` WHERE \`resolution\`=? AND \`timestamp\`>=FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=0 AND \`asset\`=?;`;
+        query += `UPDATE ${this.data.updateTable} SET \`value\`=\`value\`+?,\`timestamp\`=\`timestamp\` WHERE \`resolution\`=? AND \`timestamp\`>=? AND \`account\`=? AND \`depot\`=0 AND \`asset\`=?;`;
         values.push(change, UpdateResolution.Year, year, data.account, data.asset);
 
         // update all existing subsequent updates with resolution year for depot x
-        query += `UPDATE ${this.data.updateTable} SET \`value\`=\`value\`+?,\`timestamp\`=\`timestamp\` WHERE \`resolution\`=? AND \`timestamp\`>=FROM_UNIXTIME(?) AND \`account\`=? AND \`depot\`=? AND \`asset\`=?;`;
+        query += `UPDATE ${this.data.updateTable} SET \`value\`=\`value\`+?,\`timestamp\`=\`timestamp\` WHERE \`resolution\`=? AND \`timestamp\`>=? AND \`account\`=? AND \`depot\`=? AND \`asset\`=?;`;
         values.push(change, UpdateResolution.Year, year, data.account, data.depot, data.asset);
 
         // select latest update

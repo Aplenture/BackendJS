@@ -110,7 +110,7 @@ export class Database {
 
         for (let i = 0; i < ascendingUpdates.length; ++i) {
             const update = ascendingUpdates[i];
-            const executedUpdates = await this.query(`SELECT * FROM \`updates\` WHERE \`time\`=FROM_UNIXTIME(?) AND \`name\`=? AND \`version\`=? LIMIT 1`, [
+            const executedUpdates = await this.query(`SELECT * FROM \`updates\` WHERE \`time\`=? AND \`name\`=? AND \`version\`=? LIMIT 1`, [
                 parseFromTime(new Date(update.timestamp).getTime()),
                 update.name,
                 update.version
@@ -124,7 +124,7 @@ export class Database {
             this.eventManager.onMessage.emit(this, `execute update '${update.name}'`);
 
             await this.query(update.update);
-            await this.query(`INSERT INTO \`updates\` (\`time\`,\`name\`,\`version\`) VALUES (FROM_UNIXTIME(?),?,?)`, [
+            await this.query(`INSERT INTO \`updates\` (\`time\`,\`name\`,\`version\`) VALUES (?,?,?)`, [
                 parseFromTime(new Date(update.timestamp).getTime()),
                 update.name,
                 update.version
@@ -154,7 +154,7 @@ export class Database {
 
         for (let i = 0; i < descendingUpdates.length; ++i) {
             const update = descendingUpdates[i];
-            const executedUpdates = await this.query(`SELECT * FROM \`updates\` WHERE \`time\`=FROM_UNIXTIME(?) AND \`name\`=? AND \`version\`=? LIMIT 1`, [
+            const executedUpdates = await this.query(`SELECT * FROM \`updates\` WHERE \`time\`=? AND \`name\`=? AND \`version\`=? LIMIT 1`, [
                 parseFromTime(new Date(update.timestamp).getTime()),
                 update.name,
                 update.version
@@ -194,7 +194,7 @@ export class Database {
 
         for (let i = 0; i < descendingUpdates.length; ++i) {
             const update = descendingUpdates[i];
-            const executedUpdates = await this.query(`SELECT * FROM \`updates\` WHERE \`time\`=FROM_UNIXTIME(?) AND \`name\`=? AND \`version\`=? LIMIT 1`, [
+            const executedUpdates = await this.query(`SELECT * FROM \`updates\` WHERE \`time\`=? AND \`name\`=? AND \`version\`=? LIMIT 1`, [
                 parseFromTime(new Date(update.timestamp).getTime()),
                 update.name,
                 update.version
@@ -210,7 +210,7 @@ export class Database {
             if (update.revert)
                 await this.query(update.revert);
 
-            await this.query(`DELETE from \`updates\` WHERE \`time\`=FROM_UNIXTIME(?) AND \`name\`=? AND \`version\`=?`, [
+            await this.query(`DELETE from \`updates\` WHERE \`time\`=? AND \`name\`=? AND \`version\`=?`, [
                 parseFromTime(new Date(update.timestamp).getTime()),
                 update.name,
                 update.version
@@ -339,7 +339,7 @@ export class Database {
 
         values.forEach(value => result = result.replace('?', undefined == value
             ? "NULL"
-            : typeof value === 'string'
+            : typeof value === 'string' && 0 != value.indexOf("FROM_UNIXTIME(")
                 ? "'" + CoreJS.encodeString(value) + "'"
                 : value.toString()
         ));

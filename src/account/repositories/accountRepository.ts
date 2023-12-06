@@ -21,7 +21,7 @@ export class AccountRepository extends Repository<string> {
     }
 
     public async getByID(id: number): Promise<Account | null> {
-        const result = await this.database.query(`SELECT *, FROM_UNIXTIME(\`created\`) as \`created\` FROM ${this.data} WHERE \`id\`=? LIMIT 1`, [
+        const result = await this.database.query(`SELECT * FROM ${this.data} WHERE \`id\`=? LIMIT 1`, [
             id
         ]);
 
@@ -37,7 +37,7 @@ export class AccountRepository extends Repository<string> {
     }
 
     public async getByName(username: string): Promise<Account | null> {
-        const result = await this.database.query(`SELECT *, FROM_UNIXTIME(\`created\`) as \`created\` FROM ${this.data} WHERE \`username\`=? LIMIT 1`, [
+        const result = await this.database.query(`SELECT * FROM ${this.data} WHERE \`username\`=? LIMIT 1`, [
             username
         ]);
 

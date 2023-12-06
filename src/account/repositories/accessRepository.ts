@@ -73,7 +73,7 @@ export class AccessRepository extends Repository<string> {
             : null;
 
         const keys = ['`created`', '`account`', '`api`', '`secret`', '`label`', '`rights`'];
-        const values = ['FROM_UNIXTIME(?)', '?', '?', '?', '?', '?'];
+        const values = ['?', '?', '?', '?', '?', '?'];
 
         const args = [
             Database.parseFromTime(created),
@@ -86,7 +86,7 @@ export class AccessRepository extends Repository<string> {
 
         if (expiration) {
             keys.push('`expiration`');
-            values.push('FROM_UNIXTIME(?)');
+            values.push('?');
             args.push(Database.parseFromTime(expiration));
         }
 

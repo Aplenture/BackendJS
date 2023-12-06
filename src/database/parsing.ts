@@ -12,15 +12,15 @@ export function trimTime(time?: number): number {
     return CoreJS.trimTime(1000, time);
 }
 
-export function parseFromTime(time?: number): number {
-    if (!time)
+export function parseFromTime(time?: number): string | null {
+    if (undefined == time)
         return null;
 
-    return trimTime(time) / 1000;
+    return `FROM_UNIXTIME(${trimTime(time) / 1000})`;
 }
 
-export function parseToTime(time: string): number | null {
-    if (!time)
+export function parseToTime(time?: string): number | null {
+    if (undefined == time)
         return null;
 
     return Number(time);
