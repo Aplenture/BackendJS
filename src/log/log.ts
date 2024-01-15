@@ -28,7 +28,7 @@ export class Log {
     }
 
     public write(text: string | Buffer, title?: string): void {
-        this.stream.write(`${CoreJS.formatDateTime(new Date(), { seconds: true })} >> ${title ? title + ': ' + text : text}\n`);
+        this.stream.write(`${CoreJS.formatTime("YYYY-MM-DD hh:mm:ss")} >> ${title ? title + ': ' + text : text}\n`);
     }
 
     public warning(text: string, title?: string): void {
