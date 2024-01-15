@@ -547,7 +547,7 @@ export class Repository extends Database.Repository<Tables> {
         values.push(now, type, data.account, data.depot, data.asset, data.order, data.value, data.data);
 
         // insert resolution year for depot 0 if not exists
-        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<? AND \`account\`=? AND \`depot\`=0 AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`asset\`,\`value\`) VALUES (?,?,?,?,@value);`;
+        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<? AND \`account\`=? AND \`depot\`=0 AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) VALUES (?,?,?,0,?,@value);`;
         values.push(UpdateResolution.Year, year, data.account, data.asset, UpdateResolution.Year, year, data.account, data.asset);
 
         // insert resolution year for depot x if not exists
@@ -555,7 +555,7 @@ export class Repository extends Database.Repository<Tables> {
         values.push(UpdateResolution.Year, year, data.account, data.depot, data.asset, UpdateResolution.Year, year, data.account, data.depot, data.asset);
 
         // insert resolution month for depot 0 if not exists
-        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<? AND \`account\`=? AND \`depot\`=0 AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`asset\`,\`value\`) VALUES (?,?,?,?,@value);`;
+        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<? AND \`account\`=? AND \`depot\`=0 AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) VALUES (?,?,?,0,?,@value);`;
         values.push(UpdateResolution.Month, month, data.account, data.asset, UpdateResolution.Month, month, data.account, data.asset);
 
         // insert resolution month for depot x if not exists
@@ -563,7 +563,7 @@ export class Repository extends Database.Repository<Tables> {
         values.push(UpdateResolution.Month, month, data.account, data.depot, data.asset, UpdateResolution.Month, month, data.account, data.depot, data.asset);
 
         // insert resolution week for depot 0 if not exists
-        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<? AND \`account\`=? AND \`depot\`=0 AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`asset\`,\`value\`) VALUES (?,?,?,?,@value);`;
+        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<? AND \`account\`=? AND \`depot\`=0 AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) VALUES (?,?,?,0,?,@value);`;
         values.push(UpdateResolution.Week, week, data.account, data.asset, UpdateResolution.Week, week, data.account, data.asset);
 
         // insert resolution week for depot x if not exists
@@ -571,7 +571,7 @@ export class Repository extends Database.Repository<Tables> {
         values.push(UpdateResolution.Week, week, data.account, data.depot, data.asset, UpdateResolution.Week, week, data.account, data.depot, data.asset);
 
         // insert resolution day for depot 0 if not exists
-        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<? AND \`account\`=? AND \`depot\`=0 AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`asset\`,\`value\`) VALUES (?,?,?,?,@value);`;
+        query += `SELECT @value := COALESCE((SELECT \`value\` FROM ${this.data.updateTable} WHERE \`resolution\`<=? AND \`timestamp\`<? AND \`account\`=? AND \`depot\`=0 AND \`asset\`=? ORDER BY \`timestamp\` DESC LIMIT 1),0); INSERT IGNORE INTO ${this.data.updateTable} (\`resolution\`,\`timestamp\`,\`account\`,\`depot\`,\`asset\`,\`value\`) VALUES (?,?,?,0,?,@value);`;
         values.push(UpdateResolution.Day, day, data.account, data.asset, UpdateResolution.Day, day, data.account, data.asset);
 
         // insert resolution day for depot x if not exists
@@ -629,42 +629,46 @@ export class Repository extends Database.Repository<Tables> {
         };
     }
 
-    public async removeEvent(id: number): Promise<Update> {
+    public async removeEvent(id: number): Promise<Update | null> {
         const values = [];
 
         // first lock tables
         let query = `LOCK TABLES ${this.data.eventTable} WRITE, ${this.data.eventTable} e READ, ${this.data.updateTable} u WRITE;`;
 
         // update all existing subsequent updates with resolution day for depot 0
-        query += `SELECT @value := COALESCE((SELECT u.timestamp FROM ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? WHERE u.resolution=? AND u.timestamp<=e.timestamp AND u.account=e.account AND u.depot=0 AND u.asset=e.asset ORDER BY u.timestamp DESC LIMIT 1),0); UPDATE ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? SET u.value=u.value-IF(e.type<0,-e.value,e.value),u.timestamp=u.timestamp WHERE u.resolution=? AND u.timestamp>=@value AND u.account=e.account AND u.depot=0 AND u.asset=e.asset;`;
+        query += `SELECT @event_timestamp := (SELECT \`timestamp\` FROM ${this.data.eventTable} WHERE \`id\`=?);`;
+        values.push(id);
+
+        // update all existing subsequent updates with resolution day for depot 0
+        query += `SELECT @value := COALESCE((SELECT u.timestamp FROM ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? WHERE u.resolution=? AND u.timestamp<=e.timestamp AND u.account=e.account AND u.depot=0 AND u.asset=e.asset ORDER BY u.timestamp DESC LIMIT 1), @event_timestamp); UPDATE ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? SET u.value=u.value-IF(e.type<0,-e.value,e.value),u.timestamp=u.timestamp WHERE u.resolution=? AND u.timestamp>=@value AND u.account=e.account AND u.depot=0 AND u.asset=e.asset;`;
         values.push(id, UpdateResolution.Day, id, UpdateResolution.Day);
 
         // update all existing subsequent updates with resolution day for depot x
-        query += `SELECT @value := COALESCE((SELECT u.timestamp FROM ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? WHERE u.resolution=? AND u.timestamp<=e.timestamp AND u.account=e.account AND u.depot=e.depot AND u.asset=e.asset ORDER BY u.timestamp DESC LIMIT 1),0); UPDATE ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? SET u.value=u.value-IF(e.type<0,-e.value,e.value),u.timestamp=u.timestamp WHERE u.resolution=? AND u.timestamp>=@value AND u.account=e.account AND u.depot=e.depot AND u.asset=e.asset;`;
+        query += `SELECT @value := COALESCE((SELECT u.timestamp FROM ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? WHERE u.resolution=? AND u.timestamp<=e.timestamp AND u.account=e.account AND u.depot=e.depot AND u.asset=e.asset ORDER BY u.timestamp DESC LIMIT 1), @event_timestamp); UPDATE ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? SET u.value=u.value-IF(e.type<0,-e.value,e.value),u.timestamp=u.timestamp WHERE u.resolution=? AND u.timestamp>=@value AND u.account=e.account AND u.depot=e.depot AND u.asset=e.asset;`;
         values.push(id, UpdateResolution.Day, id, UpdateResolution.Day);
 
         // update all existing subsequent updates with resolution week for depot 0
-        query += `SELECT @value := COALESCE((SELECT u.timestamp FROM ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? WHERE u.resolution=? AND u.timestamp<=e.timestamp AND u.account=e.account AND u.depot=0 AND u.asset=e.asset ORDER BY u.timestamp DESC LIMIT 1),0); UPDATE ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? SET u.value=u.value-IF(e.type<0,-e.value,e.value),u.timestamp=u.timestamp WHERE u.resolution=? AND u.timestamp>=@value AND u.account=e.account AND u.depot=0 AND u.asset=e.asset;`;
+        query += `SELECT @value := COALESCE((SELECT u.timestamp FROM ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? WHERE u.resolution=? AND u.timestamp<=e.timestamp AND u.account=e.account AND u.depot=0 AND u.asset=e.asset ORDER BY u.timestamp DESC LIMIT 1), @event_timestamp); UPDATE ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? SET u.value=u.value-IF(e.type<0,-e.value,e.value),u.timestamp=u.timestamp WHERE u.resolution=? AND u.timestamp>=@value AND u.account=e.account AND u.depot=0 AND u.asset=e.asset;`;
         values.push(id, UpdateResolution.Week, id, UpdateResolution.Week);
 
         // update all existing subsequent updates with resolution week for depot x
-        query += `SELECT @value := COALESCE((SELECT u.timestamp FROM ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? WHERE u.resolution=? AND u.timestamp<=e.timestamp AND u.account=e.account AND u.depot=e.depot AND u.asset=e.asset ORDER BY u.timestamp DESC LIMIT 1),0); UPDATE ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? SET u.value=u.value-IF(e.type<0,-e.value,e.value),u.timestamp=u.timestamp WHERE u.resolution=? AND u.timestamp>=@value AND u.account=e.account AND u.depot=e.depot AND u.asset=e.asset;`;
+        query += `SELECT @value := COALESCE((SELECT u.timestamp FROM ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? WHERE u.resolution=? AND u.timestamp<=e.timestamp AND u.account=e.account AND u.depot=e.depot AND u.asset=e.asset ORDER BY u.timestamp DESC LIMIT 1), @event_timestamp); UPDATE ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? SET u.value=u.value-IF(e.type<0,-e.value,e.value),u.timestamp=u.timestamp WHERE u.resolution=? AND u.timestamp>=@value AND u.account=e.account AND u.depot=e.depot AND u.asset=e.asset;`;
         values.push(id, UpdateResolution.Week, id, UpdateResolution.Week);
 
         // update all existing subsequent updates with resolution month for depot 0
-        query += `SELECT @value := COALESCE((SELECT u.timestamp FROM ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? WHERE u.resolution=? AND u.timestamp<=e.timestamp AND u.account=e.account AND u.depot=0 AND u.asset=e.asset ORDER BY u.timestamp DESC LIMIT 1),0); UPDATE ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? SET u.value=u.value-IF(e.type<0,-e.value,e.value),u.timestamp=u.timestamp WHERE u.resolution=? AND u.timestamp>=@value AND u.account=e.account AND u.depot=0 AND u.asset=e.asset;`;
+        query += `SELECT @value := COALESCE((SELECT u.timestamp FROM ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? WHERE u.resolution=? AND u.timestamp<=e.timestamp AND u.account=e.account AND u.depot=0 AND u.asset=e.asset ORDER BY u.timestamp DESC LIMIT 1), @event_timestamp); UPDATE ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? SET u.value=u.value-IF(e.type<0,-e.value,e.value),u.timestamp=u.timestamp WHERE u.resolution=? AND u.timestamp>=@value AND u.account=e.account AND u.depot=0 AND u.asset=e.asset;`;
         values.push(id, UpdateResolution.Month, id, UpdateResolution.Month);
 
         // update all existing subsequent updates with resolution month for depot x
-        query += `SELECT @value := COALESCE((SELECT u.timestamp FROM ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? WHERE u.resolution=? AND u.timestamp<=e.timestamp AND u.account=e.account AND u.depot=e.depot AND u.asset=e.asset ORDER BY u.timestamp DESC LIMIT 1),0); UPDATE ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? SET u.value=u.value-IF(e.type<0,-e.value,e.value),u.timestamp=u.timestamp WHERE u.resolution=? AND u.timestamp>=@value AND u.account=e.account AND u.depot=e.depot AND u.asset=e.asset;`;
+        query += `SELECT @value := COALESCE((SELECT u.timestamp FROM ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? WHERE u.resolution=? AND u.timestamp<=e.timestamp AND u.account=e.account AND u.depot=e.depot AND u.asset=e.asset ORDER BY u.timestamp DESC LIMIT 1), @event_timestamp); UPDATE ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? SET u.value=u.value-IF(e.type<0,-e.value,e.value),u.timestamp=u.timestamp WHERE u.resolution=? AND u.timestamp>=@value AND u.account=e.account AND u.depot=e.depot AND u.asset=e.asset;`;
         values.push(id, UpdateResolution.Month, id, UpdateResolution.Month);
 
         // update all existing subsequent updates with resolution year for depot 0
-        query += `SELECT @value := COALESCE((SELECT u.timestamp FROM ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? WHERE u.resolution=? AND u.timestamp<=e.timestamp AND u.account=e.account AND u.depot=0 AND u.asset=e.asset ORDER BY u.timestamp DESC LIMIT 1),0); UPDATE ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? SET u.value=u.value-IF(e.type<0,-e.value,e.value),u.timestamp=u.timestamp WHERE u.resolution=? AND u.timestamp>=@value AND u.account=e.account AND u.depot=0 AND u.asset=e.asset;`;
+        query += `SELECT @value := COALESCE((SELECT u.timestamp FROM ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? WHERE u.resolution=? AND u.timestamp<=e.timestamp AND u.account=e.account AND u.depot=0 AND u.asset=e.asset ORDER BY u.timestamp DESC LIMIT 1), @event_timestamp); UPDATE ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? SET u.value=u.value-IF(e.type<0,-e.value,e.value),u.timestamp=u.timestamp WHERE u.resolution=? AND u.timestamp>=@value AND u.account=e.account AND u.depot=0 AND u.asset=e.asset;`;
         values.push(id, UpdateResolution.Year, id, UpdateResolution.Year);
 
         // update all existing subsequent updates with resolution year for depot x
-        query += `SELECT @value := COALESCE((SELECT u.timestamp FROM ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? WHERE u.resolution=? AND u.timestamp<=e.timestamp AND u.account=e.account AND u.depot=e.depot AND u.asset=e.asset ORDER BY u.timestamp DESC LIMIT 1),0); UPDATE ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? SET u.value=u.value-IF(e.type<0,-e.value,e.value),u.timestamp=u.timestamp WHERE u.resolution=? AND u.timestamp>=@value AND u.account=e.account AND u.depot=e.depot AND u.asset=e.asset;`;
+        query += `SELECT @value := COALESCE((SELECT u.timestamp FROM ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? WHERE u.resolution=? AND u.timestamp<=e.timestamp AND u.account=e.account AND u.depot=e.depot AND u.asset=e.asset ORDER BY u.timestamp DESC LIMIT 1), @event_timestamp); UPDATE ${this.data.updateTable} u JOIN ${this.data.eventTable} e ON e.id=? SET u.value=u.value-IF(e.type<0,-e.value,e.value),u.timestamp=u.timestamp WHERE u.resolution=? AND u.timestamp>=@value AND u.account=e.account AND u.depot=e.depot AND u.asset=e.asset;`;
         values.push(id, UpdateResolution.Year, id, UpdateResolution.Year);
 
         // select latest update
@@ -680,14 +684,45 @@ export class Repository extends Database.Repository<Tables> {
 
         const result = await this.database.query(query, values);
 
+        if (!result[18].length)
+            return null;
+
         return {
-            timestamp: Database.parseToTime(result[17][0].timestamp),
-            resolution: result[17][0].resolution,
-            account: result[17][0].account,
-            depot: result[17][0].depot,
-            asset: result[17][0].asset,
-            value: result[17][0].value
+            timestamp: Database.parseToTime(result[18][0].timestamp),
+            resolution: result[18][0].resolution,
+            account: result[18][0].account,
+            depot: result[18][0].depot,
+            asset: result[18][0].asset,
+            value: result[18][0].value
         };
+    }
+
+    public async removeEvents(account: number, end: number): Promise<void> {
+        const date = new Date(end);
+        const day = Database.parseFromTime(Number(CoreJS.calcDate({ date })));
+        const week = Database.parseFromTime(Number(CoreJS.calcDate({ date, weekDay: CoreJS.WeekDay.Monday })));
+        const month = Database.parseFromTime(Number(CoreJS.calcDate({ date, monthDay: 1 })));
+        const year = Database.parseFromTime(Number(CoreJS.calcDate({ date, monthDay: 1, month: CoreJS.Month.January })));
+
+        await this.database.query(`
+        LOCK TABLES ${this.data.updateTable} WRITE;
+            DELETE FROM ${this.data.updateTable} WHERE \`account\`=? AND ((\`resolution\`=? AND \`timestamp\`<=?) OR (\`resolution\`=? AND \`timestamp\`<=?) OR (\`resolution\`=? AND \`timestamp\`<=?) OR (\`resolution\`=? AND \`timestamp\`<=?));
+        UNLOCK TABLES;`, [
+            account,
+            UpdateResolution.Day,
+            day,
+            UpdateResolution.Week,
+            week,
+            UpdateResolution.Month,
+            month,
+            UpdateResolution.Year,
+            year
+        ]);
+
+        await this.database.fetch(`SELECT * FROM ${this.data.eventTable} WHERE \`account\`=? AND \`timestamp\`<=? ORDER BY \`id\` DESC`, data => this.removeEvent(data.id), [
+            account,
+            Database.parseFromTime(end)
+        ]);
     }
 
     public increase(update: UpdateData) {
