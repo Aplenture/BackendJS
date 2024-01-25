@@ -6,5 +6,5 @@
  */
 
 export interface Args {
-    readonly debug: boolean;
+    readonly debug?: boolean;
 }
